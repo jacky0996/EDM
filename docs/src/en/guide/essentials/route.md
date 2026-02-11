@@ -40,15 +40,15 @@ Permission control is controlled by the `authority` field in the `meta` property
 
 ```ts
 // Uncomment if needed and create the folder
-// const externalRouteFiles = import.meta.glob('./external/**/*.ts', { eager: true }); // [!code --]
-const staticRouteFiles = import.meta.glob('./static/**/*.ts', { eager: true }); // [!code ++]
+// const externalRouteFiles = import.meta.glob('./external/**/*.ts', { eager: true }); 
+const staticRouteFiles = import.meta.glob('./static/**/*.ts', { eager: true }); 
 /** Dynamic routes */
 const dynamicRoutes: RouteRecordRaw[] = mergeRouteModules(dynamicRouteFiles);
 
 /** External route list, these pages can be accessed without Layout, possibly used for embedding in other systems */
-// const externalRoutes: RouteRecordRaw[] = mergeRouteModules(externalRouteFiles) // [!code --]
-const externalRoutes: RouteRecordRaw[] = []; // [!code --]
-const externalRoutes: RouteRecordRaw[] = mergeRouteModules(externalRouteFiles); // [!code ++]
+// const externalRoutes: RouteRecordRaw[] = mergeRouteModules(externalRouteFiles) 
+const externalRoutes: RouteRecordRaw[] = []; 
+const externalRoutes: RouteRecordRaw[] = mergeRouteModules(externalRouteFiles); 
 ```
 
 ### Dynamic Routes

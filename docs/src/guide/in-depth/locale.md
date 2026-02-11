@@ -112,21 +112,17 @@ const items = computed(() => [{ title: $t('about.desc') }]);
   ```ts
   export interface LanguageOption {
     label: string;
-    value: 'en-US' | 'zh-CN'; // [!code --]
-    value: 'en-US' | 'zh-CN' | 'zh-TW'; // [!code ++]
+    value: 'en-US' | 'zh-CN'; 
+    value: 'en-US' | 'zh-CN' | 'zh-TW'; 
   }
   export const SUPPORT_LANGUAGES: LanguageOption[] = [
-    {
-      label: '简体中文',
-      value: 'zh-CN',
-    },
     {
       label: 'English',
       value: 'en-US',
     },
     {
-      label: '繁体中文', // [!code ++]
-      value: 'zh-TW', // [!code ++]
+      label: '繁体中文', 
+      value: 'zh-TW', 
     },
   ];
   ```
@@ -134,8 +130,8 @@ const items = computed(() => [{ title: $t('about.desc') }]);
 - 在 `packages/locales/typing.ts`内，新增 Typescript 类型：
 
   ```ts
-  export type SupportedLanguagesType = 'en-US' | 'zh-CN'; // [!code --]
-  export type SupportedLanguagesType = 'en-US' | 'zh-CN' | 'zh-TW'; // [!code ++]
+  export type SupportedLanguagesType = 'en-US' | 'zh-CN'; 
+  export type SupportedLanguagesType = 'en-US' | 'zh-CN' | 'zh-TW'; 
   ```
 
 到这里，你就可以在项目内使用新增的语言包了。
@@ -219,8 +215,8 @@ async function loadDayjsLocale(lang: SupportedLanguagesType) {
     await coreSetup(app, {
       defaultLocale: preferences.app.locale,
       loadMessages,
-      missingWarn: !import.meta.env.PROD, // [!code --]
-      missingWarn: false, // [!code ++]
+      missingWarn: !import.meta.env.PROD, 
+      missingWarn: false, 
       ...options,
     });
   }

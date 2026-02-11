@@ -15,10 +15,9 @@ import { preferences } from '@vben/preferences';
 
 import dayjs from 'dayjs';
 import enLocale from 'element-plus/es/locale/lang/en';
-import zhCNLocale from 'element-plus/es/locale/lang/zh-cn';
 import zhTWLocale from 'element-plus/es/locale/lang/zh-tw';
 
-const elementLocale = ref<Language>(zhCNLocale);
+const elementLocale = ref<Language>(zhTWLocale);
 
 const modules = import.meta.glob('./langs/**/*.json');
 
@@ -48,7 +47,7 @@ async function loadThirdPartyMessage(lang: SupportedLanguagesType) {
 }
 
 /**
- * 加载dayjs的语言包
+ * 加载dayjs的語言包
  * @param lang
  */
 async function loadDayjsLocale(lang: SupportedLanguagesType) {
@@ -58,17 +57,13 @@ async function loadDayjsLocale(lang: SupportedLanguagesType) {
       locale = await import('dayjs/locale/en');
       break;
     }
-    case 'zh-CN': {
-      locale = await import('dayjs/locale/zh-cn');
-      break;
-    }
     case 'zh-TW': {
       locale = await import('dayjs/locale/zh-tw');
       break;
     }
-    // 默认使用英语
+    // 默认使用繁体中文
     default: {
-      locale = await import('dayjs/locale/en');
+      locale = await import('dayjs/locale/zh-tw');
     }
   }
   if (locale) {
@@ -88,13 +83,12 @@ async function loadElementLocale(lang: SupportedLanguagesType) {
       elementLocale.value = enLocale;
       break;
     }
-    case 'zh-CN': {
-      elementLocale.value = zhCNLocale;
-      break;
-    }
     case 'zh-TW': {
       elementLocale.value = zhTWLocale;
       break;
+    }
+    default: {
+      elementLocale.value = zhTWLocale;
     }
   }
 }

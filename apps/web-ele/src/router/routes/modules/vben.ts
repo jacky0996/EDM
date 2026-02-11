@@ -49,50 +49,6 @@ const routes: RouteRecordRaw[] = [
           title: 'Github',
         },
       },
-      {
-        name: 'VbenNaive',
-        path: '/vben-admin/naive',
-        component: IFrameView,
-        meta: {
-          badgeType: 'dot',
-          icon: 'logos:naiveui',
-          link: VBEN_NAIVE_PREVIEW_URL,
-          title: $t('demos.vben.naive-ui'),
-        },
-      },
-      {
-        name: 'VbenAntd',
-        path: '/vben-admin/antd',
-        component: IFrameView,
-        meta: {
-          badgeType: 'dot',
-          icon: SvgAntdvLogoIcon,
-          link: VBEN_ANT_PREVIEW_URL,
-          title: $t('demos.vben.antdv'),
-        },
-      },
-      {
-        name: 'VbenAntdVNext',
-        path: '/vben-admin/antdv-next',
-        component: IFrameView,
-        meta: {
-          badgeType: 'dot',
-          icon: SvgAntdvNextLogoIcon,
-          link: VBEN_ANTDV_NEXT_PREVIEW_URL,
-          title: $t('demos.vben.antdv-next'),
-        },
-      },
-      {
-        name: 'VbenTDesign',
-        path: '/vben-admin/tdesign',
-        component: IFrameView,
-        meta: {
-          badgeType: 'dot',
-          icon: SvgTDesignIcon,
-          link: VBEN_TD_PREVIEW_URL,
-          title: $t('demos.vben.tdesign'),
-        },
-      },
     ],
   },
   {

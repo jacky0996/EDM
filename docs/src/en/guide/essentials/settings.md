@@ -129,12 +129,12 @@ To add a new dynamically modifiable configuration item, simply follow the steps 
   ```ts
   export interface VbenAdminProAppConfigRaw {
     VITE_GLOB_API_URL: string;
-    VITE_GLOB_OTHER_API_URL: string; // [!code ++]
+    VITE_GLOB_OTHER_API_URL: string; 
   }
 
   export interface ApplicationConfig {
     apiURL: string;
-    otherApiURL: string; // [!code ++]
+    otherApiURL: string; 
   }
   ```
 
@@ -150,11 +150,11 @@ To add a new dynamically modifiable configuration item, simply follow the steps 
       ? window._VBEN_ADMIN_PRO_APP_CONF_
       : (env as VbenAdminProAppConfigRaw);
 
-    const { VITE_GLOB_API_URL, VITE_GLOB_OTHER_API_URL } = config; // [!code ++]
+    const { VITE_GLOB_API_URL, VITE_GLOB_OTHER_API_URL } = config; 
 
     return {
       apiURL: VITE_GLOB_API_URL,
-      otherApiURL: VITE_GLOB_OTHER_API_URL, // [!code ++]
+      otherApiURL: VITE_GLOB_OTHER_API_URL, 
     };
   }
   ```

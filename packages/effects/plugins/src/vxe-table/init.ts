@@ -35,8 +35,8 @@ import {
   // VxeTextarea,
 } from 'vxe-pc-ui';
 import enUS from 'vxe-pc-ui/lib/language/en-US';
-// 导入默认的语言
-import zhCN from 'vxe-pc-ui/lib/language/zh-CN';
+// 导入繁体中文语言
+import zhTW from 'vxe-pc-ui/lib/language/zh-TW';
 import {
   VxeColgroup,
   VxeColumn,
@@ -104,13 +104,14 @@ export function setupVbenVxeTable(setupOptions: SetupVxeTable) {
   const { configVxeTable, useVbenForm } = setupOptions;
 
   initVxeTable();
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   useTableForm = useVbenForm;
 
   const { isDark, locale } = usePreferences();
 
   const localMap = {
-    'zh-CN': zhCN,
     'en-US': enUS,
+    'zh-TW': zhTW,
   };
 
   watch(
