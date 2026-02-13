@@ -9,7 +9,7 @@ interface RowType {
   id: string;
   name: string;
   status: number;
-  email: string;
+  emails: { email: string }[];
   createTime: string;
 }
 
@@ -74,7 +74,15 @@ const gridOptions: VxeTableGridOptions<RowType> = {
         },
       },
     },
-    { field: 'email', title: '信箱' },
+    {
+      field: 'emails',
+      title: '信箱',
+      slots: {
+        default: ({ row }) => {
+          return row.emails?.map((e) => e.email).join(', ');
+        },
+      },
+    },
     { field: 'created_at', title: '註冊時間' },
   ],
   height: 'auto',

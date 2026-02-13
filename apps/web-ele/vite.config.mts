@@ -13,6 +13,12 @@ export default defineConfig(async () => {
       ],
       server: {
         proxy: {
+          '/api/ehr': {
+            changeOrigin: true,
+            rewrite: (path) => path.replace(/^\/api\/ehr/, '/api/ehr'),
+            target: 'http://127.0.0.1:8000',
+            ws: true,
+          },
           '/api': {
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, ''),
