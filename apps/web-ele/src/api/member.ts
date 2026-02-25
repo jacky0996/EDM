@@ -10,8 +10,8 @@ export async function getMemberListApi(params: any) {
 /**
  * 匯入人員名單
  */
-export async function importMemberApi(data: FormData) {
-  return requestClient.post('/edm/member/import', data);
+export async function importMemberApi(data: any) {
+  return requestClient.post('/edm/member/add', data);
 }
 /**
  * 獲取人員詳情

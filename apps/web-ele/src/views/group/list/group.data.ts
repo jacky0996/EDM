@@ -97,7 +97,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
       },
     },
     {
-      field: 'creator_id',
+      field: 'creator.name',
       title: '建立者',
       minWidth: 120,
     },

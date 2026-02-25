@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
-import { ElButton, ElMessage, ElUpload, type UploadFile } from 'element-plus';
+import { ElButton, ElMessage, ElUpload, ElSelect, ElOption, type UploadFile } from 'element-plus';
 
 import { useVbenModal } from '@vben/common-ui';
+import { getGroupListApi } from '#/api/group';
 
 interface Props {
   /** 彈窗標題 */
@@ -26,6 +27,21 @@ const emit = defineEmits(['success']);
 
 const fileList = ref<UploadFile[]>([]);
 const uploading = ref(false);
+const groupList = ref<any[]>([]);
+const selectedGroupId = ref<string | number | null>(null);
+
+async function fetchGroups() {
+  try {
+    const res = await getGroupListApi({ page: 1, pageSize: 1000 });
+    groupList.value = res.items || [];
+  } catch (error) {
+    console.error('Failed to fetch groups:', error);
+  }
+}
+
+onMounted(() => {
+  fetchGroups();
+});
 
 const [Modal, modalApi] = useVbenModal({
   onCancel() {
@@ -40,6 +56,11 @@ const [Modal, modalApi] = useVbenModal({
     const formData = new FormData();
     // 放入檔案
     formData.append('file', fileList.value[0]!.raw as File);
+
+    // 放入選擇的群組 ID
+    if (selectedGroupId.value) {
+      formData.append('groupId', String(selectedGroupId.value));
+    }
 
     // 放入額外參數
     if (props.extraParams) {
@@ -119,6 +140,25 @@ function handleRemove() {
         >
           下載匯入範例
         </ElButton>
+      </div>
+
+      <div class="mb-8 p-6 bg-muted/30 rounded-lg flex items-center gap-4">
+        <span class="text-xl font-medium shrink-0">匯入至群組：</span>
+        <ElSelect
+          v-model="selectedGroupId"
+          placeholder="請選擇目標群組 (選填)"
+          clearable
+          filterable
+          class="w-full"
+          size="large"
+        >
+          <ElOption
+            v-for="item in groupList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </ElSelect>
       </div>
 
       <ElUpload

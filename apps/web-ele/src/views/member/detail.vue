@@ -303,7 +303,7 @@ function handleBack() {
                 {{ item.members ? item.members.length : '0' }}
               </td>
               <td>
-                {{ formatValue(item.creator_id) }}
+                {{ formatValue(item.creator?.name) }}
               </td>
               <td>
                 <ElTag :type="item.status === 1 ? 'success' : 'danger'" size="small">
