@@ -15,12 +15,18 @@ interface Props {
   uploadApi: (data: FormData) => Promise<any>;
   /** 額外的上傳參數，用於後端識別功能 */
   extraParams?: Record<string, any>;
+  /** 預設選取的群組 ID */
+  defaultGroupId?: string | number | null;
+  /** 是否禁用群組選擇 */
+  groupDisabled?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   title: '匯入資料',
   sampleUrl: '',
   extraParams: () => ({}),
+  defaultGroupId: null,
+  groupDisabled: false,
 });
 
 const emit = defineEmits(['success']);
@@ -39,8 +45,15 @@ async function fetchGroups() {
   }
 }
 
-onMounted(() => {
-  fetchGroups();
+onMounted(async () => {
+  await fetchGroups();
+  if (props.defaultGroupId) {
+    // 確保類型匹配，試試看原始值或轉為數字
+    const found = groupList.value.find(g => String(g.id) === String(props.defaultGroupId));
+    if (found) {
+      selectedGroupId.value = found.id;
+    }
+  }
 });
 
 const [Modal, modalApi] = useVbenModal({
@@ -149,6 +162,7 @@ function handleRemove() {
           placeholder="請選擇目標群組 (選填)"
           clearable
           filterable
+          :disabled="props.groupDisabled"
           class="w-full"
           size="large"
         >

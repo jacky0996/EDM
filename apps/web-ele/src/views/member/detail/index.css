@@ -48,8 +48,8 @@
 }
 
 .custom-detail-table th {
-  background-color: var(--el-fill-color-light);
-  color: var(--el-text-color-secondary);
+  background-color: #475569;
+  color: white;
   font-weight: 600;
   text-align: left;
   padding: 10px 12px;

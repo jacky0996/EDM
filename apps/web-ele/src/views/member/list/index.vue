@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { Page } from '@vben/common-ui';
 
 import { ElButton } from 'element-plus';
@@ -7,12 +8,14 @@ import { useVbenModal } from '@vben/common-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 
-import { formOptions, gridOptions } from './member.data.ts';
+import { formOptions, gridOptions } from './member.data';
 import ExcelImportModal from '#/components/common/excel-import-modal.vue';
 import { importMemberApi } from '#/api/member';
 import { readExcel } from '#/utils/excel';
 
 const [Grid, gridApi] = useVbenVxeGrid({ formOptions, gridOptions });
+
+const loading = ref(false);
 
 const [ImportVbenModal, importModalApi] = useVbenModal({
   connectedComponent: ExcelImportModal,
@@ -54,7 +57,7 @@ function handleImportSuccess() {
 </script>
 
 <template>
-  <Page auto-content-height>
+  <Page :loading="loading" auto-content-height>
     <Grid>
       <template #toolbar-tools>
         <ElButton type="primary" @click="handleImport"> 匯入人員名單 </ElButton>

@@ -28,7 +28,7 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'GroupDetail',
         path: 'detail/:id',
-        component: () => import('#/views/group/list/index.vue'),
+        component: () => import('#/views/group/detail/index.vue'),
         meta: {
           hideInMenu: true,
           title: '群組詳情',
@@ -54,7 +54,7 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'MemberList',
         path: 'list',
-        component: () => import('#/views/member/index.vue'),
+        component: () => import('#/views/member/list/index.vue'),
         meta: {
           title: '人員管理',
         },
@@ -62,7 +62,7 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'MemberDetail',
         path: 'detail/:id',
-        component: () => import('#/views/member/detail.vue'),
+        component: () => import('#/views/member/detail/index.vue'),
         meta: {
           hideInMenu: true,
           title: '人員詳情',

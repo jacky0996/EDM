@@ -2,8 +2,8 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Page } from '@vben/common-ui';
-import { ElCard, ElDescriptions, ElDescriptionsItem, ElTag, ElButton, ElInput, ElMessage, ElMessageBox } from 'element-plus';
-import { getMemberDetailApi } from '#/api/member';
+import { ElCard, ElDescriptions, ElDescriptionsItem, ElTag, ElButton, ElInput, ElMessage, ElMessageBox, ElSwitch } from 'element-plus';
+import { getMemberDetailApi, updateMemberStatusApi, updateMemberMobileApi, updateMemberEmailApi } from '#/api/member';
 import { formatDateTime } from '#/utils/date';
 
 const route = useRoute();
@@ -58,19 +58,37 @@ function handleCancel() {
   editValue.value = '';
 }
 
-function handleSave(index: number) {
+async function handleSave(index: number) {
   if (!editValue.value) {
     ElMessage.warning('請輸入電子郵件');
     return;
   }
-  // 更新本地數據
-  if (typeof memberData.value.emails[index] === 'string') {
-    memberData.value.emails[index] = editValue.value;
-  } else {
-    memberData.value.emails[index].email = editValue.value;
+  
+  const item = memberData.value.emails[index];
+  const emailId = typeof item === 'object' ? item.id : null;
+  
+  if (!emailId) {
+    ElMessage.error('找不到郵件 ID，無法更新');
+    return;
   }
-  ElMessage.success('更新成功');
-  handleCancel();
+
+  try {
+    loading.value = true;
+    await updateMemberEmailApi(emailId, editValue.value);
+    // 更新本地數據
+    if (typeof memberData.value.emails[index] === 'string') {
+      memberData.value.emails[index] = editValue.value;
+    } else {
+      memberData.value.emails[index].email = editValue.value;
+    }
+    ElMessage.success('電子郵件更新成功');
+    handleCancel();
+  } catch (error) {
+    console.error('Failed to update email:', error);
+    ElMessage.error('電子郵件更新失敗');
+  } finally {
+    loading.value = false;
+  }
 }
 
 function handleDelete(index: number) {
@@ -94,20 +112,37 @@ function handleMobileCancel() {
   editMobileValue.value = '';
 }
 
-function handleMobileSave(index: number) {
+async function handleMobileSave(index: number) {
   if (!editMobileValue.value) {
     ElMessage.warning('請輸入行動電話');
     return;
   }
-  // 更新本地數據 (Key 為 mobile)
+
   const item = memberData.value.mobiles[index];
-  if (typeof item === 'string') {
-    memberData.value.mobiles[index] = editMobileValue.value;
-  } else {
-    item.mobile = editMobileValue.value;
+  const mobileId = typeof item === 'object' ? item.id : null;
+
+  if (!mobileId) {
+    ElMessage.error('找不到電話 ID，無法更新');
+    return;
   }
-  ElMessage.success('更新成功');
-  handleMobileCancel();
+
+  try {
+    loading.value = true;
+    await updateMemberMobileApi(mobileId, editMobileValue.value);
+    // 更新本地數據 (Key 為 mobile)
+    if (typeof item === 'string') {
+      memberData.value.mobiles[index] = editMobileValue.value;
+    } else {
+      item.mobile = editMobileValue.value;
+    }
+    ElMessage.success('行動電話更新成功');
+    handleMobileCancel();
+  } catch (error) {
+    console.error('Failed to update mobile:', error);
+    ElMessage.error('行動電話更新失敗');
+  } finally {
+    loading.value = false;
+  }
 }
 
 function handleMobileDelete(index: number) {
@@ -124,6 +159,21 @@ function handleMobileDelete(index: number) {
 onMounted(() => {
   fetchMemberData();
 });
+
+async function handleStatusChange(val: any) {
+  try {
+    loading.value = true;
+    await updateMemberStatusApi(memberId, Number(val));
+    ElMessage.success('狀態更新成功');
+  } catch (error) {
+    console.error('Failed to update status:', error);
+    ElMessage.error('狀態更新失敗');
+    // 如果失敗，則刷回原始資料以恢復狀態
+    fetchMemberData();
+  } finally {
+    loading.value = false;
+  }
+}
 
 function formatValue(val: any) {
   return val && val !== '' ? val : '尚無資料';
@@ -147,9 +197,15 @@ function handleBack() {
           {{ memberData.name }}
         </ElDescriptionsItem>
         <ElDescriptionsItem label="狀態">
-          <ElTag :type="memberData.status === 1 ? 'success' : 'danger'">
-            {{ memberData.status === 1 ? '啟動' : '禁用' }}
-          </ElTag>
+          <ElSwitch 
+            v-model="memberData.status" 
+            :active-value="1" 
+            :inactive-value="0"
+            active-text="啟動"
+            inactive-text="停用"
+            inline-prompt
+            @change="handleStatusChange"
+          />
         </ElDescriptionsItem>
       </ElDescriptions>
     </ElCard>
@@ -322,4 +378,4 @@ function handleBack() {
   </Page>
 </template>
 
-<style scoped src="./detail.css"></style>
+<style scoped src="./index.css"></style>

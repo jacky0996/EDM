@@ -1,157 +1,77 @@
-<div align="center">
-  <a href="https://github.com/anncwb/vue-vben-admin">
-    <img alt="VbenAdmin Logo" width="215" src="https://unpkg.com/@vbenjs/static-source@0.1.7/source/logo-v1.webp">
-  </a>
-  <br>
-  <br>
+# EDM 營銷與成員管理系統 (EDM & Member Management System)
 
-[![license](https://img.shields.io/github/license/anncwb/vue-vben-admin.svg)](LICENSE)
+這是一個基於 **Vue 3** 與 **Vben Admin** 框架構建的現代化營銷與成員管理系統。旨在提供高效的群組管理、精確的人員數據維護以及靈活的營銷活動分析。
 
-  <h1>Vue Vben Admin</h1>
-</div>
+---
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=vbenjs_vue-vben-admin&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=vbenjs_vue-vben-admin) [![codeql](https://github.com/vbenjs/vue-vben-admin/actions/workflows/codeql.yml/badge.svg)](https://github.com/vbenjs/vue-vben-admin/actions/workflows/codeql.yml) [![build](https://github.com/vbenjs/vue-vben-admin/actions/workflows/build.yml/badge.svg)](https://github.com/vbenjs/vue-vben-admin/actions/workflows/build.yml) [![ci](https://github.com/vbenjs/vue-vben-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/vbenjs/vue-vben-admin/actions/workflows/ci.yml) [![deploy](https://github.com/vbenjs/vue-vben-admin/actions/workflows/deploy.yml/badge.svg)](https://github.com/vbenjs/vue-vben-admin/actions/workflows/deploy.yml)
+## 🚀 系統概述 (System Overview)
 
-**English** | [中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md)
+EDM 系統作為核心數據中心，負責管理大量的人員資料並將其分類至不同群組。系統支持大規模的 Excel 數據匯入、即時的狀態同步以及細粒度的通訊資料維護。目前專案正處於功能擴充期，未來將與 **HWS 系統** 進行深度整合，達成統一身份驗證 (SSO) 與測試環境同步。
 
-## Introduction
+---
 
-Vue Vben Admin is a free and open source middle and back-end template. Using the latest `vue3`, `vite`, `TypeScript` and other mainstream technology development, the out-of-the-box middle and back-end front-end solutions can also be used for learning reference.
+## 🛠️ 技術架構 (Technical Stack)
 
-## Upgrade Notice
+- **前端框架**：Vue 3 (Composition API)
+- **基礎架構**：[Vben Admin 5.0](https://github.com/vbenjs/vue-vben-admin) (高性能企業級管理後台，Monorepo 架構)
+- **UI 組件庫**：Element Plus
+- **程式語言**：TypeScript
+- **開發工具**：pnpm, Vite, Turbo (Monorepo 管理)
+- **整合功能**：
+  - **VXE Table**：高效能的神表格組件，用於處理大量成員數據。
+  - **ExcelJS / xlsx**：強大的 Excel 讀寫能力，支持人員名單匯入。
+  - **Vben Modal / Form**：統一的彈窗與表單開發範式。
 
-This is the latest version, 5.0, and it is not compatible with previous versions. If you are starting a new project, it is recommended to use the latest version. If you wish to view the old version, please use the [v2 branch](https://github.com/vbenjs/vue-vben-admin/tree/v2).
+---
 
-## Features
+## 📋 功能清單 (Feature Roadmap)
 
-- **Latest Technology Stack**: Developed with cutting-edge front-end technologies like Vue 3 and Vite
-- **TypeScript**: A language for application-scale JavaScript
-- **Themes**: Multiple theme colors available with customizable options
-- **Internationalization**: Comprehensive built-in internationalization support
-- **Permissions**: Built-in solution for dynamic route-based permission generation
+### ✅ 已開發功能 (Developed)
+*   **群組管理 (Group Management)**
+    *   群組列表展示、分頁與檢索。
+    *   **即時狀態切換**：使用 `ElSwitch` 即時同步群組啟用/禁用狀態。
+    *   **詳情頁標籤化**：整合「人員列表」、「活動列表」與「分析報告」入口。
+    *   **快速新增**：彈窗式新增群組，包含名稱必填驗證與備註說明。
+*   **人員管理 (Member Management)**
+    *   **Excel 批次匯入**：專屬人員匯入模組，支持預選群組鎖定，防止歸類錯誤。
+    *   **通訊資料維護**：支援行動電話與電子郵件的非同步編輯（傳遞唯一 ID 進行精準更新）。
+    *   **狀態控制**：與群組一致的開關式狀態管理。
+*   **基礎建設**
+    *   全系統 API 呼叫 Loading 狀態反饋。
+    *   模組化目錄重構：遵循 `Feature-based` 結構 (`list/detail` 分離)，提升擴充性。
 
-## Preview
+### 🗓️ 未開發 / 規劃中 (Upcoming)
+*   **活動系統 (Activity System)**：建立活動流程、活動與群組/成員的雙向關聯。
+*   **HWS 系統整合**：
+    *   專案合併與測試環境部署。
+    *   **SSO 整合**：與 Laravel (HWS) 共享登入狀態與權限控管。
+*   **數據可視化**：群組與活動的成效分析圖表。
 
-- [Vben Admin](https://vben.pro/) - Full version Chinese site
+---
 
-Test Account: vben/123456
+## 🏃 快速啟動 (Quick Start)
 
-<div align="center">
-  <img alt="VbenAdmin Logo" width="100%" src="https://anncwb.github.io/anncwb/images/preview1.png">
-  <img alt="VbenAdmin Logo" width="100%" src="https://anncwb.github.io/anncwb/images/preview2.png">
-  <img alt="VbenAdmin Logo" width="100%" src="https://anncwb.github.io/anncwb/images/preview3.png">
-</div>
+專案採用 **pnpm monorepo** 管理，請確保已安裝 [pnpm](https://pnpm.io/)。
 
-### Use Gitpod
-
-Open the project in Gitpod (free online dev environment for GitHub) and start coding immediately.
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/vbenjs/vue-vben-admin)
-
-## Documentation
-
-[Document](https://doc.vben.pro/)
-
-## Install and Use
-
-1. Get the project code
-
+### 1. 安裝依賴
 ```bash
-git clone https://github.com/vbenjs/vue-vben-admin.git
-```
-
-2. Install dependencies
-
-```bash
-cd vue-vben-admin
-npm i -g corepack
 pnpm install
 ```
 
-3. Run
-
+### 2. 啟動開發環境
+本專案目前主要的開發模組為 `web-ele` (Element Plus 版本)：
 ```bash
-pnpm dev
+pnpm dev:ele
 ```
 
-4. Build
-
+### 3. 編譯與構建
 ```bash
-pnpm build
+# 編譯 Element Plus 版本
+pnpm build:ele
 ```
 
-## Change Log
+---
 
-[CHANGELOG](https://github.com/vbenjs/vue-vben-admin/releases)
-
-## How to Contribute
-
-You are very welcome to join! [Raise an issue](https://github.com/anncwb/vue-vben-admin/issues/new/choose) or submit a Pull Request.
-
-**Pull Request Process:**
-
-1. Fork the code
-2. Create your branch: `git checkout -b feat/xxxx`
-3. Submit your changes: `git commit -am 'feat(function): add xxxxx'`
-4. Push your branch: `git push origin feat/xxxx`
-5. Submit `pull request`
-
-## Git Contribution Submission Specification
-
-Reference [vue](https://github.com/vuejs/vue/blob/dev/.github/COMMIT_CONVENTION.md) specification ([Angular](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular))
-
-- `feat` Add new features
-- `fix` Fix the problem/BUG
-- `style` The code style is related and does not affect the running result
-- `perf` Optimization/performance improvement
-- `refactor` Refactor
-- `revert` Undo edit
-- `test` Test related
-- `docs` Documentation/notes
-- `chore` Dependency update/scaffolding configuration modification etc.
-- `ci` Continuous integration
-- `types` Type definition file changes
-
-## Browser Support
-
-The `Chrome 80+` browser is recommended for local development
-
-Support modern browsers, not IE
-
-| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Safari |
-| :-: | :-: | :-: | :-: |
-| last 2 versions | last 2 versions | last 2 versions | last 2 versions |
-
-## Maintainer
-
-[@Vben](https://github.com/anncwb)
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=vbenjs/vue-vben-admin&type=Date)](https://star-history.com/#vbenjs/vue-vben-admin&Date)
-
-## Donate
-
-If you think this project is helpful to you, you can help the author buy a cup of coffee to show your support!
-
-![donate](https://unpkg.com/@vbenjs/static-source@0.1.7/source/sponsor.png)
-
-<a style="display: block;width: 100px;height: 50px;line-height: 50px; color: #fff;text-align: center; background: #408aee;border-radius: 4px;" href="https://www.paypal.com/paypalme/cvvben">Paypal Me</a>
-
-## Contributors
-
-<a href="https://openomy.app/github/vbenjs/vue-vben-admin" target="_blank" style="display: block; width: 100%;" align="center">
-  <img src="https://openomy.app/svg?repo=vbenjs/vue-vben-admin&chart=bubble&latestMonth=3" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />
- </a>
-
-<a href="https://github.com/vbenjs/vue-vben-admin/graphs/contributors">
-  <img alt="Contributors" src="https://contrib.rocks/image?repo=vbenjs/vue-vben-admin" />
-</a>
-
-## Discord
-
-- [Github Discussions](https://github.com/anncwb/vue-vben-admin/discussions)
-
-## License
-
-[MIT © Vben-2020](./LICENSE)
+## 📁 相關文件
+- [開發日誌 (Weekly Dev-Log)](./docs/dev-log.md) - 詳細紀錄每週開發進度與技術決策。
+- [跨系統 Auth 同步計畫](./docs/sso-integration-plan.md) - Laravel 與 Vue 整合方案。
