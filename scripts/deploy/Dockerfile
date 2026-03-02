@@ -13,8 +13,12 @@ WORKDIR /app
 # copy package.json and pnpm-lock.yaml to workspace
 COPY . /app
 
-# 安裝依賴 (移除 --frozen-lockfile 以利主機端自動更正依賴狀態)
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
+# 安裝依賴 (增加逾時與重試以應對不穩定的網路環境)
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm config set fetch-retries 5 && \
+    pnpm config set fetch-retry-mintimeout 20000 && \
+    pnpm config set fetch-retry-maxtimeout 120000 && \
+    pnpm install
 # 編譯 web-ele 模組
 RUN pnpm run build:ele
 
