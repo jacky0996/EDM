@@ -13,8 +13,8 @@ WORKDIR /app
 # copy package.json and pnpm-lock.yaml to workspace
 COPY . /app
 
-# 安裝依賴
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+# 安裝依賴 (移除 --frozen-lockfile 以利主機端自動更正依賴狀態)
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 # 編譯 web-ele 模組
 RUN pnpm run build:ele
 

@@ -88,6 +88,24 @@ docker-compose up -d
 ```
 啟動後，系統將運行在 `http://localhost:8080`。
 
+### 3. 主機 Nginx 反向代理設定 (建議)
+如果您的主機 80 Port 已被佔用，且希望透過網域（如 `edm.yourdomain.com`）訪問，請在主機的 Nginx 配置中加入以下設定：
+
+```nginx
+server {
+    listen 80;
+    server_name edm.yourdomain.com; # 替換為您的網域
+
+    location / {
+        proxy_pass http://127.0.0.1:9000; # 指向 Docker 映射的 Port
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
 ---
 
 ## 📁 相關文件

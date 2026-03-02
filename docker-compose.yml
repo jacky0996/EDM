@@ -5,7 +5,7 @@ services:
       dockerfile: scripts/deploy/Dockerfile
     container_name: edm-web-ele
     ports:
-      - "8080:8080"
+      - "9000:8080"  # 將主機 9000 Port 對應至容器內的 8080 Port
     restart: always
     networks:
       - edm-network
