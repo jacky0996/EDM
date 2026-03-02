@@ -6,7 +6,6 @@ import { requestClient } from '#/api/request';
 export async function getGroupListApi(params: any) {
   return requestClient.post('/edm/group/list', params);
 }
-
 /**
  * 獲取群組詳情
  */

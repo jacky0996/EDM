@@ -6,6 +6,7 @@ import { router } from '#/router';
 
 import { ElTag, ElLink } from 'element-plus';
 import { formatDateTime } from '#/utils/date';
+import { getGroupListApi } from '#/api/group';
 
 interface RowType {
   id: number;
@@ -56,9 +57,6 @@ const formOptions: VbenFormProps = {
   submitOnEnter: true,
 };
 
-
-
-import { getGroupListApi } from '#/api/group';
 
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {

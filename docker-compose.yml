@@ -1,0 +1,15 @@
+services:
+  edm-app:
+    build:
+      context: .
+      dockerfile: scripts/deploy/Dockerfile
+    container_name: edm-web-ele
+    ports:
+      - "8080:8080"
+    restart: always
+    networks:
+      - edm-network
+
+networks:
+  edm-network:
+    driver: bridge

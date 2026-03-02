@@ -72,6 +72,24 @@ pnpm build:ele
 
 ---
 
+## 🐳 Docker 部署 (Docker Deployment)
+
+系統支持使用 Docker 進行容器化部署，配置已針對 `web-ele` 模組進行優化。
+
+### 1. 本地構建映像檔
+```bash
+docker build -t edm-web-ele:latest -f scripts/deploy/Dockerfile .
+```
+
+### 2. 使用 Docker Compose 啟動
+如果您已安裝 Docker Compose，可以使用以下指令一鍵啟動：
+```bash
+docker-compose up -d
+```
+啟動後，系統將運行在 `http://localhost:8080`。
+
+---
+
 ## 📁 相關文件
 - [開發日誌 (Weekly Dev-Log)](./docs/dev-log.md) - 詳細紀錄每週開發進度與技術決策。
 - [跨系統 Auth 同步計畫](./docs/sso-integration-plan.md) - Laravel 與 Vue 整合方案。

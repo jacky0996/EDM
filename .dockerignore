@@ -1,7 +1,15 @@
-node_modules
+# 排除所有層級的 node_modules
+**/node_modules
+# 排除 Git 相關
 .git
 .gitignore
-*.md
-dist
+# 排除編譯產物
+**/dist
 .turbo
+# 排除說明文件與壓縮檔
+*.md
 dist.zip
+# 排除開發工具快取
+.vscode
+.idea
+.pnpm-store
