@@ -13,12 +13,15 @@ WORKDIR /app
 # copy package.json and pnpm-lock.yaml to workspace
 COPY . /app
 
-# 安裝依賴 (增加逾時與重試以應對不穩定的網路環境)
+# 跳過 Playwright 瀏覽器下載 (大幅縮減安裝體積與時間)
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+
+# 安裝依賴 (增加逾時、重試與詳細日誌協助排錯)
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm config set fetch-retries 5 && \
     pnpm config set fetch-retry-mintimeout 20000 && \
     pnpm config set fetch-retry-maxtimeout 120000 && \
-    pnpm install
+    pnpm install --no-frozen-lockfile --reporter=append-only
 # 編譯 web-ele 模組
 RUN pnpm run build:ele
 
