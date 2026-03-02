@@ -39,7 +39,7 @@ COPY --from=builder /app/apps/web-ele/dist /usr/share/nginx/html
 # 複製 nginx 配置
 COPY --from=builder /app/scripts/deploy/nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 8080
+EXPOSE 80
 
 # 啟動 nginx
 CMD ["nginx", "-g", "daemon off;"]
