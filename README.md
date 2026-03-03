@@ -78,7 +78,7 @@ pnpm build:ele
 
 ### 1. 本地構建映像檔
 ```bash
-docker build -t edm-web-ele:latest -f scripts/deploy/Dockerfile .
+docker build -t edm-image .
 ```
 
 ### 2. 使用 Docker Compose 啟動
@@ -86,7 +86,7 @@ docker build -t edm-web-ele:latest -f scripts/deploy/Dockerfile .
 ```bash
 docker-compose up -d
 ```
-啟動後，系統將運行在 `http://localhost:8080`。
+啟動後，系統將運行在 `http://localhost` (80 Port)。
 
 ### 3. 主機 Nginx 反向代理設定 (建議)
 如果您的主機 80 Port 已被佔用，且希望透過網域（如 `edm.yourdomain.com`）訪問，請在主機的 Nginx 配置中加入以下設定：
@@ -97,7 +97,7 @@ server {
     server_name edm.yourdomain.com; # 替換為您的網域
 
     location / {
-        proxy_pass http://127.0.0.1:9000; # 指向 Docker 映射的 Port
+        proxy_pass http://127.0.0.1:80; # 指向 Docker 映射的 Port (目前設為 80)
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

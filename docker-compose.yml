@@ -2,7 +2,8 @@ services:
   edm-app:
     build:
       context: .
-      dockerfile: scripts/deploy/Dockerfile
+      dockerfile: Dockerfile
+    image: edm-image
     container_name: edm-web-ele
     ports:
       - "80:80"  # 直接使用主機 80 Port 對應至容器內的 80 Port
