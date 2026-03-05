@@ -60,5 +60,5 @@ export async function getAccessCodesApi() {
  * 驗證 SSO Token
  */
 export async function verifySsoTokenApi(token: string) {
-  return requestClient.post<AuthApi.SsoResult>('/sso/verify-token', { token });
+  return requestClient.post<AuthApi.SsoResult>('/edm/sso/verify-token', { token });
 }
