@@ -44,6 +44,20 @@ public function redirectToEdm() {
 ### B. 實作 Token 驗證 API
 新增一個不需要 CSRF 保護的 API 介面（建議放在 `routes/api.php`）。
 
+### C. CORS 配置 (重要)
+由於 EDM 與 HWS 位於不同網域，Laravel 必須允許來自 EDM 網域的請求。請修正 `config/cors.php`：
+
+```php
+'paths' => ['api/*', 'sanctum/csrf-cookie'],
+'allowed_methods' => ['*'],
+'allowed_origins' => ['https://uatedm.hwacom.com', 'https://edm.hwacom.com'], // 填入您的 EDM 網域
+'allowed_origins_patterns' => [],
+'allowed_headers' => ['*'],
+'exposed_headers' => [],
+'max_age' => 0,
+'supports_credentials' => false, // 方案 A 不需 Cookie，設為 false 更安全
+```
+
 ```php
 // API 路由: POST /api/sso/verify-token
 public function verifyToken(Request $request) {
