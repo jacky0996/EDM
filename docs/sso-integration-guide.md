@@ -51,7 +51,11 @@ public function verifyToken(Request $request) {
     $userId = Cache::pull("sso_token_{$request->token}");
     
     if (!$userId) {
-        return response()->json(['message' => 'Token 無效或已過期'], 401);
+        return response()->json([
+            'code' => -1,
+            'message' => 'Token 無效或已過期',
+            'data' => null
+        ], 401);
     }
 
     $user = User::find($userId);
@@ -59,14 +63,18 @@ public function verifyToken(Request $request) {
     // 2. 生成正式的 API 訪問 Token (如 Sanctum 或 JWT)
     $accessToken = $user->createToken('edm-access')->plainTextToken;
 
-    // 3. 回傳前端所需的標準格式
+    // 3. ✅ 重要：回傳前端所需的標準格式 (須包裹在 data 中且 code 為 0)
     return response()->json([
-        'accessToken' => $accessToken,
-        'userInfo' => [
-            'userId' => $user->id,
-            'realName' => $user->name,
-            'roles' => $user->getRoleNames(), // 必須包含權限角色
-            'homePath' => '/dashboard/analysis', // 登入後的導向頁面
+        'code' => 0,
+        'message' => 'ok',
+        'data' => [
+            'accessToken' => $accessToken,
+            'userInfo' => [
+                'userId' => $user->id,
+                'realName' => $user->name,
+                'roles' => $user->getRoleNames(), // 必須包含權限角色
+                'homePath' => '/dashboard/analysis', // 登入後的導向頁面
+            ]
         ]
     ]);
 }
