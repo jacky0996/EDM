@@ -17,7 +17,8 @@ import { Page } from '@vben/common-ui';
             <ul class="list-decimal pl-5 space-y-2">
               <li><strong>建立群組：</strong>點擊「新增群組」，確認必填欄位（群組名稱）未填寫時會阻擋送出。填寫並送出後，確認新群組出現在列表中。</li>
               <li><strong>狀態切換：</strong>在列表中或群組詳情中切換「啟用/禁用」狀態，重新整理頁面，確認狀態有被正確保存。</li>
-              <li><strong>群組詳情檢視：</strong>點擊列表中的群組名稱，應成功進入詳情頁。確認頁面有三個標籤：人員列表、活動列表、群組分析。</li>
+              <li><strong>群組詳情檢視：</strong>點擊列表中的群組名稱，應成功進入詳情頁。</li>
+              <li><strong>人員匯入：</strong>在群組詳情頁中，點擊「匯入人員名單」按鈕，應成功進入匯入頁面，且匯入功能正確。</li>
             </ul>
           </div>
 
@@ -28,7 +29,6 @@ import { Page } from '@vben/common-ui';
               <li><strong>人員匯入：</strong>
                 <ul class="list-disc pl-5 mt-1 space-y-1 text-gray-600">
                   <li>自「人員管理」列表點擊匯入，應可自由選擇欲匯入的群組。</li>
-                  <li>自「群組詳情」的人員列表標籤底下點擊匯入，群組欄位應被 <strong>鎖定且自動帶入當前群組</strong>。</li>
                   <li>下載範例檔後，填寫測試資料上傳，確認資料正確進入對應群組。</li>
                 </ul>
               </li>

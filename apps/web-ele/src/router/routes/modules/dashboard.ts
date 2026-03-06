@@ -5,7 +5,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       icon: 'lucide:book-open',
       order: -1,
-      title: '使用說明',
+      title: '開發日誌',
       hideChildrenInMenu: true, // 隱藏子選單，使根節點成為單一可點擊項目
     },
     name: 'Dashboard',
@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           affixTab: true,
           icon: 'lucide:book-open',
-          title: '使用說明',
+          title: '開發日誌',
         },
       },
       {
