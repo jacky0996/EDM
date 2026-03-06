@@ -12,8 +12,10 @@ export const overridesPreferences = defineOverridesPreferences({
   },
   widget: {
     fullscreen: false,
-    languageToggle: false,
-    timezone: false,
+    languageToggle: false, // 隱藏語系切換
+    timezone: false, // 隱藏時區切換
     lockScreen: false,
+    globalSearch: false, // 隱藏全域搜尋
+    notification: false, // 隱藏右上角通知鈴鐺
   },
 });

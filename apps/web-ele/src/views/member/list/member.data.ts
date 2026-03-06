@@ -25,6 +25,7 @@ const STATUS_MAP = {
 } as const;
 
 const formOptions: VbenFormProps = {
+  // 預設展開搜尋列
   collapsed: false,
   schema: [
     {
@@ -33,6 +34,7 @@ const formOptions: VbenFormProps = {
       label: '姓名',
       componentProps: {
         placeholder: '請輸入姓名',
+        clearable: true, // 允許清除搜尋
       },
     },
     {
@@ -45,12 +47,13 @@ const formOptions: VbenFormProps = {
           { label: STATUS_MAP[0].label, value: 0 },
         ],
         placeholder: '請選擇狀態',
+        clearable: true, // 允許清除搜尋
       },
     },
   ],
-  // 是否在字段值改變時提交表單
+  // 欄位值改變時自動觸發搜尋
   submitOnChange: true,
-  // 按下回車時是否提交表單
+  // 按下 Enter 時觸發搜尋
   submitOnEnter: true,
 };
 

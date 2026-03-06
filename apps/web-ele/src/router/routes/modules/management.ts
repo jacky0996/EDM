@@ -10,7 +10,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:users-round',
       order: 20,
       title: '群組管理',
-      authority: ['super', 'admin', 'group_read'],
+      // authority: ['super', 'admin', 'group_read'], // 先暫時拔除權限控制
       hideChildrenInMenu: true,
     },
     name: 'GroupManagementSingle',
@@ -44,7 +44,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:user',
       order: 30,
       title: '人員管理',
-      authority: ['super', 'admin', 'member_read'],
+      // authority: ['super', 'admin', 'member_read'], // 先暫時拔除權限控制
       hideChildrenInMenu: true,
     },
     name: 'MemberManagementSingle',
