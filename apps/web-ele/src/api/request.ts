@@ -21,7 +21,14 @@ import { refreshTokenApi } from './core';
 
 const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
-function createRequestClient(baseURL: string, options?: RequestClientOptions) {
+interface AdditionalOptions {
+  skipAuthenticate?: boolean;
+}
+
+function createRequestClient(
+  baseURL: string,
+  options?: RequestClientOptions & AdditionalOptions,
+) {
   const client = new RequestClient({
     ...options,
     baseURL,
@@ -85,15 +92,17 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   );
 
   // token過期
-  client.addResponseInterceptor(
-    authenticateResponseInterceptor({
-      client,
-      doReAuthenticate,
-      doRefreshToken,
-      enableRefreshToken: preferences.app.enableRefreshToken,
-      formatToken,
-    }),
-  );
+  if (!options?.skipAuthenticate) {
+    client.addResponseInterceptor(
+      authenticateResponseInterceptor({
+        client,
+        doReAuthenticate,
+        doRefreshToken,
+        enableRefreshToken: preferences.app.enableRefreshToken,
+        formatToken,
+      }),
+    );
+  }
 
   // 通用的錯誤處理，如果沒有進入上面的錯誤處理邏輯，就會進入這裡
   client.addResponseInterceptor(
@@ -114,4 +123,11 @@ export const requestClient = createRequestClient(apiURL, {
   responseReturn: 'data',
 });
 
-export const baseRequestClient = new RequestClient({ baseURL: apiURL });
+/**
+ * 基礎請求客戶端 (不包含 401 自動登出邏輯)
+ * 用於 SSO 驗證、登出等不希望觸發全域引導的場景
+ */
+export const baseRequestClient = createRequestClient(apiURL, {
+  responseReturn: 'data',
+  skipAuthenticate: true, // ✅ 跳過自動登出邏輯
+});

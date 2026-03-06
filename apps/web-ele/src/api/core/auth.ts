@@ -58,7 +58,10 @@ export async function getAccessCodesApi() {
 
 /**
  * 驗證 SSO Token
+ * 使用 baseRequestClient 以避免在 Token 過期時觸發全域 401 登出
  */
 export async function verifySsoTokenApi(token: string) {
-  return requestClient.post<AuthApi.SsoResult>('/edm/sso/verify-token', { token });
+  return baseRequestClient.post<AuthApi.SsoResult>('/edm/sso/verify-token', {
+    token,
+  });
 }

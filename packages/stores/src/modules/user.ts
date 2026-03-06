@@ -41,9 +41,8 @@ interface AccessState {
 export const useUserStore = defineStore('core-user', {
   actions: {
     setUserInfo(userInfo: BasicUserInfo | null) {
-      // 设置用户信息
       this.userInfo = userInfo;
-      // 设置角色信息
+
       const roles = userInfo?.roles ?? [];
       this.setUserRoles(roles);
     },
@@ -55,9 +54,10 @@ export const useUserStore = defineStore('core-user', {
     userInfo: null,
     userRoles: [],
   }),
+  persist: true,
 });
 
-// 解决热更新问题
+// 解決hotfix
 const hot = import.meta.hot;
 if (hot) {
   hot.accept(acceptHMRUpdate(useUserStore, hot));
