@@ -31,7 +31,7 @@ import { Page } from '@vben/common-ui';
             <li><strong>測試準備與部署：</strong>完成測試機環境架設規劃，並建立「測試項目」指南頁面供驗收單位參考。</li>
           </ul>
 
-          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週提案 (Next Week's Proposal)</h3>
+          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週提案</h3>
           <ol class="list-decimal pl-5 space-y-1 mb-6">
             <li>活動功能製作</li>
             <li>測試項目修正或優化</li>
@@ -47,7 +47,7 @@ import { Page } from '@vben/common-ui';
             <li><strong>人員通訊資料編輯：</strong>完成「行動電話」與「電子郵件」的編輯功能與即時同步。</li>
           </ul>
 
-          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週提案 (Next Week's Proposal)</h3>
+          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週提案</h3>
           <ol class="list-decimal pl-5 space-y-1">
             <li>測試環境架設</li>
             <li>系統整合與合併 (HWS SSO功能)。</li>
@@ -57,7 +57,7 @@ import { Page } from '@vben/common-ui';
 
       <el-card shadow="never">
         <template #header>
-          <div class="font-bold text-lg">💬 開發議題庫 (Issue Backlog)</div>
+          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">💬 開發議題庫</h3>
         </template>
         <div class="text-sm text-gray-600 leading-relaxed">
           <ul class="list-disc pl-5 space-y-1">
