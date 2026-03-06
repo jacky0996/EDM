@@ -32,10 +32,11 @@ const formOptions: VbenFormProps = {
   schema: [
     {
       component: 'Input',
-      fieldName: 'groupName',
+      fieldName: 'name',
       label: '群組名稱',
       componentProps: {
         placeholder: '請輸入群組名稱',
+        clearable: true,
       },
     },
     {
@@ -43,6 +44,7 @@ const formOptions: VbenFormProps = {
       fieldName: 'status',
       label: '狀態',
       componentProps: {
+        clearable: true,
         options: [
           { label: STATUS_MAP[1].label, value: 1 },
           { label: STATUS_MAP[0].label, value: 0 },
