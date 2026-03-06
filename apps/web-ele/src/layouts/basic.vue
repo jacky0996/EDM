@@ -1,3 +1,4 @@
+```
 <script lang="ts" setup>
 
 import { computed, watch } from 'vue';
@@ -8,13 +9,10 @@ import {
   UserDropdown,
 } from '@vben/layouts';
 import { preferences } from '@vben/preferences';
-import { useAccessStore, useUserStore } from '@vben/stores';
+import { useUserStore } from '@vben/stores';
 import { useAuthStore } from '#/store';
-import LoginForm from '#/views/_core/authentication/login.vue';
-
 const userStore = useUserStore();
 const authStore = useAuthStore();
-const accessStore = useAccessStore();
 const { destroyWatermark, updateWatermark } = useWatermark();
 
 const menus = computed(() => [
@@ -65,12 +63,7 @@ watch(
     </template>
     <!-- 已隱藏右上角小鈴鐺與通知面板，未來依需求逐步開啟 -->
     <template #extra>
-      <AuthenticationLoginExpiredModal
-        v-model:open="accessStore.loginExpired"
-        :avatar
-      >
-        <LoginForm />
-      </AuthenticationLoginExpiredModal>
+      <!-- 移除原生的 AuthenticationLoginExpiredModal，改於 API 攔截器直接導向 SSO -->
     </template>
     <template #lock-screen>
       <LockScreen :avatar @to-login="handleLogout" />

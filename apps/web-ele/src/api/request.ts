@@ -35,21 +35,16 @@ function createRequestClient(
   });
 
   /**
-   * 重新認證
+   * 重新認證 (401 攔截)
    */
   async function doReAuthenticate() {
     console.warn('Access token or refresh token is invalid or expired. ');
     const accessStore = useAccessStore();
     const authStore = useAuthStore();
     accessStore.setAccessToken(null);
-    if (
-      preferences.app.loginExpiredMode === 'modal' &&
-      accessStore.isAccessChecked
-    ) {
-      accessStore.setLoginExpired(true);
-    } else {
-      await authStore.logout();
-    }
+    
+    // 因為我們使用 SSO，所以不顯示預設的登入彈窗，而是直接登出並導回 SSO
+    await authStore.logout();
   }
 
   /**
