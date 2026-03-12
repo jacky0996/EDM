@@ -12,7 +12,7 @@ const [Grid] = useVbenVxeGrid({ formOptions, gridOptions });
 const loading = ref(false);
 
 function handleCreate() {
-  router.push('/event-management/create');
+  router.push('/event/create');
 }
 </script>
 

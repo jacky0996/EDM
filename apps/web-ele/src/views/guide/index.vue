@@ -11,8 +11,8 @@ import { Page } from '@vben/common-ui';
         </template>
         <div class="text-sm text-gray-600 leading-relaxed">
           <ul class="list-disc pl-5 mt-2 space-y-1">
-            <li><strong>群組管理：</strong>可以建立群組並將人員分類。</li>
-            <li><strong>人員管理：</strong>管理人員詳細資料、聯絡方式，並提供批次匯入功能。</li>
+            <!-- <li><strong>群組管理：</strong>可以建立群組並將人員分類。</li>
+            <li><strong>人員管理：</strong>管理人員詳細資料、聯絡方式，並提供批次匯入功能。</li> -->
           </ul>
         </div>
       </el-card>
@@ -22,6 +22,20 @@ import { Page } from '@vben/common-ui';
           <div class="font-bold text-lg">📝 專案開發日誌 (Development Log)</div>
         </template>
         <div class="text-sm text-gray-700 leading-relaxed space-y-3">
+          <h3 class="font-bold text-base text-blue-600 border-b pb-1">當週交付價值 (3/9～3/13)</h3>
+          <ul class="list-disc pl-5 space-y-1 mb-4">
+            <li><strong>活動管理頁面撰寫：</strong>功能框架開發中 (尚未完成)。</li>
+            <li><strong>新增活動頁面撰寫：</strong>包含 CKEditor 整合與動態預覽優化 (尚未完成)。</li>
+            <li><strong>架構與資安議題討論：</strong>與系統組合開發組進行內部討論，針對專案架構、檔案處理(是否對外)、解決方法及其他資安防護進行評估。</li>
+          </ul>
+
+          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週預計交付</h3>
+          <ol class="list-decimal pl-5 space-y-1 mb-6">
+            <li>完成前後分離之系統架設</li>
+            <li>檔案或圖片資安問題處理</li>
+            <li>活動管理項目完成</li>
+          </ol>
+
           <h3 class="font-bold text-base text-blue-600 border-b pb-1">當週交付價值 (3/2～3/6)</h3>
           <ul class="list-disc pl-5 space-y-1 mb-4">
             <li><strong>系統整合與 SSO (HWS 串接)：</strong>實作基於 Token 交換的信任登入機制，並處理跨網域 CORS 議題 (使用 Nginx 反向代理)。</li>
@@ -31,7 +45,7 @@ import { Page } from '@vben/common-ui';
             <li><strong>測試準備與部署：</strong>完成測試機環境架設規劃，並建立「測試項目」指南頁面供驗收單位參考。</li>
           </ul>
 
-          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週提案</h3>
+          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週預計交付</h3>
           <ol class="list-decimal pl-5 space-y-1 mb-6">
             <li>活動功能製作</li>
             <li>測試項目修正或優化</li>
@@ -47,19 +61,14 @@ import { Page } from '@vben/common-ui';
             <li><strong>人員通訊資料編輯：</strong>完成「行動電話」與「電子郵件」的編輯功能與即時同步。</li>
           </ul>
 
-          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週提案</h3>
+          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週預計交付</h3>
           <ol class="list-decimal pl-5 space-y-1">
             <li>測試環境架設</li>
             <li>系統整合與合併 (HWS SSO功能)。</li>
           </ol>
         </div>
-      </el-card>
-
-      <el-card shadow="never">
-        <template #header>
-          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">💬 開發議題庫</h3>
-        </template>
-        <div class="text-sm text-gray-600 leading-relaxed">
+        <div>
+          <h3 class="font-bold text-base text-blue-600 border-b pb-1">開發議題庫</h3>
           <ul class="list-disc pl-5 space-y-1">
             <li>補上使用說明書及測試說明書</li>
             <li>補上流程說明圖</li>

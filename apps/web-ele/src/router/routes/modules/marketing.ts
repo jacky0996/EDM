@@ -13,7 +13,7 @@ const routes: RouteRecordRaw[] = [
       authority: ['super', 'admin', 'event_read'],
     },
     name: 'EventManagementGroup',
-    path: '/event-management',
+    path: '/event',
     children: [
       {
         name: 'EventCreate',

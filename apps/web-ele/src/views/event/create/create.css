@@ -1,18 +1,26 @@
-/* 活動新增頁面樣式 */
-
 /* 讓日期選擇器寬度 100% */
-.el-date-editor {
+:deep(.el-date-editor) {
   width: 100%;
 }
 
 /* 讓所有單行輸入框加高 */
-.el-input__wrapper {
-  min-height: 44px;
-  padding-top: 4px;
-  padding-bottom: 4px;
+:deep(.el-input__wrapper), :deep(.custom-height .el-input__wrapper) {
+  min-height: 56px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 /* 讓日期選擇器也同步加高 */
-.el-input.el-date-editor .el-input__wrapper {
-  min-height: 44px;
+:deep(.el-input.el-date-editor .el-input__wrapper), :deep(.custom-height.el-date-editor .el-input__wrapper) {
+  min-height: 56px;
+}
+
+/* 確保橫幅上傳區域寬度 100% */
+:deep(.banner-uploader), :deep(.banner-uploader .el-upload) {
+  width: 100%;
+}
+
+/* 確保 CKEditor 寬度與輸入框一致 */
+:deep(.ck-editor) {
+  width: 100% !important;
 }
