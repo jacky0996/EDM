@@ -4,7 +4,7 @@ const routes: RouteRecordRaw[] = [
   {
     meta: {
       icon: 'lucide:clipboard-check',
-      order: 10,
+      order: 2,
       title: '測試項目',
     },
     name: 'TestGroup',

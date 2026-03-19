@@ -4,7 +4,7 @@ const routes: RouteRecordRaw[] = [
   {
     meta: {
       icon: 'lucide:book-open',
-      order: -1,
+      order: 1,
       title: '開發日誌',
       hideChildrenInMenu: true, // 隱藏子選單，使根節點成為單一可點擊項目
     },

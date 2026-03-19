@@ -62,6 +62,34 @@ sequenceDiagram
     Back-->>Front: 回傳登入成功與 UserInfo
     Front->>Front: 儲存至 PINIA 與 LocalStorage
 `;
+
+const eventUml = `
+graph TD
+    Start[活動管理入口] --> List[活動列表頁面]
+    List --> SearchEvent[查詢: 活動名稱搜尋]
+    
+    List --> CreateStart[建立活動項目]
+    CreateStart --> MetaData[輸入活動名稱/時間/地標]
+    MetaData --> Banner[上傳 1920x600 活動橫幅]
+    Banner --> CKEditor[使用 CKEditor 編輯活動內容]
+    CKEditor --> Preview[Gmail 風格預覽: Web/Mobile 切換]
+    Preview --> SubmitCreate[儲存建立]
+
+    List --> ClickEventName[點選活動名稱]
+    ClickEventName --> Detail[活動詳細頁面 - 頁籤式設計]
+    
+    Detail -- 活動預覽(詳細頁) --> ReadOnly{預設唯讀模式}
+    ReadOnly -- 點選編輯 --> EditMode[編輯模式: 修改內容/橫幅/狀態]
+    EditMode -- 儲存/取消 --> ReadOnly
+    
+    Detail -- 邀請名單 --> InviteList[邀請名單分頁列表]
+    InviteList --> SearchName[姓名搜尋過濾]
+    InviteList --> ImportGroup[從群組列表匯入人員]
+    ImportGroup --> SelectPop[彈窗選擇欲匯入群組]
+    SelectPop --> FetchAndRender[API 載入並即時同步數值]
+    
+    Detail -- 其他功能頁籤 --> Future[分析/問卷/設定 開發中]
+`;
 </script>
 
 <template>
@@ -87,7 +115,16 @@ sequenceDiagram
             </div>
           </el-tab-pane>
           
-          <el-tab-pane label="🔑 登入與 SSO 串接">
+          <el-tab-pane label="📅 活動管理">
+            <div class="py-4">
+              <div class="mb-4 text-sm text-gray-500 italic">
+                活動管理－描述：包含活動建立流程（預覽/編輯）、詳細頁頁籤設計以及邀請名單匯入邏輯。
+              </div>
+              <MermaidView :content="eventUml" />
+            </div>
+          </el-tab-pane>
+
+          <el-tab-pane label="🔑 系統串接">
             <div class="py-4">
               <div class="mb-4 text-sm text-gray-500 italic">
                  登入與 SSO 串接－描述：呈現 EDM 系統與 Laravel HWS 之間的 SSO Token 交換與 Session 建立流程。
