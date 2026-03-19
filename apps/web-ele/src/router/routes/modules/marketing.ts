@@ -10,7 +10,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:calendar-days',
       order: 10,
       title: '活動管理',
-      authority: ['super', 'admin', 'event_read'],
+      // authority: ['super', 'admin', 'event_read'],
     },
     name: 'EventManagementGroup',
     path: '/event',
@@ -21,8 +21,19 @@ const routes: RouteRecordRaw[] = [
         component: () => import('#/views/event/create/index.vue'),
         meta: {
           title: '建立活動',
-          authority: ['super', 'admin', 'event_create'],
+          // authority: ['super', 'admin', 'event_create'],
           hideInMenu: true, // 從側邊欄隱藏，改由列表按鈕觸發
+        },
+      },
+      {
+        name: 'EventDetail',
+        path: 'detail/:id',
+        component: () => import('#/views/event/detail/index.vue'),
+        meta: {
+          title: '活動詳細與編輯',
+          // authority: ['super', 'admin', 'event_read', 'event_create'],
+          hideInMenu: true, // 從側邊欄隱藏，改由列表名稱點擊觸發
+          currentActiveMenu: '/event/list', // 保持列表選單高亮
         },
       },
       {
@@ -31,7 +42,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('#/views/event/list/index.vue'),
         meta: {
           title: '活動列表',
-          authority: ['super', 'admin', 'event_read'],
+          // authority: ['super', 'admin', 'event_read'],
         },
       },
       {
@@ -40,7 +51,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('#/views/event/privacy/index.vue'),
         meta: {
           title: '個資聲明',
-          authority: ['super', 'admin', 'event_create'],
+          // authority: ['super', 'admin', 'event_create'],
         },
       },
       {

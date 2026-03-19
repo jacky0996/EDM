@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Page } from '@vben/common-ui';
 import { ElCard, ElDescriptions, ElDescriptionsItem, ElTag, ElButton, ElInput, ElMessage, ElMessageBox, ElSwitch } from 'element-plus';
@@ -8,7 +8,7 @@ import { formatDateTime } from '#/utils/date';
 
 const route = useRoute();
 const router = useRouter();
-const memberId = route.params.id as string;
+const memberId = computed(() => route.params.id as string);
 
 // 人員數據
 const memberData = ref<any>({
@@ -28,10 +28,10 @@ const editingMobileIndex = ref<number | null>(null);
 const editMobileValue = ref('');
 
 async function fetchMemberData() {
-  if (!memberId) return;
+  if (!memberId.value) return;
   loading.value = true;
   try {
-    const res = await getMemberDetailApi(memberId);
+    const res = await getMemberDetailApi(memberId.value);
     memberData.value = {
       ...res,
       name: res.name || '',
@@ -156,14 +156,10 @@ function handleMobileDelete(index: number) {
   }).catch(() => {});
 }
 
-onMounted(() => {
-  fetchMemberData();
-});
-
 async function handleStatusChange(val: any) {
   try {
     loading.value = true;
-    await updateMemberStatusApi(memberId, Number(val));
+    await updateMemberStatusApi(memberId.value, Number(val));
     ElMessage.success('狀態更新成功');
   } catch (error) {
     console.error('Failed to update status:', error);
@@ -174,6 +170,16 @@ async function handleStatusChange(val: any) {
     loading.value = false;
   }
 }
+
+watch(
+  () => memberId.value,
+  (newId) => {
+    if (newId) {
+      fetchMemberData();
+    }
+  },
+  { immediate: true },
+);
 
 function formatValue(val: any) {
   return val && val !== '' ? val : '尚無資料';

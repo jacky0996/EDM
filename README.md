@@ -121,3 +121,4 @@ server {
 ## 📁 相關文件
 - [開發日誌 (Weekly Dev-Log)](./docs/dev-log.md) - 詳細紀錄每週開發進度與技術決策。
 - [SSO 整合技術指南](./docs/sso-integration-guide.md) - Laravel 與 Vue 整合方案。
+

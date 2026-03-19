@@ -3,6 +3,7 @@ import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 
 import { h } from 'vue';
 import { ElTag, ElLink } from 'element-plus';
+import { router } from '#/router';
 import { formatDateTime } from '#/utils/date';
 import { getEventListApi } from '#/api/event';
 
@@ -67,7 +68,12 @@ export const gridOptions: VxeTableGridOptions<RowType> = {
         default: ({ row }) => {
           return h(
             ElLink,
-            { type: 'primary' },
+            {
+              type: 'primary',
+              onClick: () => {
+                router.push(`/event/detail/${row.id}`);
+              },
+            },
             { default: () => row.title }
           );
         },

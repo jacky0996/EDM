@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Page, useVbenModal } from '@vben/common-ui';
-import { ElCard, ElDescriptions, ElDescriptionsItem, ElTag, ElButton, ElMessage, ElTabs, ElTabPane, ElSwitch } from 'element-plus';
-import { getGroupDetailApi, updateGroupStatusApi } from '#/api/group';
+import { ElCard, ElDescriptions, ElDescriptionsItem, ElTag, ElButton, ElMessage, ElTabs, ElTabPane, ElSwitch, ElTable, ElTableColumn } from 'element-plus';
+import { getGroupDetailApi, updateGroupStatusApi, getGroupEventListApi } from '#/api/group';
 import { importMemberApi } from '#/api/member';
 import { formatDateTime } from '#/utils/date';
 import { readExcel } from '#/utils/excel';
@@ -47,8 +47,34 @@ async function fetchGroupData() {
   }
 }
 
+// 活動列表
+const eventList = ref<any[]>([]);
+const eventLoading = ref(false);
+
+async function fetchGroupEvents() {
+  if (!groupId) return;
+  eventLoading.value = true;
+  try {
+    const res: any = await getGroupEventListApi({ group_id: groupId });
+    // 預期回傳陣列或在 data.items 內
+    eventList.value = res?.data?.items || res?.items || res || [];
+  } catch (error) {
+    console.error('Failed to fetch group events:', error);
+    ElMessage.error('獲取活動列表失敗');
+  } finally {
+    eventLoading.value = false;
+  }
+}
+
 onMounted(() => {
   fetchGroupData();
+});
+
+// 當切換到活動列表時才載入
+watch(activeTab, (newTab) => {
+  if (newTab === 'activities' && eventList.value.length === 0) {
+    fetchGroupEvents();
+  }
 });
 
 function handleBack() {
@@ -204,7 +230,51 @@ function formatValue(val: any) {
 
         <!-- 活動列表標籤 -->
         <ElTabPane label="活動列表" name="activities">
-          <div class="text-secondary text-center py-10">活動列表功能開發中...</div>
+          <div class="mb-4">
+            <span class="font-bold text-lg">相關活動 ({{ eventList.length }} 個)</span>
+          </div>
+
+          <ElTable
+            v-loading="eventLoading"
+            :data="eventList"
+            border
+            stripe
+            style="width: 100%"
+            class="rounded-md"
+          >
+            <ElTableColumn label="活動名稱" min-width="200">
+              <template #default="{ row }">
+                <span 
+                  class="text-primary cursor-pointer hover:underline font-medium" 
+                  @click="router.push(`/event/detail/${row.id}`)"
+                >
+                  {{ row.title || row.name || '-' }}
+                </span>
+              </template>
+            </ElTableColumn>
+            <ElTableColumn prop="start_time" label="開始時間" width="180">
+              <template #default="{ row }">
+                {{ row.start_time ? formatDateTime(row.start_time) : '-' }}
+              </template>
+            </ElTableColumn>
+            <ElTableColumn prop="end_time" label="結束時間" width="180">
+              <template #default="{ row }">
+                {{ row.end_time ? formatDateTime(row.end_time) : '-' }}
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="操作" width="100" align="center">
+              <template #default="{ row }">
+                <ElButton 
+                  size="small" 
+                  type="primary" 
+                  link 
+                  @click="router.push(`/event/detail/${row.id}`)"
+                >
+                  查看
+                </ElButton>
+              </template>
+            </ElTableColumn>
+          </ElTable>
         </ElTabPane>
 
         <!-- 群組分析標籤 -->

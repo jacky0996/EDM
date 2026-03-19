@@ -28,6 +28,14 @@ async function handleLogout() {
 }
 
 
+// 診斷：監聽人員資訊變動，確保資料載入後能立即看到內容
+watch(
+  () => userStore.userInfo,
+  (info) => {
+  },
+  { immediate: true, deep: true }
+);
+
 watch(
   () => ({
     enable: preferences.app.watermark,
@@ -57,9 +65,13 @@ watch(
         :avatar
         :menus
         :text="userStore.userInfo?.realName"
-        :description="userStore.userInfo?.email || ''"
+        :description="String(userStore.userInfo?.email || 'N/A')"
         @logout="handleLogout"
       />
+      <!-- 測試用：在選單下面直接印出一段字確認 -->
+      <div v-if="userStore.userInfo" style="display:none">
+        Debug Info: {{ userStore.userInfo?.email }}
+      </div>
     </template>
     <!-- 已隱藏右上角小鈴鐺與通知面板，未來依需求逐步開啟 -->
     <template #extra>

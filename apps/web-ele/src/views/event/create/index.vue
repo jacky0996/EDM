@@ -69,7 +69,7 @@ function updateIframeHeight(e: any) {
         class="space-y-6"
       >
         <!-- Banner 上傳 -->
-        <ElFormItem label="活動橫幅(預設夾帶華電標誌，點選後可以替換圖片)" prop="banner_url" required>
+        <ElFormItem label="活動橫幅(預設夾帶華電標誌，點選後可以替換圖片)" prop="img_url" required>
           <ElUpload
             class="banner-uploader w-full"
             :show-file-list="false"
@@ -113,9 +113,9 @@ function updateIframeHeight(e: any) {
         </ElFormItem>
 
         <!-- 活動簡介 -->
-        <ElFormItem label="活動簡介" prop="description" required>
+        <ElFormItem label="活動簡介" prop="summary" required>
           <ElInput
-            v-model="form.description"
+            v-model="form.summary"
             type="textarea"
             :rows="4"
             placeholder="請輸入活動簡介"

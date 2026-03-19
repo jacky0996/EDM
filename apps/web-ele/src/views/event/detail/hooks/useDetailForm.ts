@@ -1,15 +1,21 @@
-import { reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { reactive, ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import type { FormRules, UploadFile, UploadProps } from 'element-plus';
-import { requestClient } from '#/api/request';
 import { useUserStore } from '@vben/stores';
+import { getEventDetailApi, updateEventApi } from '#/api/event';
 
-export function useForm(formRef: any) {
+export function useDetailForm(formRef: any) {
   const router = useRouter();
+  const route = useRoute();
   const userStore = useUserStore();
   
+  const eventId = computed(() => route.params.id as string);
+  const isReadonly = ref(true);
+  const loading = ref(false);
+
   const form = reactive({
+    id: eventId.value,
     title: '',
     summary: '',
     start_time: '' as null | string,
@@ -35,6 +41,46 @@ export function useForm(formRef: any) {
     content: [{ required: true, message: '請輸入活動內容', trigger: 'blur' }],
   };
 
+  /** 取得活動詳細資料 */
+  async function fetchEventDetail() {
+    if (!eventId.value) return;
+    try {
+      loading.value = true;
+      const res: any = await getEventDetailApi({ id: eventId.value });
+      // 假設回傳資料在 res.data 或是直接展開
+      const detail = res?.data || res || {};
+      
+      // 填入表單資料 (可根據實際 API 回傳欄位調整)
+      form.title = detail.title || '';
+      form.summary = detail.summary || detail.description || '';
+      form.start_time = detail.start_time || '';
+      form.end_time = detail.end_time || '';
+      form.landmark = detail.landmark || '';
+      form.address = detail.address || '';
+      form.img_url = detail.img_url || detail.banner_url || '/event_default.png';
+      form.content = detail.content || '';
+
+      bannerPreviewUrl.value = form.img_url;
+    } catch (error) {
+      console.error('Failed to fetch event detail:', error);
+      ElMessage.error('無法取得活動詳細資料');
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  watch(
+    () => eventId.value,
+    (newId) => {
+      if (newId) {
+        // 重置唯讀狀態並重新獲取資料
+        isReadonly.value = true;
+        fetchEventDetail();
+      }
+    },
+    { immediate: true },
+  );
+
   /** 上傳前確認格式 */
   const beforeBannerUpload: UploadProps['beforeUpload'] = (rawFile) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -58,42 +104,52 @@ export function useForm(formRef: any) {
     }
   }
 
-  /** 送出表單 */
+  /** 切換編輯模式 */
+  function toggleEdit() {
+    isReadonly.value = false;
+  }
+
+  /** 放棄編輯並還原 */
+  function cancelEdit() {
+    isReadonly.value = true;
+    fetchEventDetail(); // 重新拉取原始資料覆蓋
+    formRef.value?.clearValidate();
+  }
+
+  /** 送出表單 (更新) */
   async function handleSubmit() {
     try {
       await formRef.value?.validate();
+      loading.value = true;
       
-      // 取得全域儲存的使用者資訊
       const userInfo: any = userStore.userInfo || {};
-      
-      // 組合要發送給後端的 payload，加入 user 相關資訊
       const payload = {
         ...form,
-        user_id: userInfo?.id || userInfo?.userId || '', // 自動抓取 id 或 userId
-        creator_name: userInfo?.realName || userInfo?.username || '', // 附帶建立者名稱供參考
+        updater_id: userInfo?.id || userInfo?.userId || '',
       };
       
-      const res: any = await requestClient.post('/edm/event/create', payload, {
-        responseReturn: 'body',
-      });
+      const res: any = await updateEventApi(payload);
       
-      if (res && (res.code === 200 || res.code === 0)) {
-        ElMessage.success('建立成功');
-        router.push('/event/list');
+      // 使用與 create 相同的驗證邏輯：如果 res 有 code = 0，或 requestClient 已經解包
+      if (res && (res.code === 200 || res.code === 0 || !res.code)) {
+        ElMessage.success('更新成功');
+        isReadonly.value = true;
+        await fetchEventDetail(); // 更新後重新拉資料
       } else {
-        throw new Error(res?.msg || res?.message || '建立失敗');
+        throw new Error(res?.msg || res?.message || '更新失敗');
       }
     } catch (error: any) {
       console.error(error);
-      ElMessage.error(error.message || '請確認表單位填寫正確');
+      ElMessage.error(error.message || '請確認表單欄位填寫正確');
+    } finally {
+      loading.value = false;
     }
   }
 
-  function handleCancel() {
+  function handleBack() {
     router.push('/event/list');
   }
 
-  /** 預覽相關數據生成 */
   const previewVisible = ref(false);
   const previewDevice = ref<'web' | 'mobile'>('web');
 
@@ -142,12 +198,16 @@ export function useForm(formRef: any) {
     rules,
     bannerPreviewUrl,
     uploading,
+    loading,
+    isReadonly,
     previewVisible,
     previewDevice,
     beforeBannerUpload,
     handleBannerChange,
+    toggleEdit,
+    cancelEdit,
     handleSubmit,
-    handleCancel,
+    handleBack,
     generatePreviewHtml,
     handlePreview,
   };
