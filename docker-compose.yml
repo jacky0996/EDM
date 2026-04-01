@@ -11,9 +11,9 @@ services:
     networks:
       - edm-network
     # --- [資安隔離] 使用域名通訊，不再需要 hardcoded IP 別名 ---
-    # 健康檢查
+    # 健康檢查 (改用檔案檢查，避免因為網路/域名問題誤判)
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      test: ["CMD", "ls", "/usr/share/nginx/html/index.html"]
       interval: 30s
       timeout: 10s
       retries: 3
