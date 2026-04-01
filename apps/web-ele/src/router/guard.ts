@@ -58,15 +58,23 @@ function setupAccessGuard(router: Router) {
       delete newQuery.token;
       delete newQuery.hws_token;
 
-      // 執行驗證 (剛才在 store 修改過的單次驗證版)
       const success = await authStore.ssoLogin(ssoToken);
       if (success) {
-        console.log('[Guard] SSO 驗證成功，移除 Token 並進入首頁。');
+        console.log('[Guard] SSO 驗證成功，進入系統。');
         return { path: to.path, query: newQuery, replace: true };
       } else {
-        console.error('[Guard] SSO 驗證失敗，移除失效 Token 並前往登入。');
-        // SSO 失敗處置：可以去 401 頁面或直接導回 HWS 原點
-        return { path: '/login', query: newQuery, replace: true };
+        console.error('[Guard] SSO 驗證失敗，10 秒後導回 HWS。');
+        
+        // --- 10 秒跳轉與訊息通知 ---
+        import('element-plus').then(({ ElMessage }) => {
+          ElMessage.error('SSO 驗證失敗，將在 10 秒後導回核心系統首頁。');
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        
+        const hwsUrl = import.meta.env.VITE_HWS_URL;
+        window.location.href = `${hwsUrl}login`;
+        return false;
       }
     }
 
