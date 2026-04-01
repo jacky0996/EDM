@@ -50,15 +50,23 @@ function setupAccessGuard(router: Router) {
     const userStore = useUserStore();
     const authStore = useAuthStore();
 
-    // SSO Token 攔截處理 (優先處理網址帶 Token 的情況)
-    const token = to.query.token as string;
-    if (token) {
-      const success = await authStore.ssoLogin(token);
+    // SSO Token 攔截處理 (支援 token 與 hws_token 參數名)
+    const ssoToken = (to.query.token || to.query.hws_token) as string;
+    if (ssoToken) {
+      // 構建不帶 Token 的新參數 (防止迴圈)
+      const newQuery = { ...to.query };
+      delete newQuery.token;
+      delete newQuery.hws_token;
+
+      // 執行驗證 (剛才在 store 修改過的單次驗證版)
+      const success = await authStore.ssoLogin(ssoToken);
       if (success) {
-        // 驗證成功，移除網址上的 token 參數並重導向至原路徑
-        const newQuery = { ...to.query };
-        delete newQuery.token;
+        console.log('[Guard] SSO 驗證成功，移除 Token 並進入首頁。');
         return { path: to.path, query: newQuery, replace: true };
+      } else {
+        console.error('[Guard] SSO 驗證失敗，移除失效 Token 並前往登入。');
+        // SSO 失敗處置：可以去 401 頁面或直接導回 HWS 原點
+        return { path: '/login', query: newQuery, replace: true };
       }
     }
 
@@ -69,7 +77,7 @@ function setupAccessGuard(router: Router) {
         return true;
       }
 
-      // [核心修正] 如果沒有 Token，則直接導向 HWS (不帶複雜的 redirect 參數)
+      // [核心修正] 如果沒有 Token，則直接導向 HWS Login 頁面
       const hwsUrl = import.meta.env.VITE_HWS_URL;
       window.location.href = `${hwsUrl}login`;
       return false;
