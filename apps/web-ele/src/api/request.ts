@@ -25,8 +25,8 @@ const { apiURL: originalApiURL } = useAppConfig(import.meta.env, import.meta.env
 // 1. 一般業務網址：UAT/正式環境強制走相對路徑 /api/ (隱藏實體 IP)
 const apiURL = import.meta.env.DEV ? originalApiURL : '/api/';
 
-// 2. SSO 核心驗證網址：直接從環境變數讀取 (核心系統位址)
-const ssoApiURL = (import.meta.env.VITE_SSO_VERIFY_URL as string) || apiURL;
+// 2. SSO 核心驗證網址：優先讀取 VITE_SSO_VERIFY_URL 環境變數
+const ssoApiURL = (import.meta.env.VITE_SSO_VERIFY_URL as string) || (import.meta.env.DEV ? originalApiURL : '/api/');
 
 interface AdditionalOptions {
   skipAuthenticate?: boolean;
