@@ -181,17 +181,39 @@ function handleRemove() {
         :limit="1"
         :on-change="handleFileChange"
         :on-remove="handleRemove"
+        :show-file-list="false"
         accept=".xlsx, .xls"
         action=""
         drag
       >
-        <div class="el-upload__text py-16">
-          <div class="text-6xl mb-6 text-primary/60">
-            <i class="el-icon-upload"></i>
-          </div>
-          <div class="text-2xl mb-2">將檔案拖曳至此</div>
-          <em class="text-primary cursor-pointer font-bold text-2xl">或點擊上傳</em>
+        <!-- 核心變更：根據有無檔案切換中間內容 -->
+        <div class="el-upload__text py-16 px-8 min-h-[350px] flex flex-col items-center justify-center">
+          <template v-if="fileList.length === 0">
+            <div class="text-6xl mb-6 text-primary/60 transition-all hover:scale-110">
+              <i class="el-icon-upload"></i>
+            </div>
+            <div class="text-2xl mb-2 font-medium">將 Excel 檔案拖曳至此</div>
+            <div class="text-xl text-muted-foreground mt-2">或 <em class="text-primary cursor-pointer font-bold not-italic">點擊此處選擇檔案</em></div>
+          </template>
+
+          <template v-else>
+            <div class="w-full flex flex-col items-center animate-in fade-in zoom-in duration-300">
+              <div class="text-7xl mb-6 text-green-500">
+                <!-- 使用一個漂亮的 Excel 圖標或文件圖標 -->
+                <i class="el-icon-document-checked"></i>
+              </div>
+              <div class="text-2xl font-bold mb-2 truncate max-w-[90%] text-foreground">{{ fileList[0].name }}</div>
+              <div class="text-lg text-muted-foreground mb-6">{{ (fileList[0].size / 1024).toFixed(1) }} KB</div>
+              
+              <div class="flex gap-4">
+                <ElButton type="danger" plain @click.stop="handleRemove">
+                  移除重新選取
+                </ElButton>
+              </div>
+            </div>
+          </template>
         </div>
+        
         <template #tip>
           <div class="el-upload__tip text-center mt-8 text-xl text-gray-400">
             <span class="text-xl">僅支援 .xlsx 或 .xls 格式之 Excel 檔案</span>

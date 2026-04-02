@@ -118,6 +118,40 @@ server {
 
 ---
 
+---
+
+## 🔐 SSO 認證與資安架構 (SSO & Security)
+
+專案已完成與 **HWS (Identity Provider)** 的深度整合，實現了「資安隱身型」的單一登入流程。
+
+### 1. 認證流程 (Authentication Flow)
+1.  **引導登入**：前端偵測無 Token 時，自動導向至 `VITE_HWS_URL` (HWS 登入頁)。
+2.  **帶回 Token**：HWS 驗證成功後，將使用者導回 `VITE_EDM_URL` 並在網址列攜帶 `?token=...`。
+3.  **背景驗證**：前端攔截 URL Token，透過系統內建的「隱身代理」呼叫 `verify-token` 介面換取實體 AccessToken。
+
+### 2. 隱身代理機制 (Nginx Reverse Proxy)
+為了保護核心系統 (HWS) 不被外部直接窺探，系統採用了 Nginx 反向代理技術：
+-   **前端呼叫**：`/api-sso/edm/sso/verify-token` (對外隱藏真實域名)。
+-   **Nginx 轉發**：伺服器內部將 `/api-sso/` 流量導向 **內網實體 IP** `192.168.3.5` (Port 80/443)。
+-   **優點**：即使 UAT 伺服器沒有外網連線權限，也能透過內網存取認證系統，且瀏覽器 F12 只能看見 EDM 系統自身的網域。
+
+### 3. JWT 標頭強化 (Header Injection)
+在 `api/request.ts` 中，所有業務 API 請求都會自動注入以下標頭：
+-   **`Authorization`**: `Bearer <token>` (標準 JWT)。
+-   **`X-User-Info`**: **Base64 編碼** 的使用者資料 JSON。
+    -   *原因*：防止標頭包含中文字元發生的 HTTP Header 解析錯誤，並提供後端即時的使用者 Metadata。
+
+### 4. 環境變數對應表 (.env.uat)
+| 變數名稱 | 數值範例 | 說明 |
+| :--- | :--- | :--- |
+| `VITE_HWS_URL` | `https://uathws.hwacom.com/` | HWS 登入頁面網址 |
+| `VITE_EDM_URL` | `https://uatedm.hwacom.com` | 本系統 UAT 接收回傳網址 |
+| `VITE_SSO_VERIFY_URL` | `/api-sso/` | 觸發 Nginx 代理的虛擬路徑 |
+| `VITE_PROXY_API_TARGET` | `http://uatedmapi.hwacom.com` | Vite 開發用 API 目標 |
+| `VITE_PROXY_SSO_TARGET` | `http://192.168.3.5` | Vite 開發用 SSO 目標 |
+
+---
+
 ## 📁 相關文件
 - [開發日誌 (Weekly Dev-Log)](./docs/dev-log.md) - 詳細紀錄每週開發進度與技術決策。
 - [SSO 整合技術指南](./docs/sso-integration-guide.md) - Laravel 與 Vue 整合方案。

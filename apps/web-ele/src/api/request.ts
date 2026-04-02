@@ -77,6 +77,18 @@ function createRequestClient(
       config.headers.Authorization = formatToken(accessStore.accessToken);
       config.headers['Accept-Language'] = preferences.app.locale;
 
+      // 🌟 [JWT 強化] 同步送出 UserInfo (直接從 LocalStorage 讀取，防止循環引用崩潰)
+      try {
+        // 從 Vben 的預設儲存中抓取使用者資料 (注意：Vben 預設使用特定的 Key)
+        const userStorage = localStorage.getItem('ACCESS_TOKEN_USER_INFO');
+        if (userStorage) {
+          // 直接轉 Base64 送出
+          config.headers['X-User-Info'] = window.btoa(unescape(encodeURIComponent(userStorage)));
+        }
+      } catch (e) {
+        console.warn('[Request] UserInfo 讀取或編碼失敗', e);
+      }
+
       // 每次發送請求時同步更新最後活動時間 (Session 續期)
       localStorage.setItem('edm_last_activity', Date.now().toString());
 

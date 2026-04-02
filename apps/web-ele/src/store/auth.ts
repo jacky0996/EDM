@@ -109,21 +109,27 @@ export const useAuthStore = defineStore('auth', () => {
         // 成功判定：檢查 code 是否為 0 且 payload 裡擁有 accessToken
         if (jsonRoot && jsonRoot.code === 0 && payload?.accessToken) {
           accessStore.setAccessToken(payload.accessToken);
-
-          // 從 payload 抓取使用者資訊
-          const userInfo = payload.userInfo || payload.data?.userInfo;
+          
+          // 💡 取得使用者資訊 (相容各種回傳巢狀結構)
+          const userInfo = payload.userInfo || payload.data?.userInfo || jsonRoot.data;
           
           if (userInfo) {
+            // 🌟 2. 存入 Pinia (用於 UI)
             userStore.setUserInfo({
               ...userInfo,
-              username: userInfo.realName || userInfo.name || 'User',
+              realName: userInfo.realName || userInfo.name || 'SSO User',
             });
 
-            localStorage.setItem('edm_last_activity', Date.now().toString());
-            console.log(`[SSO] 驗證成功 (第 ${retryCount + 1} 次嘗試)`);
+            // 🌟 3. 持久化存入 localStorage (用於 request Header 抓取，防止 Store 循環引用)
+            localStorage.setItem('ACCESS_TOKEN_USER_INFO', JSON.stringify({
+              ...userInfo,
+              realName: userInfo.realName || userInfo.name || 'SSO User',
+            }));
+
+            console.log(`[SSO] 登錄成功:`, userStore.userInfo?.realName);
             return true;
           }
-          throw new Error('回傳中找不到使用者資訊 (userInfo)');
+          throw new Error('回傳中找不到使用者資訊');
         }
         
         throw new Error(`驗證未通過 (Code: ${jsonRoot?.code}, Message: ${jsonRoot?.message})`);
@@ -142,24 +148,32 @@ export const useAuthStore = defineStore('auth', () => {
     return false;
   }
 
+  /**
+   * 登出並導回 SSO 登入頁 (依環境變數跳轉)
+   */
   async function logout(redirect: boolean = true) {
     try {
       await logoutApi();
     } catch {
-      // 不做任何處理
+      // 靜默處理
     }
+    
+    // 1. 各項 Store 與緩存清空
     resetAllStores();
-    accessStore.setLoginExpired(false);
-
-    // 回登入頁帶上當前路由位址
-    await router.replace({
-      path: LOGIN_PATH,
-      query: redirect
-        ? {
-            redirect: encodeURIComponent(router.currentRoute.value.fullPath),
-          }
-        : {},
-    });
+    accessStore.setAccessToken(null);
+    localStorage.removeItem('ACCESS_TOKEN_USER_INFO');
+    
+    // 2. 🌟 SSO 全環境動態跳轉
+    if (redirect) {
+      // 優先讀取環境變數 (例如: http://127.0.0.1:8000, https://uathws.hwacom.com, https://hws.hwacom.com)
+      const hwsBaseUrl = import.meta.env.VITE_HWS_URL || 'http://127.0.0.1:8000';
+      const redirectParam = encodeURIComponent(window.location.href);
+      
+      console.log(`[SSO] 正在導回 HWS 認證中心: ${hwsBaseUrl}`);
+      
+      // 執行全頁面跳轉 (強制結束當前應用狀態)
+      window.location.href = `${hwsBaseUrl}/login?redirect=${redirectParam}`;
+    }
   }
 
   async function fetchUserInfo() {
