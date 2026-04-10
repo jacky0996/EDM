@@ -83,6 +83,44 @@ import { Page } from '@vben/common-ui';
 
       <el-card shadow="never">
         <template #header>
+          <div class="font-bold text-lg text-emerald-600">🎯 第三階段測試：Google 問卷與報名表</div>
+        </template>
+        <div class="text-sm text-gray-700 leading-relaxed">
+          <p class="mb-4">此階段測試目標為確認 EDM 系統與 Google Forms API 的整合流程，包含自動建立表單、題型對接以及更新同步邏輯。</p>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-base mb-2 border-l-4 border-emerald-500 pl-2"> 功能開關與初始化 </h3>
+            <ul class="list-decimal pl-5 space-y-2">
+              <li><strong>活動顯示狀態：</strong>進入活動詳情頁，切換「顯示報名表功能」開關，確認重新整理後側邊或分頁列表是否正確出現「活動邀請表」項目。</li>
+              <li><strong>建立初始問卷：</strong>在活動邀請表分頁中，勾選「預設欄位」（如：姓名、手機）並點擊「匯出 Google 問卷」。</li>
+              <li><strong>成功提示與連結：</strong>確認建立成功後，畫面正確顯示「Google 表單 ID」與「Responder 網址」，且點擊網址能正確開啟外部 Google 問卷。</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="font-bold text-base mb-2 border-l-4 border-teal-500 pl-2"> 內容同步與解析 </h3>
+            <ul class="list-decimal pl-5 space-y-2">
+              <li><strong>編輯配置邏輯：</strong>點擊「編輯配置」，確認系統能自動從 Google 抓回原始題目，並正確將 Google Item 映射回系統內的 UI 表單（如：單選、複選、複選）。</li>
+              <li><strong>增刪題目同步：</strong>
+                <ul class="list-disc pl-5 mt-1 space-y-1 text-gray-600">
+                  <li>新增一個「自定義題目」(如：用餐習慣 - 單選)。</li>
+                  <li>點擊「同步更新表單」。</li>
+                  <li>前往 Google 表單前端連結，確認新題目已正確出現且舊題目維持正確。</li>
+                </ul>
+              </li>
+              <li><strong>異常流程驗證：</strong>
+                <ul class="list-disc pl-5 mt-1 space-y-1 text-gray-600">
+                  <li><strong>解除綁定：</strong>點擊「解除綁定」，確認資料庫紀錄移除但 Google 雲端表單實體應保留（安全機制）。</li>
+                  <li><strong>重複建立阻擋：</strong>若已存在綁定紀錄，確認系統會阻擋再次點擊建立按鈕，引導使用者使用更新功能。</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card shadow="never">
+        <template #header>
           <div class="font-bold text-lg text-orange-600">📝 測試回報格式</div>
         </template>
         <div class="text-sm text-gray-600">

@@ -7,13 +7,17 @@ import { Page } from '@vben/common-ui';
     <div class="p-4 space-y-4">
       <el-card shadow="never">
         <template #header>
-          <div class="font-bold text-lg">💡 歡迎使用 EDM 行銷管理工具</div>
+          <div class="font-bold text-lg flex items-center gap-2">
+            <span class="text-blue-500">💡</span> 歡迎使用 EDM 行銷管理工具
+          </div>
         </template>
-        <div class="text-sm text-gray-600 leading-relaxed">
-          <ul class="list-disc pl-5 mt-2 space-y-1">
-            <!-- <li><strong>群組管理：</strong>可以建立群組並將人員分類。</li>
-            <li><strong>人員管理：</strong>管理人員詳細資料、聯絡方式，並提供批次匯入功能。</li> -->
-          </ul>
+        <div class="flex flex-wrap gap-4">
+          <el-button type="primary" plain @click="$router.push('/testing/uml')">
+            📊 檢視系統 UML 流程圖
+          </el-button>
+          <el-button type="success" plain @click="$router.push('/testing/index')">
+            🎯 檢視測試項目驗證指南
+          </el-button>
         </div>
       </el-card>
 
@@ -24,15 +28,16 @@ import { Page } from '@vben/common-ui';
         <div class="text-sm text-gray-700 leading-relaxed space-y-3">
           <h3 class="font-bold text-base text-blue-600 border-b pb-1">當週交付價值 (3/30～4/10)</h3>
           <ul class="list-disc pl-5 space-y-1 mb-4">
-            <li><strong>活動分析視覺化深度優化：</strong>實作極簡圓環圖 (Donut Chart) 與中心總數顯示，導入左圖右文排版與微互動進度條，並採用高對比護眼配色方案。</li>
-            <li><strong>Google 表單自動化與整合：</strong>支援問卷與報名表自動產製及 type 參數分流，並將活動屬性統一對接至 `is_registration` 與 `is_approve` 新邏輯。</li>
-            <li><strong>問卷與感謝函體系建置：</strong>完成 SurveyForm 與 ThankyouForm UI 標準化，並在頁面下方實作「發送與回覆狀態追蹤清單」。</li>
-            <li><strong>UAT 環境佈署與代理優化：</strong>深度除錯 UAT 環境之 CORS 與 308 重定向問題，優化 Nginx 代理配置（HTTPS 強制轉發、SSL 驗證略過）。</li>
+            <li><strong>活動分析UI調整：</strong>調整色系與版面配置，參照新聞稿採左圖右文。</li>
+            <li><strong>Google 表單自動化與整合：</strong>報名表管理功能，可在EDM系統內建立表單。</li>
+            <li><strong>測試機環境調整：</strong> 區分前後端/HWS/資料庫，並將相關系統設置寫入腳本，及防火牆和外網設定。</li>
           </ul>
 
           <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週預計交付</h3>
           <ol class="list-decimal pl-5 space-y-1 mb-6">
- 
+            <li>google問卷數據整合(圓餅圖)</li>
+            <li>Alice提出問卷之使用建議(相關資料匯出)</li>
+            <li>Aws寄信功能</li>
           </ol>
 
           <hr class="my-6 border-dashed" />
@@ -107,4 +112,3 @@ import { Page } from '@vben/common-ui';
     </div>
   </Page>
 </template>
-

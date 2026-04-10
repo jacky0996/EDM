@@ -83,11 +83,70 @@ graph TD
     Detail -- 邀請名單 --> InviteList[邀請名單分頁列表]
     InviteList --> ImportGroup[從現有群組列表匯入人員]
 `;
+
+const formUsageUml = `
+sequenceDiagram
+    participant User as EDM 系統(前端)
+    participant System as EDM 系統(後端)
+    participant Cloud as Google 雲端表單
+    
+    Note over User: 情境一：第一次建立表單
+    User->>System: 1. 在系統中設定題目與選項
+    System->>Cloud: 2. 自動在 Google 雲端建立表單
+    Cloud-->>System: 3. 完成建立並回傳專屬網址
+    System-->>User: 4. 畫面顯示成功連結
+    
+    Note over User: 情境二：之後點選「編輯配置」
+    User->>System: 1. 想要修改已建立的表單
+    System->>Cloud: 2. 從 Google 獲取最新題目資訊
+    System->>System: 3. 自動辨識題目類型 (如單選、複選)
+    System-->>User: 4. 畫面自動呈現已填好的內容，可直接修改
+`;
+
+const formLogicUml = `
+graph TD
+    Start[解析原始資料] --> Loop[遍歷 items 陣列]
+    Loop --> MatchStandard{符合標準欄位?}
+    
+    MatchStandard -- title 匹配 --> AssignStandard[推入 standardFields 陣列]
+    MatchStandard -- 不匹配 --> CheckType{問卷類型判斷}
+    
+    subgraph 映射邏輯
+    CheckType -- textQuestion --> IsParagraph{paragraph?}
+    IsParagraph -- 是 --> Textarea[類型: textarea]
+    IsParagraph -- 否 --> Text[類型: text]
+    
+    CheckType -- choiceQuestion --> ChoiceType{型態判斷}
+    ChoiceType -- RADIO --> Radio[類型: radio]
+    ChoiceType -- CHECKBOX --> Checkbox[類型: checkbox]
+    ChoiceType -- DROP_DOWN --> Dropdown[類型: dropdown]
+    ChoiceType --> ExtractOptions[提取 Options 陣列]
+    
+    CheckType -- date/time --> DateTime[類型: date/time]
+    end
+    
+    AssignStandard & Textarea & Text & Radio & Checkbox & Dropdown & DateTime --> Next[下一個項目]
+    Next --> Loop
+    Next -- 完成 --> End[產出 UI Config 結構]
+`;
+
+const formTestUml = `
+graph LR
+    A[進入活動詳情] --> B{開啟報名表開關?}
+    B -- 是 --> C[出現活動邀請表頁籤]
+    C --> D[勾選欄位 / 新增題目]
+    D --> E[點擊 匯出 Google 問卷]
+    E --> F{API 建立成功?}
+    F -- 成功 --> G[顯示 Form ID 與 連結]
+    F -- 失敗 --> H[顯示錯誤訊息]
+    G --> I[點擊連結 進行試填]
+    I --> J[確認 Google 表單題目正確]
+`;
 </script>
 
 <template>
   <Page title="UML 系統架構圖">
-    <div class="p-4">
+    <div class="p-4 space-y-6">
       <el-card shadow="never" class="uml-card">
         <el-tabs type="border-card">
           <el-tab-pane label="👤 人員管理">
@@ -117,6 +176,18 @@ graph TD
             </div>
           </el-tab-pane>
 
+          <el-tab-pane label="📝 活動邀請表">
+            <div class="py-4">
+              <div class="mb-4 text-sm text-gray-500 italic font-bold text-blue-600">
+                Google 表單使用流程 (User Flow)
+              </div>
+              <div class="mb-4 text-xs text-gray-400">
+                管理員如何透過系統自動化管理 Google 表單，無需手動去 Google 後端操作。
+              </div>
+              <MermaidView :content="formUsageUml" />
+            </div>
+          </el-tab-pane>
+
           <el-tab-pane label="🔑 系統串接">
             <div class="py-4">
               <div class="mb-4 text-sm text-gray-500 italic">
@@ -125,7 +196,33 @@ graph TD
               <MermaidView :content="loginUml" />
             </div>
           </el-tab-pane>
+
+          <el-tab-pane label="🧪 測試驗證流">
+            <div class="py-4">
+              <div class="mb-4 text-sm text-gray-500 italic">
+                 Google 問卷測試驗證－描述：管理員從開啟功能到完成表單建立的端到端驗證路徑。
+              </div>
+              <MermaidView :content="formTestUml" />
+            </div>
+          </el-tab-pane>
         </el-tabs>
+      </el-card>
+
+      <!-- 新增：系統測試驗證區 -->
+      <!-- 解析映射邏輯 (移動至最下方) -->
+      <el-card shadow="never" class="!border-gray-100 mb-4 bg-gray-50/30">
+        <template #header>
+          <div class="font-bold text-lg flex items-center gap-2">
+            <span class="text-emerald-500 font-bold">⚙️</span> Google 表單解析映射邏輯 (Logic Deep-Dive)
+          </div>
+        </template>
+        <div class="py-4">
+          <div class="mb-6 border-l-4 border-emerald-500 pl-4">
+             <div class="text-sm font-bold text-gray-700">自動化解析原理</div>
+             <div class="text-xs text-gray-500 mt-1">系統如何將 Google 雲端的原始資料轉換成 EDM 介面可讀取的格式</div>
+          </div>
+          <MermaidView :content="formLogicUml" />
+        </div>
       </el-card>
     </div>
   </Page>
