@@ -80,6 +80,10 @@ function openExternalLink(url: string) {
   if (url) window.open(url, '_blank');
 }
 
+function handleCopy() {
+  navigator.clipboard.writeText(formUrl.value).then(() => ElMessage.success('已複製連結'));
+}
+
 function addQuestion() {
   config.customQuestions.push({ 
     label: '', 
@@ -135,28 +139,40 @@ async function handleCreateSurvey() {
 <template>
   <div v-loading="loading" class="survey-form-config p-2">
     
-    <!-- 頂部狀態列 (已產製時顯示管理清單，未產製時顯示配置入口) -->
-    <div v-if="isCreated" class="animate-fade-in">
-      <ElCard shadow="never" class="!rounded-2xl border-gray-200 bg-gray-900 border-l-[6px] border-indigo-500">
-        <div class="flex flex-wrap items-center justify-between gap-4">
+    <!-- A. 頂部狀態列 (已產製時顯示管理清單) -->
+    <div v-if="isCreated" class="animate-fade-in group">
+      <ElCard shadow="never" class="!rounded-2xl border border-indigo-100 bg-white p-1 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <!-- 裝飾微光 -->
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-50/50 blur-3xl rounded-full"></div>
+        
+        <div class="flex flex-wrap items-center justify-between gap-6 p-3 relative z-10">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-xl flex items-center justify-center border border-indigo-500/30">
+            <div class="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center border border-indigo-100 transition-transform group-hover:scale-105 shadow-sm">
               <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>
             </div>
             <div class="flex flex-col">
-              <span class="text-white font-bold text-lg">Google 問卷已產製</span>
-              <span class="text-gray-400 text-xs">專屬表單與編輯器皆已配置就緒</span>
+              <div class="flex items-center gap-2">
+                <span class="text-gray-800 font-bold text-lg tracking-tight">Google 問卷已產製</span>
+                <span class="bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-md font-black uppercase shadow-sm">Live</span>
+              </div>
+              <span class="text-gray-400 text-xs mt-0.5 font-medium">專屬表單與編輯器皆已配置就緒，可開始收集回饋</span>
             </div>
           </div>
-          <div class="flex-1 max-w-xl px-4">
-            <ElInput v-model="formUrl" readonly size="default" class="custom-dark-input">
-              <template #prefix><span class="text-gray-600">🔗</span></template>
-            </ElInput>
+
+          <div class="flex-1 min-w-[280px] flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-100 group-hover:border-indigo-200 transition-all shadow-inner">
+            <code class="text-indigo-700 text-[11px] px-2 truncate flex-1 font-mono font-bold">{{ formUrl }}</code>
+            <ElButton type="primary" size="small" circle plain @click="handleCopy" class="!bg-white border-gray-200 hover:!border-indigo-500 font-bold">
+              <template #icon><svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" /></svg></template>
+            </ElButton>
           </div>
-          <div class="flex gap-2">
-            <ElButton type="primary" plain @click="openExternalLink(formUrl)">前往填寫頁面</ElButton>
-            <ElButton type="warning" plain @click="openExternalLink(editUrl)">雲端編輯器</ElButton>
-            <ElButton type="info" plain @click="isCreated = false">重新配置介面</ElButton>
+
+          <div class="flex items-center gap-3">
+            <ElButton type="primary" class="!rounded-xl px-5 !h-10 font-bold shadow-md shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-95 transition-all" @click="openExternalLink(formUrl)">
+              開啟預覽 ↗
+            </ElButton>
+            <div class="h-6 w-[1px] bg-gray-200 mx-1"></div>
+            <ElButton v-if="editUrl" type="success" class="!rounded-xl px-4 !h-10 font-bold shadow-sm" @click="openExternalLink(editUrl)">雲端編輯器</ElButton>
+            <ElButton type="danger" class="!rounded-xl px-4 !h-10 font-bold shadow-sm" @click="isCreated = false">重新配置</ElButton>
           </div>
         </div>
       </ElCard>

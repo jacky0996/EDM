@@ -47,22 +47,32 @@ function handleSendTest() {
 <template>
   <div v-loading="loading" class="thankyou-form-config p-2">
     
-    <!-- 頂部狀態列 -->
-    <div v-if="isConfigured" class="animate-fade-in">
-      <ElCard shadow="never" class="!rounded-2xl border-gray-200 bg-gray-900 border-l-[6px] border-emerald-500">
-        <div class="flex flex-wrap items-center justify-between gap-4">
+    <!-- A. 頂部狀態列 (啟用後顯示) -->
+    <div v-if="isConfigured" class="animate-fade-in group">
+      <ElCard shadow="never" class="!rounded-2xl border border-emerald-100 bg-white p-1 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <!-- 裝飾微光 -->
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-50/50 blur-3xl rounded-full"></div>
+        
+        <div class="flex flex-wrap items-center justify-between gap-6 p-3 relative z-10">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center border border-emerald-500/30">
+            <div class="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center border border-emerald-100 transition-transform group-hover:scale-105 shadow-sm">
               <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" /></svg>
             </div>
             <div class="flex flex-col">
-              <span class="text-white font-bold text-lg">感謝函已啟用</span>
-              <span class="text-gray-400 text-xs">系統正持續監測發送與開信狀態</span>
+              <div class="flex items-center gap-2">
+                <span class="text-gray-800 font-bold text-lg tracking-tight">感謝函機制已啟動</span>
+                <span class="bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-md font-black uppercase shadow-sm">Success</span>
+              </div>
+              <span class="text-gray-400 text-xs mt-0.5 font-medium">系統正持續監測發送狀態，您也可以手動發送測試。</span>
             </div>
           </div>
-          <div class="flex gap-2">
-            <ElButton type="primary" plain @click="handleSendTest">發送測試信</ElButton>
-            <ElButton type="info" plain @click="isConfigured = false">重新編輯內容</ElButton>
+
+          <div class="flex items-center gap-3">
+            <ElButton type="primary" class="!rounded-xl px-6 !h-10 font-bold shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20" @click="handleSendTest">
+              發送測試信件
+            </ElButton>
+            <div class="h-6 w-[1px] bg-gray-200 mx-1"></div>
+            <ElButton type="success" class="!rounded-xl px-4 !h-10 font-bold shadow-sm" @click="isConfigured = false">重新編輯內容</ElButton>
           </div>
         </div>
       </ElCard>

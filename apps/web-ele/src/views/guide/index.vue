@@ -22,6 +22,21 @@ import { Page } from '@vben/common-ui';
           <div class="font-bold text-lg">📝 專案開發日誌 (Development Log)</div>
         </template>
         <div class="text-sm text-gray-700 leading-relaxed space-y-3">
+          <h3 class="font-bold text-base text-blue-600 border-b pb-1">當週交付價值 (3/30～4/10)</h3>
+          <ul class="list-disc pl-5 space-y-1 mb-4">
+            <li><strong>活動分析視覺化深度優化：</strong>實作極簡圓環圖 (Donut Chart) 與中心總數顯示，導入左圖右文排版與微互動進度條，並採用高對比護眼配色方案。</li>
+            <li><strong>Google 表單自動化與整合：</strong>支援問卷與報名表自動產製及 type 參數分流，並將活動屬性統一對接至 `is_registration` 與 `is_approve` 新邏輯。</li>
+            <li><strong>問卷與感謝函體系建置：</strong>完成 SurveyForm 與 ThankyouForm UI 標準化，並在頁面下方實作「發送與回覆狀態追蹤清單」。</li>
+            <li><strong>UAT 環境佈署與代理優化：</strong>深度除錯 UAT 環境之 CORS 與 308 重定向問題，優化 Nginx 代理配置（HTTPS 強制轉發、SSL 驗證略過）。</li>
+          </ul>
+
+          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週預計交付</h3>
+          <ol class="list-decimal pl-5 space-y-1 mb-6">
+ 
+          </ol>
+
+          <hr class="my-6 border-dashed" />
+
           <h3 class="font-bold text-base text-blue-600 border-b pb-1">當週交付價值 (3/23～3/27)</h3>
           <ul class="list-disc pl-5 space-y-1 mb-4">
             <li><strong>人員管理優化：</strong>實作業務人員自動綁定機制，支援 Excel 匯入時透過「工號」自動勾稽關聯。</li>
@@ -29,12 +44,6 @@ import { Page } from '@vben/common-ui';
             <li><strong>活動詳細頁面開發：</strong>完成報名表配置介面、審核名單流程管理、以及活動分析數據視覺化（ECharts 整合）之靜態畫面。</li>
             <li><strong>Docker 建置優化：</strong>修正 Dockerfile 指令，解決核心工具安裝時的網路逾時報錯，提升編譯效率。</li>
           </ul>
-
-          <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">下週預計交付</h3>
-          <ol class="list-decimal pl-5 space-y-1 mb-6">
-            <li><strong>發信系統核心開發：</strong>實作寄信功能（含 Proxy 設定與郵件圖片外部呈現之資安處理）。</li>
-            <li><strong>環境遷移與同步：</strong>將現有後端 API、DB 連線及資料完整搬移至全新測試主機。</li>
-          </ol>
 
           <h3 class="font-bold text-base text-blue-600 border-b pb-1 mt-4">當週交付價值 (3/16～3/20)</h3>
           <ul class="list-disc pl-5 space-y-1 mb-4">
