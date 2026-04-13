@@ -115,8 +115,9 @@ async function handleCreateSurvey() {
       type: 'survey', // 指定為問券類型
       config: config
     }, {
-      responseReturn: 'body'
-    });
+      responseReturn: 'body',
+      timeout: 60000
+    } as any);
 
     if (res && (res.code === 200 || res.code === 0 || res.status === true)) {
       isCreated.value = true;

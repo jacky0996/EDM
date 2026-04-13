@@ -9,11 +9,13 @@ import { getEventListApi } from '#/api/event';
 
 interface RowType {
   id: number;
+  event_number: string | null;
   title: string;
   status: number;
   start_time: string | null;
   end_time: string | null;
   landmark: string | null;
+  type: string | null;
   schedule_at: string | null;
   created_at: string;
 }
@@ -23,6 +25,15 @@ const STATUS_MAP = {
   1: { label: '處理中', type: 'warning' },
   2: { label: '已完成', type: 'success' },
   3: { label: '失敗', type: 'danger' },
+} as const;
+ 
+const EVENT_TYPE_MAP = {
+  0: { label: '會議', type: 'primary' },
+  1: { label: '工作坊', type: 'success' },
+  2: { label: '記者會', type: 'warning' },
+  3: { label: '標準制定會議', type: 'danger' },
+  4: { label: '創意競賽', type: 'info' },
+  5: { label: '其他活動', type: '' },
 } as const;
 
 export const formOptions: VbenFormProps = {
@@ -61,15 +72,27 @@ export const gridOptions: VxeTableGridOptions<RowType> = {
   columns: [
     { title: '序號', type: 'seq', width: 60 },
     {
+      field: 'event_number',
+      title: '活動編號',
+      width: 120,
+      slots: {
+        default: ({ row }) => {
+          return h('span', { class: 'text-gray-400 font-mono' }, row.event_number || '-');
+        },
+      },
+    },
+    {
       field: 'title',
       title: '活動名稱',
-      minWidth: 150,
+      minWidth: 200,
       slots: {
         default: ({ row }) => {
           return h(
             ElLink,
             {
               type: 'primary',
+              underline: false,
+              class: 'font-bold',
               onClick: () => {
                 router.push(`/event/detail/${row.id}`);
               },
@@ -80,13 +103,14 @@ export const gridOptions: VxeTableGridOptions<RowType> = {
       },
     },
     {
-      field: 'status',
-      title: '發送狀態',
-      width: 120,
+      field: 'type',
+      title: '活動類型',
+      width: 130,
       slots: {
         default: ({ row }) => {
-          const statusConfig = STATUS_MAP[row.status as keyof typeof STATUS_MAP] || STATUS_MAP[0];
-          return h(ElTag, { type: statusConfig.type }, { default: () => statusConfig.label });
+          const typeVal = row.type as unknown as keyof typeof EVENT_TYPE_MAP;
+          const label = EVENT_TYPE_MAP[typeVal]?.label || row.type || '未選取';
+          return h('span', { class: 'text-gray-600 font-medium' }, label);
         },
       },
     },
@@ -107,16 +131,6 @@ export const gridOptions: VxeTableGridOptions<RowType> = {
       slots: {
         default: ({ row }) => {
           return row.end_time ? formatDateTime(row.end_time) : '-';
-        },
-      },
-    },
-    {
-      field: 'landmark',
-      title: '活動地標',
-      minWidth: 150,
-      slots: {
-        default: ({ row }) => {
-          return row.landmark ?? '-';
         },
       },
     },

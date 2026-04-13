@@ -16,6 +16,9 @@ import {
   ElSwitch,
   ElSelect,
   ElOption,
+  ElDialog,
+  ElDescriptions,
+  ElDescriptionsItem,
 } from 'element-plus';
 import { requestClient } from '#/api/request';
 
@@ -27,6 +30,7 @@ const props = defineProps<{
 
 const { parseGoogleForm } = useGoogleFormParser();
 const loading = ref(false);
+const loadError = ref(false);
 const isDisplay = ref(true); 
 const isCreatedOrBound = ref(false);
 const formUrl = ref('');
@@ -37,7 +41,7 @@ const displayList = ref<any[]>([]);
 const config = reactive({
   title: props.eventData?.title || '活動報名表',
   description: props.eventData?.summary || '感謝您參加本活動，請填寫以下報名資訊。',
-  standardFields: ['name', 'mobile', 'email', 'company'],
+  standardFields: ['name', 'mobile', 'email'],
   customQuestions: [] as any[]
 });
 
@@ -57,7 +61,6 @@ const fieldOptions = [
   { label: '電子郵件', value: 'email', disabled: true },
   { label: '公司名稱', value: 'company' },
   { label: '職稱', value: 'job_title' },
-  { label: '餐旅需求', value: 'dietary' },
 ];
 
 const hasOptions = (type: string) => ['radio', 'checkbox', 'dropdown'].includes(type);
@@ -73,41 +76,69 @@ watch(() => props.eventData?.id, () => {
 async function checkDisplayAndLoad() {
   if (!props.eventData?.id) return;
   
-  // 檢查是否開啟報名表 (對位新的參數 is_registration)
-  if (props.eventData.is_registration === 0) {
-    isDisplay.value = false;
-    return;
-  }
-
-  isDisplay.value = true;
   loading.value = true;
+  loadError.value = false;
   try {
+    // 考慮到 Google API 或大量數據讀取可能較慢，在此增加 timeout 設定 (若 requestClient 支援)
     const res: any = await requestClient.post('/edm/event/getDisplayList', {
       event_id: props.eventData.id
-    }, { responseReturn: 'raw' });
+    }, { 
+      responseReturn: 'raw',
+      timeout: 60000 // 延長至 60 秒
+    } as any);
 
     const body = res?.data || res || {};
 
-    if (body.code === 1) {
-      isDisplay.value = false;
+    if (body.code !== 0) {
+      if (body.message?.includes('找不到對應的活動')) {
+         isDisplay.value = false;
+      }
       return;
     }
 
-    const sheetData = body.data || {};
-    const url = sheetData.url || sheetData.form_url || sheetData.sheet_url || '';
-    
-    if (url) {
-      formUrl.value = url;
-      formId.value = sheetData.id || ''; // 儲存表單 ID
+    const resData = body.data || {};
+    isDisplay.value = resData.requires_registration ?? true;
+
+    if (resData.google_form_bound) {
+      const details = resData.form_details || {};
+      formUrl.value = details.form_url || '';
+      formId.value = details.id || '';
       isCreatedOrBound.value = true;
+
+      // 解析並顯示名單 (已經從後端讀取回來的 responses)
+      if (details.responses && Array.isArray(details.responses)) {
+        displayList.value = details.responses.map((res: any) => {
+          const rowData: any = {
+            _responseId: res.google_response_id,
+            _createTime: res.submitted_at,
+            _rawAnswers: res.answers || [],
+            status: res.status ?? 0 // 預設 0: 待審核
+          };
+          
+          if (res.answers && Array.isArray(res.answers)) {
+            res.answers.forEach((ans: any) => {
+               const title = ans.title || '';
+               if (title.includes('姓名')) rowData.name = ans.answer;
+               else if (title.includes('電話') || title.includes('手機')) rowData.mobile = ans.answer;
+               else if (title.includes('公司')) rowData.company = ans.answer;
+               else if (title.includes('郵件') || title.toLowerCase().includes('email')) rowData.email = ans.answer;
+               else rowData[title] = ans.answer;
+            });
+          }
+          return rowData;
+        });
+      } else {
+        displayList.value = [];
+      }
     } else {
       isCreatedOrBound.value = false;
       formId.value = '';
+      displayList.value = [];
     }
-
-    displayList.value = body.list || sheetData.list || [];
   } catch (error) {
-    console.warn('Load failed', error);
+    console.error('getDisplayList Timeout or Failed:', error);
+    loadError.value = true;
+    ElMessage.error('連線逾時，請檢查網路或稍後再試');
   } finally {
     loading.value = false;
   }
@@ -127,7 +158,7 @@ async function handleCreateForm() {
       event_id: props.eventData.id,
       type: 'registration',
       config: config
-    });
+    }, { timeout: 60000 } as any);
 
     // 只要沒進入 catch，就代表執行成功
     ElMessage.success('產製成功');
@@ -148,7 +179,7 @@ async function handleEditForm() {
   try {
     const res: any = await requestClient.post('/edm/event/getGoogleForm', {
       id: formId.value
-    });
+    }, { timeout: 60000 } as any);
     
     // 使用 Hook 解析原始 Google 資料
     const googleInfo = res.data?.google_info || res.google_info;
@@ -205,6 +236,29 @@ async function handleDeleteUrl() {
   }
 }
 
+const dialogVisible = ref(false);
+const currentResponse = ref<any>(null);
+
+function handleViewResponse(row: any) {
+  currentResponse.value = row;
+  dialogVisible.value = true;
+}
+
+function formatDate(dateStr: string) {
+  if (!dateStr) return '(未知)';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+  
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const h = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  const s = String(date.getSeconds()).padStart(2, '0');
+  
+  return `${y}-${m}-${d} ${h}:${min}:${s}`;
+}
+
 function handleCopy() {
   navigator.clipboard.writeText(formUrl.value).then(() => ElMessage.success('已複製連結'));
 }
@@ -219,8 +273,17 @@ function addQuestion() {
   <div v-loading="loading" class="registration-form-container p-2">
     
     <!-- 情境 1: 活動不需填寫報名表 -->
-    <div v-if="!isDisplay" class="py-20 flex justify-center bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div v-if="!isDisplay" class="py-20 flex flex-col items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100 italic text-gray-400">
       <ElEmpty description="此活動目前設定為：不需報名表" />
+    </div>
+
+    <!-- 加載異常狀態 -->
+    <div v-else-if="loadError" class="py-20 flex flex-col items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100">
+      <div class="text-red-400 mb-4">
+        <svg viewBox="0 0 24 24" width="64" height="64"><path fill="currentColor" d="M12,2L1,21H23L12,2M12,6L19.53,19H4.47L12,6M11,10V14H13V10H11M11,16V18H13V16H11Z" /></svg>
+      </div>
+      <p class="text-gray-600 font-bold mb-4">資料加載發生逾時</p>
+      <ElButton type="primary" @click="checkDisplayAndLoad">重新嘗試</ElButton>
     </div>
 
     <!-- 情境 2: 報名表管理介面 -->
@@ -358,19 +421,66 @@ function addQuestion() {
             </div>
           </template>
           <ElTable :data="displayList" stripe border class="w-full" empty-text="目前尚無報名資料">
-            <ElTableColumn prop="name" label="姓名" width="150"><template #default="{row}"><span class="font-bold text-blue-600">{{ row.name }}</span></template></ElTableColumn>
-            <ElTableColumn prop="company" label="公司單位" min-width="200" />
-            <ElTableColumn prop="mobile" label="行動電話" width="180" />
-            <ElTableColumn v-if="props.eventData.is_approve" label="審核狀態" width="120">
+            <ElTableColumn prop="name" label="姓名" width="120">
+              <template #default="{row}"><span class="font-bold text-blue-600">{{ row.name }}</span></template>
+            </ElTableColumn>
+            <ElTableColumn prop="company" label="公司單位" min-width="150" />
+            <ElTableColumn prop="mobile" label="行動電話" width="130" />
+            <ElTableColumn prop="email" label="電子郵件" min-width="180" />
+            <ElTableColumn label="操作" width="100" align="center" fixed="right">
                <template #default="{row}">
-                 <span :class="row.status === 1 ? 'text-green-600' : 'text-gray-400'">{{ row.status === 1 ? '已通過' : '待審核' }}</span>
+                 <ElButton type="primary" link @click="handleViewResponse(row)">查看回復</ElButton>
                </template>
             </ElTableColumn>
           </ElTable>
         </ElCard>
       </div>
-
     </div>
+
+    <!-- 回覆詳情彈窗 -->
+    <ElDialog v-model="dialogVisible" title="詳細填寫內容" width="650px" destroy-on-close class="!rounded-2xl">
+      <div v-if="currentResponse" class="flex flex-col">
+        <!-- 頂部核心資訊摘要 -->
+        <div class="grid grid-cols-2 gap-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-100">
+           <div class="flex flex-col">
+              <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">姓名</span>
+              <span class="text-blue-600 font-bold">{{ currentResponse.name || '---' }}</span>
+           </div>
+           <div class="flex flex-col">
+              <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">電子郵件</span>
+              <span class="text-gray-700 font-medium break-all">{{ currentResponse.email || '---' }}</span>
+           </div>
+           <div class="flex flex-col">
+              <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">公司單位</span>
+              <span class="text-gray-700 font-medium">{{ currentResponse.company || '---' }}</span>
+           </div>
+           <div class="flex flex-col">
+              <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">行動電話</span>
+              <span class="text-gray-700 font-medium">{{ currentResponse.mobile || '---' }}</span>
+           </div>
+        </div>
+
+        <!-- 滾動式詳細問答區 -->
+        <div class="px-1">
+          <h4 class="text-sm font-bold text-gray-500 mb-3 flex items-center gap-2">
+            <div class="w-1 h-4 bg-emerald-500 rounded-full"></div> 完整填寫內容
+          </h4>
+          <div class="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar border border-gray-100 rounded-xl">
+            <ElDescriptions :column="1" border>
+              <ElDescriptionsItem v-for="(ans, i) in currentResponse._rawAnswers" :key="i" :label="ans.title">
+                <span class="font-medium text-gray-700 whitespace-pre-wrap">{{ ans.answer || '(未填寫)' }}</span>
+              </ElDescriptionsItem>
+            </ElDescriptions>
+          </div>
+        </div>
+
+        <!-- 底部元數據 -->
+        <div class="text-[10px] text-gray-300 mt-6 flex justify-between px-2 pt-4 border-t border-gray-50">
+          <span>Response ID: {{ currentResponse._responseId }}</span>
+          <span>提交時間: {{ formatDate(currentResponse._createTime) }}</span>
+        </div>
+      </div>
+    </ElDialog>
   </div>
 </template>
 
@@ -389,5 +499,21 @@ function addQuestion() {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* 自定義捲軸樣式 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
 }
 </style>

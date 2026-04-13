@@ -10,8 +10,6 @@ import { Page } from '@vben/common-ui';
           <div class="font-bold text-lg text-blue-600">🎯 第一階段測試：群組與人員管理</div>
         </template>
         <div class="text-sm text-gray-700 leading-relaxed">
-          <p class="mb-4">此階段測試目標為確認「人員管理」與「群組管理」核心操作流程的穩定性，以及兩者之間的關聯是否正確。</p>
-
           <div class="mb-6">
             <h3 class="font-bold text-base mb-2 border-l-4 border-blue-500 pl-2"> 群組管理 </h3>
             <ul class="list-decimal pl-5 space-y-2">

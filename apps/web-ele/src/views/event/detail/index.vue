@@ -329,7 +329,7 @@ function updateIframeHeight(e: any) {
             <div class="py-6">
               <ApprovalList
                 v-if="activeTab === 'approval' && form.id"
-                :event-id="form.id"
+                :event-data="form"
               />
             </div>
           </el-tab-pane>

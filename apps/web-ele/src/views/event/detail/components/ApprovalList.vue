@@ -1,188 +1,274 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import {
   ElTable,
   ElTableColumn,
   ElButton,
   ElTag,
-  ElPagination,
   ElMessageBox,
   ElMessage,
   ElInput,
+  ElEmpty,
 } from 'element-plus';
+import { requestClient } from '#/api/request';
 
 const props = defineProps<{
-  eventId: string | number;
+  eventData: any;
 }>();
 
-// 模擬假資料
-const mockList = [
-  { id: 1, name: '王大同', company: '華電聯網', phone: '0912-345678', email: 'wang@hwacom.com', status: 'pending' },
-  { id: 2, name: '李阿美', company: '資策會', phone: '0922-111222', email: 'lee@iii.org.tw', status: 'pending' },
-  { id: 3, name: '張小明', company: '工研院', phone: '0933-555666', email: 'chang@itri.org.tw', status: 'approved' },
-  { id: 4, name: '林志玲', company: '凱渥模特', phone: '0944-777888', email: 'lin@catwalk.com', status: 'rejected' },
-  { id: 5, name: '郭台銘', company: '鴻海精密', phone: '0955-999000', email: 'terry@foxconn.com', status: 'pending' },
-];
-
 const list = ref<any[]>([]);
+const filteredList = ref<any[]>([]);
 const loading = ref(false);
-const total = ref(15); // 模擬總筆數
-const currentPage = ref(1);
-const pageSize = ref(10);
 const searchQuery = ref('');
+const googleFormId = ref<number | null>(null);
+const notApproveMode = ref(false);
 
-onMounted(() => {
-  fetchList();
-});
-
-/** 模擬取得資料 */
-function fetchList() {
-  loading.value = true;
-  // 延遲模擬 API 呼叫
-  setTimeout(() => {
-    list.value = [...mockList].map(item => ({ ...item }));
-    loading.value = false;
-  }, 300);
+function applyFilter() {
+  const q = searchQuery.value.toLowerCase().trim();
+  if (!q) {
+    filteredList.value = list.value;
+  } else {
+    filteredList.value = list.value.filter((row) =>
+      [row.name, row.company, row.email, row.mobile]
+        .filter(Boolean)
+        .some((val) => String(val).toLowerCase().includes(q))
+    );
+  }
 }
 
-/** 審核通過流程 */
+onMounted(async () => {
+  await init();
+});
+
+async function init() {
+  if (!props.eventData?.id) return;
+
+  loading.value = true;
+  try {
+    // Step 1: 取得表單綁定資訊以獲得 google_form_id
+    const displayRes: any = await requestClient.post('/edm/event/getDisplayList', {
+      event_id: props.eventData.id
+    }, { responseReturn: 'raw', timeout: 60000 } as any);
+
+    const body = displayRes?.data || displayRes || {};
+    const resData = body.data || {};
+
+    if (!resData.google_form_bound) {
+      list.value = [];
+      filteredList.value = [];
+      return;
+    }
+
+    googleFormId.value = resData.form_details?.id || null;
+    if (!googleFormId.value) return;
+
+    // Step 2: 呼叫 getApproveList
+    await fetchApproveList();
+  } catch (err) {
+    console.error('ApprovalList init failed:', err);
+    ElMessage.error('資料載入失敗，請稍後再試');
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function fetchApproveList() {
+  if (!googleFormId.value) return;
+
+  loading.value = true;
+  try {
+    const res: any = await requestClient.post('/edm/event/getApproveList', {
+      google_form_id: googleFormId.value
+    });
+
+    // API 呼叫失敗
+    if (res.code !== 0) {
+      ElMessage.error(res.message || '取得審核名單失敗');
+      return;
+    }
+
+    // 活動未開啟審核機制 (status: false)
+    if (!res.status) {
+      notApproveMode.value = true;
+      list.value = [];
+      filteredList.value = [];
+      return;
+    }
+
+    // data 有值代表已有人填寫，空陣列代表尚無人填寫，都正常顯示
+    list.value = (res.data || []).map((item: any) => {
+      const row: any = {
+        _id: item.id,
+        _responseId: item.google_response_id,
+        _createTime: item.submitted_at,
+        status: item.status ?? 0,
+        _rawAnswers: item.answers || []
+      };
+
+      if (Array.isArray(item.answers)) {
+        item.answers.forEach((ans: any) => {
+          const title = (ans.title || '').trim();
+          const answer = ans.answer || '';
+          if (title.includes('姓名')) row.name = answer;
+          else if (title.includes('電話') || title.includes('手機')) row.mobile = answer;
+          else if (title.includes('公司')) row.company = answer;
+          else if (title.includes('郵件') || title.toLowerCase().includes('email')) row.email = answer;
+        });
+      }
+
+      return row;
+    });
+
+    applyFilter();
+  } catch (err: any) {
+    ElMessage.error(err.message || '取得審核名單失敗');
+  } finally {
+    loading.value = false;
+  }
+}
+
+function getStatusTag(status: number) {
+  const map: any = {
+    0: { label: '待審核', type: 'info' },
+    1: { label: '已通過', type: 'success' },
+    2: { label: '不通過', type: 'danger' },
+  };
+  return map[status] ?? { label: '未知', type: 'info' };
+}
+
 async function handleApprove(row: any) {
   try {
     const action = await ElMessageBox.confirm(
-      '確認核准該人員報名？此操作將使狀態變更為「已過審」。',
+      `確認核准「${row.name || '此人員'}」的報名？`,
       '審核通過確認',
-      {
-        confirmButtonText: '寄出過審文件',
-        cancelButtonText: '僅過審(不寄信)',
-        distinguishCancelAndClose: true,
-        type: 'success',
-      }
-    ).catch((action) => action);
+      { confirmButtonText: '確定通過', cancelButtonText: '取消', type: 'success' }
+    ).catch((a) => a);
 
-    // 不論點選什麼(除了關閉視窗)，狀態都會變更
-    if (action === 'confirm') {
-      ElMessage.success(`${row.name} 已過審，並已發送過審文件。`);
-      row.status = 'approved';
-    } else if (action === 'cancel') {
-      ElMessage.success(`${row.name} 已過審 (未寄送文件)。`);
-      row.status = 'approved';
-    }
-  } catch (err) {
-    // 點擊關閉 X 或點擊背景不執行動作
-  }
+    if (action !== 'confirm') return;
+    await updateStatus(row, 1);
+  } catch (_) {}
 }
 
-/** 審核拒絕流程 */
 async function handleReject(row: any) {
   try {
     const action = await ElMessageBox.confirm(
-      '確認拒絕該人員報名？此操作將使狀態變更為「審核未過」。',
+      `確認拒絕「${row.name || '此人員'}」的報名？`,
       '審核拒絕確認',
-      {
-        confirmButtonText: '寄出失敗通知信',
-        cancelButtonText: '僅拒絕(不寄信)',
-        distinguishCancelAndClose: true,
-        type: 'warning',
-      }
-    ).catch((action) => action);
+      { confirmButtonText: '確定拒絕', cancelButtonText: '取消', type: 'warning' }
+    ).catch((a) => a);
 
-    if (action === 'confirm') {
-      ElMessage.warning(`${row.name} 審核未過，已發送失敗通知。`);
-      row.status = 'rejected';
-    } else if (action === 'cancel') {
-      ElMessage.warning(`${row.name} 審核未過 (未寄送郵件)。`);
-      row.status = 'rejected';
-    }
-  } catch (err) {
-    // 關閉視窗不執行
-  }
+    if (action !== 'confirm') return;
+    await updateStatus(row, 2);
+  } catch (_) {}
 }
 
-/** 狀態標籤對應樣式 */
-function getStatusTag(status: string) {
-  const map: any = {
-    pending: { label: '待審核', type: 'info' },
-    approved: { label: '已過審', type: 'success' },
-    rejected: { label: '審核未過', type: 'danger' },
-  };
-  return map[status] || { label: '未知', type: 'info' };
+async function updateStatus(row: any, status: number) {
+  try {
+    loading.value = true;
+    const res: any = await requestClient.post('/edm/event/updateResponseStatus', {
+      response_id: row._responseId,
+      status
+    });
+
+    if (res.code === 0 || res.status === true) {
+      ElMessage.success(status === 1 ? '已通過審核' : '已退件');
+      row.status = status;
+      applyFilter();
+    } else {
+      ElMessage.error(res.message || '更新失敗');
+    }
+  } catch (err: any) {
+    ElMessage.error(err.message || '連線異常');
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
 <template>
   <div class="approval-list bg-white rounded-2xl">
-    <!-- 工具列 -->
-    <div class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-4">
-        <h3 class="text-lg font-bold text-gray-800">活動報名審核名單</h3>
-        <ElInput 
-          v-model="searchQuery" 
-          placeholder="搜尋姓名或公司..." 
-          style="width: 250px;" 
-          clearable
-        />
-      </div>
-      <div class="text-xs text-gray-500">
-        目前顯示 {{ list.length }} 筆資料
-      </div>
+
+    <!-- 未開啟審核模式 -->
+    <div v-if="notApproveMode" class="py-20">
+      <ElEmpty description="此活動未開啟審核機制，或尚未建立 Google 報名表" />
     </div>
 
-    <!-- 表格區 -->
-    <ElTable 
-      v-loading="loading" 
-      :data="list" 
-      style="width: 100%"
-      class="custom-table"
-      :header-cell-style="{ backgroundColor: '#F9FAFB', fontWeight: 'bold' }"
-    >
-      <ElTableColumn prop="name" label="姓名" width="120" />
-      <ElTableColumn prop="company" label="公司單位" min-width="180" />
-      <ElTableColumn prop="phone" label="電話號碼" width="150" />
-      <ElTableColumn prop="email" label="Email" min-width="220" />
-      
-      <ElTableColumn label="當前狀態" width="120" align="center">
-        <template #default="{ row }">
-          <ElTag :type="getStatusTag(row.status).type" disable-transitions>
-            {{ getStatusTag(row.status).label }}
-          </ElTag>
-        </template>
-      </ElTableColumn>
+    <template v-else>
+      <!-- 工具列 -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-4">
+          <h3 class="text-lg font-bold text-gray-800">活動報名審核名單</h3>
+          <ElInput
+            v-model="searchQuery"
+            placeholder="搜尋姓名、公司或 Email..."
+            style="width: 280px;"
+            clearable
+            @input="applyFilter"
+            @clear="applyFilter"
+          />
+        </div>
+        <div class="flex items-center gap-4 text-sm text-gray-500">
+          <span>待審核：{{ filteredList.filter(r => r.status === 0).length }} 筆</span>
+          <span class="text-green-600">已通過：{{ filteredList.filter(r => r.status === 1).length }} 筆</span>
+          <span class="text-red-500">不通過：{{ filteredList.filter(r => r.status === 2).length }} 筆</span>
+          <ElButton size="small" @click="fetchApproveList">重新整理</ElButton>
+        </div>
+      </div>
 
-      <ElTableColumn label="審核操作" width="220" align="center" fixed="right">
-        <template #default="{ row }">
-          <div v-if="row.status === 'pending'" class="flex gap-2 justify-center">
-            <ElButton type="success" size="small" @click="handleApprove(row)">過審</ElButton>
-            <ElButton type="danger" size="small" @click="handleReject(row)">拒絕</ElButton>
-          </div>
-          <div v-else class="text-xs text-gray-400 italic">
-            已完成處理
-          </div>
-        </template>
-      </ElTableColumn>
-    </ElTable>
+      <!-- 表格 -->
+      <ElTable
+        v-loading="loading"
+        :data="filteredList"
+        style="width: 100%"
+        stripe
+        border
+        empty-text="目前尚無審核資料"
+        :header-cell-style="{ backgroundColor: '#F9FAFB', fontWeight: 'bold' }"
+      >
+        <ElTableColumn prop="name" label="姓名" width="120">
+          <template #default="{ row }">
+            <span class="font-bold text-blue-600">{{ row.name || '-' }}</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="company" label="公司單位" min-width="160" />
+        <ElTableColumn prop="mobile" label="電話號碼" width="130" />
+        <ElTableColumn prop="email" label="Email" min-width="200" />
 
-    <!-- 分頁器 -->
-    <div class="mt-8 flex items-center justify-between">
-      <div class="text-sm text-gray-500 italic">資料 ID: {{ eventId }} (僅供測試參考)</div>
-      <ElPagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-        background
-        @size-change="fetchList"
-        @current-change="fetchList"
-      />
-    </div>
+        <ElTableColumn label="提交時間" width="165">
+          <template #default="{ row }">
+            <span class="text-gray-500 text-xs">
+              {{ row._createTime ? String(row._createTime).replace('T', ' ').substring(0, 19) : '-' }}
+            </span>
+          </template>
+        </ElTableColumn>
+
+        <ElTableColumn label="審核狀態" width="110" align="center">
+          <template #default="{ row }">
+            <ElTag :type="getStatusTag(row.status).type" size="small" effect="dark" disable-transitions>
+              {{ getStatusTag(row.status).label }}
+            </ElTag>
+          </template>
+        </ElTableColumn>
+
+        <ElTableColumn label="審核操作" width="160" align="center" fixed="right">
+          <template #default="{ row }">
+            <div v-if="row.status === 0" class="flex gap-2 justify-center">
+              <ElButton type="success" size="small" @click="handleApprove(row)">通過</ElButton>
+              <ElButton type="danger" size="small" @click="handleReject(row)">拒絕</ElButton>
+            </div>
+            <span v-else class="text-xs text-gray-400 italic">已完成處理</span>
+          </template>
+        </ElTableColumn>
+      </ElTable>
+    </template>
   </div>
 </template>
 
 <style scoped>
-.custom-table :deep(.el-table__row) {
-  transition: all 0.3s ease;
+.approval-list :deep(.el-table__row) {
+  transition: all 0.2s ease;
 }
-.custom-table :deep(.el-table__row:hover) {
+.approval-list :deep(.el-table__row:hover) {
   background-color: #f8fafc !important;
 }
 </style>
