@@ -19,7 +19,7 @@ interface MailStats {
 
 interface AnalyticsState {
   invitation: MailStats; // 活動信件/EDM
-  ticket: MailStats;     // 專屬邀請函
+  ticket: MailStats;     // 專屬報名表
   survey: MailStats;     // 問卷
   thankyou: MailStats;   // 感謝函
 }
@@ -84,7 +84,7 @@ onMounted(() => {
     }]
   });
 
-  // 2. 邀請函圖表 - 護眼微紫色系
+  // 2. 報名表圖表 - 護眼微紫色系
   renderTicket({
     tooltip: { trigger: 'item', backgroundColor: '#334155', textStyle: { color: '#f8fafc' }, borderWidth: 0 },
     legend: { show: false },
@@ -97,7 +97,7 @@ onMounted(() => {
       subtextStyle: { fontSize: 13, color: '#94a3b8', fontWeight: 'bold' }
     },
     series: [{
-      name: '邀請函狀態',
+      name: '報名表狀態',
       type: 'pie',
       radius: ['65%', '80%'], 
       avoidLabelOverlap: false,
@@ -208,11 +208,11 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- Section 2: 邀請函分析 -->
+    <!-- Section 2: 報名表分析 -->
     <section>
       <div class="flex items-center gap-3 mb-6">
         <div class="w-1.5 h-6 bg-violet-400 rounded-full"></div>
-        <h3 class="text-xl font-bold text-slate-700 tracking-wide">邀請函開信率與反應分析</h3>
+        <h3 class="text-xl font-bold text-slate-700 tracking-wide">報名表開啟率與反應分析</h3>
       </div>
       
       <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">

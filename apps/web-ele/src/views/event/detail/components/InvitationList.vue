@@ -13,7 +13,7 @@ import {
   ElPagination,
   ElInput,
 } from 'element-plus';
-import { getInviteListApi, importEventGroupApi } from '#/api/event';
+import { getInviteListApi, importEventGroupApi, sendInviteMailApi } from '#/api/event';
 
 const props = defineProps<{
   eventId: string | number;
@@ -30,6 +30,99 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
 const searchName = ref('');
+
+// ================= 寄送邀請相關 =================
+const isSelectionMode = ref(false); // 是否在勾選模式
+const selectedRows = ref<any[]>([]); // 已選擇的人員
+
+// 進入寄送模式
+function enterSelectionMode() {
+  isSelectionMode.value = true;
+  selectedRows.value = [];
+}
+
+// 取消寄送模式
+function cancelSelectionMode() {
+  isSelectionMode.value = false;
+  selectedRows.value = [];
+}
+
+// 勾選變動處理
+function handleSelectionChange(val: any[]) {
+  selectedRows.value = val;
+}
+
+// 寄送給選取的人員
+async function handleSendSelected() {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('請先勾選要寄送的人員');
+    return;
+  }
+  
+  try {
+    loading.value = true;
+    const emails = selectedRows.value
+      .map(row => row.email?.email)
+      .filter(Boolean);
+      
+    if (emails.length === 0) {
+      ElMessage.warning('選取的人員中沒有電子郵件資訊');
+      return;
+    }
+
+    await sendInviteMailApi({
+      event_id: props.eventId,
+      emails: emails,
+    });
+    
+    ElMessage.success(`已成功寄送 ${emails.length} 封邀請信`);
+    cancelSelectionMode();
+    await fetchList();
+  } catch (error: any) {
+    console.error('Send selected error:', error);
+    ElMessage.error('寄送發生錯誤：' + (error.message || '未知錯誤'));
+  } finally {
+    loading.value = false;
+  }
+}
+
+// 全部寄送
+async function handleSendAll() {
+  try {
+    loading.value = true;
+    // 為了獲取完整的 Email 清單，我們呼叫 API 不分頁取得所有資料
+    const res: any = await getInviteListApi({ 
+      event_id: props.eventId,
+      page: 1,
+      pageSize: 99999, // 取得該活動所有受邀者
+    });
+    
+    const dataObj = res?.data || res || {};
+    const allMembers = dataObj.member || dataObj.items || dataObj.list || [];
+    const allEmails = allMembers
+      .map((m: any) => m.email?.email)
+      .filter(Boolean);
+
+    if (allEmails.length === 0) {
+      ElMessage.warning('邀請名單中沒有人有電子郵件資訊');
+      return;
+    }
+
+    await sendInviteMailApi({
+      event_id: props.eventId,
+      emails: allEmails,
+    });
+    
+    ElMessage.success(`已開始寄送全體邀請信，共 ${allEmails.length} 封`);
+    cancelSelectionMode();
+    await fetchList();
+  } catch (error: any) {
+    console.error('Send all error:', error);
+    ElMessage.error('寄送發生錯誤：' + (error.message || '未知錯誤'));
+  } finally {
+    loading.value = false;
+  }
+}
 
 // 取回活動邀請名單
 async function fetchList() {
@@ -148,8 +241,23 @@ onMounted(() => {
           </template>
         </ElInput>
       </div>
-      <div class="shrink-0">
-        <ElButton type="primary" @click="openImportDialog">匯入群組人員</ElButton>
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- 正常模式 -->
+        <template v-if="!isSelectionMode">
+          <ElButton type="success" @click="enterSelectionMode">寄送活動邀請</ElButton>
+          <ElButton type="primary" @click="openImportDialog">匯入群組人員</ElButton>
+        </template>
+        
+        <!-- 勾選模式 -->
+        <template v-else>
+          <ElButton @click="cancelSelectionMode">取消</ElButton>
+          <ElButton type="info" @click="handleSendAll">全部寄送</ElButton>
+          <ElButton 
+            type="primary" 
+            :disabled="selectedRows.length === 0"
+            @click="handleSendSelected"
+          >確認寄送 ({{ selectedRows.length }})</ElButton>
+        </template>
       </div>
     </div>
 
@@ -161,7 +269,11 @@ onMounted(() => {
       stripe
       style="width: 100%"
       class="rounded-md"
+      @selection-change="handleSelectionChange"
     >
+      <!-- 勾選欄位 (僅在寄送模式顯示) -->
+      <ElTableColumn v-if="isSelectionMode" type="selection" width="55" align="center" />
+      
       <ElTableColumn type="index" label="序號" width="60" align="center" />
       <ElTableColumn prop="name" label="姓名" min-width="120">
         <template #default="{ row }">

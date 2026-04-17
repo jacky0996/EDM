@@ -40,3 +40,12 @@ export async function importEventGroupApi(data: { event_id: string | number; gro
     responseReturn: 'body',
   });
 }
+
+/**
+ * 寄送活動邀請信
+ */
+export async function sendInviteMailApi(data: { event_id: string | number; emails: string[] }) {
+  return requestClient.post('/edm/mail/inviteMail', data, {
+    responseReturn: 'body',
+  });
+}
