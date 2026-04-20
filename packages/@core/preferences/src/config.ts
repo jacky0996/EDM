@@ -63,9 +63,9 @@ const defaultPreferences: Preferences = {
   },
 
   logo: {
-    enable: true,
+    enable: false,
     fit: 'contain',
-    source: '/hwacom-logo.png',
+    source: '',
   },
   navigation: {
     accordion: true,

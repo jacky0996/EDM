@@ -11,6 +11,9 @@ services:
     networks:
       - edm-network
       - backend-net
+    # 讓容器內 nginx 能透過 host.docker.internal 反向代理到宿主機的中台 Middle Platform (:80)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     # --- [資安隔離] 使用域名通訊，不再需要 hardcoded IP 別名 ---
     # 健康檢查 (改用檔案檢查，避免因為網路/域名問題誤判)
     healthcheck:

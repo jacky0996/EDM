@@ -166,13 +166,13 @@ export const useAuthStore = defineStore('auth', () => {
     // 2. 🌟 SSO 全環境動態跳轉
     if (redirect) {
       // 優先讀取環境變數 (例如: http://127.0.0.1:8000, https://uathws.hwacom.com, https://hws.hwacom.com)
-      const hwsBaseUrl = import.meta.env.VITE_HWS_URL || 'http://127.0.0.1:8000';
+      const hwsBaseUrl = (import.meta.env.VITE_HWS_URL || 'http://127.0.0.1:8000/').replace(/\/+$/, '/');
       const redirectParam = encodeURIComponent(window.location.href);
-      
-      console.log(`[SSO] 正在導回 HWS 認證中心: ${hwsBaseUrl}`);
-      
+
+      console.log(`[SSO] 正在導回 SSO 認證中心: ${hwsBaseUrl}`);
+
       // 執行全頁面跳轉 (強制結束當前應用狀態)
-      window.location.href = `${hwsBaseUrl}/login?redirect=${redirectParam}`;
+      window.location.href = `${hwsBaseUrl}login?redirect=${redirectParam}`;
     }
   }
 
