@@ -63,7 +63,7 @@ const defaultPreferences: Preferences = {
   },
 
   logo: {
-    enable: false,
+    enable: true,
     fit: 'contain',
     source: '',
   },
