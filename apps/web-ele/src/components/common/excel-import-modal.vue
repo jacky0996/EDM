@@ -1,9 +1,18 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import type { UploadFile } from 'element-plus';
 
-import { ElButton, ElMessage, ElUpload, ElSelect, ElOption, type UploadFile } from 'element-plus';
+import { onMounted, ref } from 'vue';
 
 import { useVbenModal } from '@vben/common-ui';
+
+import {
+  ElButton,
+  ElMessage,
+  ElOption,
+  ElSelect,
+  ElUpload,
+} from 'element-plus';
+
 import { getGroupListApi } from '#/api/group';
 
 interface Props {
@@ -16,7 +25,7 @@ interface Props {
   /** 額外的上傳參數，用於後端識別功能 */
   extraParams?: Record<string, any>;
   /** 預設選取的群組 ID */
-  defaultGroupId?: string | number | null;
+  defaultGroupId?: null | number | string;
   /** 是否禁用群組選擇 */
   groupDisabled?: boolean;
 }
@@ -34,7 +43,7 @@ const emit = defineEmits(['success']);
 const fileList = ref<UploadFile[]>([]);
 const uploading = ref(false);
 const groupList = ref<any[]>([]);
-const selectedGroupId = ref<string | number | null>(null);
+const selectedGroupId = ref<null | number | string>(null);
 
 async function fetchGroups() {
   try {
@@ -49,7 +58,9 @@ onMounted(async () => {
   await fetchGroups();
   if (props.defaultGroupId) {
     // 確保類型匹配，試試看原始值或轉為數字
-    const found = groupList.value.find(g => String(g.id) === String(props.defaultGroupId));
+    const found = groupList.value.find(
+      (g) => String(g.id) === String(props.defaultGroupId),
+    );
     if (found) {
       selectedGroupId.value = found.id;
     }
@@ -119,9 +130,9 @@ function handleDownloadSample() {
   // 如果有網址中有中文，部分瀏覽器需要對路徑進行編碼，但 href 通常會自動處理
   // 這裡我們嘗試直接執行下載
   link.setAttribute('download', '');
-  document.body.appendChild(link);
+  document.body.append(link);
   link.click();
-  document.body.removeChild(link);
+  link.remove();
 
   ElMessage.info('正在下載範例檔案...');
 }
@@ -140,23 +151,27 @@ function handleRemove() {
     <div class="px-12 py-10">
       <div class="mb-10 flex items-center justify-between">
         <div class="flex flex-col gap-2">
-          <span class="text-2xl font-bold text-foreground">上傳 Excel 檔案</span>
-          <span class="text-muted-foreground text-lg">請依照範例格式填寫後上傳</span>
+          <span class="text-2xl font-bold text-foreground"
+            >上傳 Excel 檔案</span
+          >
+          <span class="text-lg text-muted-foreground"
+            >請依照範例格式填寫後上傳</span
+          >
         </div>
         <ElButton
           v-if="props.sampleUrl"
           type="warning"
           plain
           size="large"
-          class="text-lg px-6 py-4"
+          class="px-6 py-4 text-lg"
           @click="handleDownloadSample"
         >
           下載匯入範例
         </ElButton>
       </div>
 
-      <div class="mb-8 p-6 bg-muted/30 rounded-lg flex items-center gap-4">
-        <span class="text-xl font-medium shrink-0">匯入至群組：</span>
+      <div class="mb-8 flex items-center gap-4 rounded-lg bg-muted/30 p-6">
+        <span class="shrink-0 text-xl font-medium">匯入至群組：</span>
         <ElSelect
           v-model="selectedGroupId"
           placeholder="請選擇目標群組 (選填)"
@@ -187,24 +202,41 @@ function handleRemove() {
         drag
       >
         <!-- 核心變更：根據有無檔案切換中間內容 -->
-        <div class="el-upload__text py-16 px-8 min-h-[350px] flex flex-col items-center justify-center">
+        <div
+          class="el-upload__text flex min-h-[350px] flex-col items-center justify-center px-8 py-16"
+        >
           <template v-if="fileList.length === 0">
-            <div class="text-6xl mb-6 text-primary/60 transition-all hover:scale-110">
+            <div
+              class="mb-6 text-6xl text-primary/60 transition-all hover:scale-110"
+            >
               <i class="el-icon-upload"></i>
             </div>
-            <div class="text-2xl mb-2 font-medium">將 Excel 檔案拖曳至此</div>
-            <div class="text-xl text-muted-foreground mt-2">或 <em class="text-primary cursor-pointer font-bold not-italic">點擊此處選擇檔案</em></div>
+            <div class="mb-2 text-2xl font-medium">將 Excel 檔案拖曳至此</div>
+            <div class="mt-2 text-xl text-muted-foreground">
+              或
+              <em class="cursor-pointer font-bold not-italic text-primary"
+                >點擊此處選擇檔案</em
+              >
+            </div>
           </template>
 
           <template v-else>
-            <div class="w-full flex flex-col items-center animate-in fade-in zoom-in duration-300">
-              <div class="text-7xl mb-6 text-green-500">
+            <div
+              class="flex w-full flex-col items-center duration-300 animate-in fade-in zoom-in"
+            >
+              <div class="mb-6 text-7xl text-green-500">
                 <!-- 使用一個漂亮的 Excel 圖標或文件圖標 -->
                 <i class="el-icon-document-checked"></i>
               </div>
-              <div class="text-2xl font-bold mb-2 truncate max-w-[90%] text-foreground">{{ fileList[0].name }}</div>
-              <div class="text-lg text-muted-foreground mb-6">{{ (fileList[0].size / 1024).toFixed(1) }} KB</div>
-              
+              <div
+                class="mb-2 max-w-[90%] truncate text-2xl font-bold text-foreground"
+              >
+                {{ fileList[0].name }}
+              </div>
+              <div class="mb-6 text-lg text-muted-foreground">
+                {{ (fileList[0].size / 1024).toFixed(1) }} KB
+              </div>
+
               <div class="flex gap-4">
                 <ElButton type="danger" plain @click.stop="handleRemove">
                   移除重新選取
@@ -213,9 +245,9 @@ function handleRemove() {
             </div>
           </template>
         </div>
-        
+
         <template #tip>
-          <div class="el-upload__tip text-center mt-8 text-xl text-gray-400">
+          <div class="el-upload__tip mt-8 text-center text-xl text-gray-400">
             <span class="text-xl">僅支援 .xlsx 或 .xls 格式之 Excel 檔案</span>
           </div>
         </template>
@@ -226,13 +258,13 @@ function handleRemove() {
 
 <style scoped>
 :deep(.el-upload-dragger) {
-  width: 100%;
-  height: 350px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border-width: 2px;
+  width: 100%;
+  height: 350px;
   border-style: dashed;
+  border-width: 2px;
 }
 
 :deep(.el-upload) {

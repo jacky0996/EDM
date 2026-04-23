@@ -10,27 +10,38 @@ export async function getGroupListApi(params: any) {
 /**
  * 獲取群組詳情
  */
-export async function getGroupDetailApi(id: string | number) {
+export async function getGroupDetailApi(id: number | string) {
   return requestClient.post('/edm/group/view', { id });
 }
 
 /**
  * 更新群組狀態
  */
-export async function updateGroupStatusApi(groupId: string | number, status: number) {
-  return requestClient.post('/edm/group/editStatus', { group_id: groupId, status });
+export async function updateGroupStatusApi(
+  groupId: number | string,
+  status: number,
+) {
+  return requestClient.post('/edm/group/editStatus', {
+    group_id: groupId,
+    status,
+  });
 }
 
 /**
  * 建立群組
  */
-export async function createGroupApi(data: { group_name: string; note?: string }) {
+export async function createGroupApi(data: {
+  group_name: string;
+  note?: string;
+}) {
   return requestClient.post('/edm/group/create', data);
 }
 
 /**
  * 獲取群組相關活動列表
  */
-export async function getGroupEventListApi(params: { group_id: string | number }) {
+export async function getGroupEventListApi(params: {
+  group_id: number | string;
+}) {
   return requestClient.post('/edm/group/getEventList', params);
 }

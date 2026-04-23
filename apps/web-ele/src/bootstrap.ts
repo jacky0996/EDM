@@ -50,9 +50,12 @@ async function bootstrap(namespace: string) {
   await initStores(app, { namespace });
 
   // SSO 閒置檢查定時器 (30 分鐘未活動則自動登出)
-  const authStore = (await import('#/store')).useAuthStore();
+  const storeModule = await import('#/store');
+  const authStore = storeModule.useAuthStore();
   setInterval(() => {
-    const lastActivity = parseInt(localStorage.getItem('edm_last_activity') || '0');
+    const lastActivity = Number.parseInt(
+      localStorage.getItem('edm_last_activity') || '0',
+    );
     if (!lastActivity) return;
     const now = Date.now();
     const idleTimeout = 30 * 60 * 1000; // 30 分鐘
@@ -60,7 +63,7 @@ async function bootstrap(namespace: string) {
     if (now - lastActivity > idleTimeout) {
       authStore.logout();
     }
-  }, 60000); // 每分鐘檢查一次
+  }, 60_000); // 每分鐘檢查一次
 
   // 安装权限指令
   registerAccessDirective(app);

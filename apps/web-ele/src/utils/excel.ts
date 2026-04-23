@@ -3,14 +3,18 @@ import * as XLSX from 'xlsx';
 /**
  * 讀取 Excel 檔案並轉化為 JSON 數據
  * @param file File 物件
- * @param options 解析選項，例如 skipRows: 1 表示跳過第一行
+ * @param options 解析選項
+ * @param options.skipRows 跳過開頭幾列，例如 1 表示跳過第一行
  * @returns JSON 陣列
  */
-export async function readExcel(file: File, options: { skipRows?: number } = {}): Promise<any[]> {
+export async function readExcel(
+  file: File,
+  options: { skipRows?: number } = {},
+): Promise<any[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
-    reader.onload = (e) => {
+
+    reader.addEventListener('load', (e) => {
       try {
         const data = e.target?.result;
         const workbook = XLSX.read(data, { type: 'binary' });
@@ -30,11 +34,11 @@ export async function readExcel(file: File, options: { skipRows?: number } = {})
       } catch (error) {
         reject(error);
       }
-    };
+    });
 
-    reader.onerror = (error) => {
-      reject(error);
-    };
+    reader.addEventListener('error', () => {
+      reject(reader.error ?? new Error('讀取檔案失敗'));
+    });
 
     reader.readAsBinaryString(file);
   });

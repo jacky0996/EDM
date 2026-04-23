@@ -1,9 +1,30 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
 import { Page } from '@vben/common-ui';
-import { ElCard, ElDescriptions, ElDescriptionsItem, ElTag, ElButton, ElInput, ElMessage, ElMessageBox, ElSwitch, ElDialog, ElForm, ElFormItem } from 'element-plus';
-import { getMemberDetailApi, updateMemberStatusApi, updateMemberMobileApi, updateMemberEmailApi } from '#/api/member';
+
+import {
+  ElButton,
+  ElCard,
+  ElDescriptions,
+  ElDescriptionsItem,
+  ElDialog,
+  ElForm,
+  ElFormItem,
+  ElInput,
+  ElMessage,
+  ElMessageBox,
+  ElSwitch,
+  ElTag,
+} from 'element-plus';
+
+import {
+  getMemberDetailApi,
+  updateMemberEmailApi,
+  updateMemberMobileApi,
+  updateMemberStatusApi,
+} from '#/api/member';
 import { requestClient } from '#/api/request';
 import { formatDateTime } from '#/utils/date';
 
@@ -15,18 +36,18 @@ const memberId = computed(() => route.params.id as string);
 const memberData = ref<any>({
   name: '',
   status: 1,
-  salesInfo: '',    
-  groups: [],       
-  mobiles: [],    
-  emails: [],      
-  organizations: []
+  salesInfo: '',
+  groups: [],
+  mobiles: [],
+  emails: [],
+  organizations: [],
 });
 
 const loading = ref(false);
-const editingIndex = ref<number | null>(null);
+const editingIndex = ref<null | number>(null);
 const editValue = ref('');
 
-const editingMobileIndex = ref<number | null>(null);
+const editingMobileIndex = ref<null | number>(null);
 const editMobileValue = ref('');
 
 async function fetchMemberData() {
@@ -46,7 +67,7 @@ async function fetchMemberData() {
       groups: res.groups || [],
       mobiles: res.mobiles || [],
       emails: res.emails || [],
-      organizations: res.organizations || []
+      organizations: res.organizations || [],
     };
   } catch (error) {
     console.error('Failed to fetch member detail:', error);
@@ -70,10 +91,10 @@ async function handleSave(index: number) {
     ElMessage.warning('請輸入電子郵件');
     return;
   }
-  
+
   const item = memberData.value.emails[index];
   const emailId = typeof item === 'object' ? item.id : null;
-  
+
   if (!emailId) {
     ElMessage.error('找不到郵件 ID，無法更新');
     return;
@@ -103,10 +124,12 @@ function handleDelete(index: number) {
     confirmButtonText: '確定',
     cancelButtonText: '取消',
     type: 'warning',
-  }).then(() => {
-    memberData.value.emails.splice(index, 1);
-    ElMessage.success('刪除成功');
-  }).catch(() => {});
+  })
+    .then(() => {
+      memberData.value.emails.splice(index, 1);
+      ElMessage.success('刪除成功');
+    })
+    .catch(() => {});
 }
 
 function handleMobileEdit(index: number, value: string) {
@@ -157,10 +180,12 @@ function handleMobileDelete(index: number) {
     confirmButtonText: '確定',
     cancelButtonText: '取消',
     type: 'warning',
-  }).then(() => {
-    memberData.value.mobiles.splice(index, 1);
-    ElMessage.success('刪除成功');
-  }).catch(() => {});
+  })
+    .then(() => {
+      memberData.value.mobiles.splice(index, 1);
+      ElMessage.success('刪除成功');
+    })
+    .catch(() => {});
 }
 
 async function handleStatusChange(val: any) {
@@ -195,11 +220,15 @@ async function handleSalesSave() {
 
   try {
     loading.value = true;
-    const res: any = await requestClient.post('/edm/member/editSales', {
-      member_id: memberId.value,
-      enumber: salesEditEnumber.value
-    }, { responseReturn: 'body' });
-    
+    const res: any = await requestClient.post(
+      '/edm/member/editSales',
+      {
+        member_id: memberId.value,
+        enumber: salesEditEnumber.value,
+      },
+      { responseReturn: 'body' },
+    );
+
     if (res.code === 0 || res.code === 200 || res.status === true) {
       ElMessage.success('業務資訊更新成功');
       salesEditVisible.value = false;
@@ -248,9 +277,9 @@ function handleBack() {
           {{ memberData.name }}
         </ElDescriptionsItem>
         <ElDescriptionsItem label="狀態">
-          <ElSwitch 
-            v-model="memberData.status" 
-            :active-value="1" 
+          <ElSwitch
+            v-model="memberData.status"
+            :active-value="1"
             :inactive-value="0"
             active-text="啟動"
             inactive-text="停用"
@@ -259,11 +288,11 @@ function handleBack() {
           />
         </ElDescriptionsItem>
         <ElDescriptionsItem label="業務">
-          <div class="flex items-center justify-between w-full">
+          <div class="flex w-full items-center justify-between">
             <span>{{ formatValue(memberData.salesInfo) }}</span>
-            <ElButton 
-              size="small" 
-              type="primary" 
+            <ElButton
+              size="small"
+              type="primary"
               plain
               @click="handleSalesEdit"
             >
@@ -284,9 +313,9 @@ function handleBack() {
     >
       <ElForm label-position="top">
         <ElFormItem label="工號" required>
-          <ElInput 
-            v-model="salesEditEnumber" 
-            placeholder="請輸入工號 " 
+          <ElInput
+            v-model="salesEditEnumber"
+            placeholder="請輸入工號 "
             clearable
           />
         </ElFormItem>
@@ -294,7 +323,9 @@ function handleBack() {
       <template #footer>
         <div class="flex justify-end gap-3">
           <ElButton @click="salesEditVisible = false">取消</ElButton>
-          <ElButton type="primary" @click="handleSalesSave" :loading="loading">儲存</ElButton>
+          <ElButton type="primary" @click="handleSalesSave" :loading="loading">
+            儲存
+          </ElButton>
         </div>
       </template>
     </ElDialog>
@@ -304,7 +335,10 @@ function handleBack() {
       <template #header>
         <span class="detail-section-title">隸屬組織</span>
       </template>
-      <div v-if="memberData.organizations.length > 0" class="detail-table-container">
+      <div
+        v-if="memberData.organizations.length > 0"
+        class="detail-table-container"
+      >
         <table class="custom-detail-table">
           <thead>
             <tr>
@@ -353,14 +387,18 @@ function handleBack() {
           <thead>
             <tr>
               <th>電話號碼</th>
-              <th style="width: 200px;">操作管理</th>
+              <th style="width: 200px">操作管理</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item, index) in memberData.mobiles" :key="index">
               <td>
                 <template v-if="editingMobileIndex === index">
-                  <ElInput v-model="editMobileValue" size="small" placeholder="請輸入行動電話" />
+                  <ElInput
+                    v-model="editMobileValue"
+                    size="small"
+                    placeholder="請輸入行動電話"
+                  />
                 </template>
                 <template v-else>
                   {{ item.mobile || item }}
@@ -368,12 +406,36 @@ function handleBack() {
               </td>
               <td>
                 <template v-if="editingMobileIndex === index">
-                  <ElButton size="small" type="primary" @click="handleMobileSave(index as number)">儲存</ElButton>
-                  <ElButton size="small" @click="handleMobileCancel">取消</ElButton>
+                  <ElButton
+                    size="small"
+                    type="primary"
+                    @click="handleMobileSave(index as number)"
+                  >
+                    儲存
+                  </ElButton>
+                  <ElButton size="small" @click="handleMobileCancel">
+                    取消
+                  </ElButton>
                 </template>
                 <template v-else>
-                  <ElButton size="small" type="primary" plain @click="handleMobileEdit(index as number, item.mobile || item)">編輯</ElButton>
-                  <ElButton size="small" type="danger" plain @click="handleMobileDelete(index as number)">刪除</ElButton>
+                  <ElButton
+                    size="small"
+                    type="primary"
+                    plain
+                    @click="
+                      handleMobileEdit(index as number, item.mobile || item)
+                    "
+                  >
+                    編輯
+                  </ElButton>
+                  <ElButton
+                    size="small"
+                    type="danger"
+                    plain
+                    @click="handleMobileDelete(index as number)"
+                  >
+                    刪除
+                  </ElButton>
                 </template>
               </td>
             </tr>
@@ -393,14 +455,18 @@ function handleBack() {
           <thead>
             <tr>
               <th>信箱地址</th>
-              <th style="width: 200px;">操作管理</th>
+              <th style="width: 200px">操作管理</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item, index) in memberData.emails" :key="index">
               <td>
                 <template v-if="editingIndex === index">
-                  <ElInput v-model="editValue" size="small" placeholder="請輸入電子郵件" />
+                  <ElInput
+                    v-model="editValue"
+                    size="small"
+                    placeholder="請輸入電子郵件"
+                  />
                 </template>
                 <template v-else>
                   {{ item.email || item }}
@@ -408,12 +474,32 @@ function handleBack() {
               </td>
               <td>
                 <template v-if="editingIndex === index">
-                  <ElButton size="small" type="primary" @click="handleSave(index as number)">儲存</ElButton>
+                  <ElButton
+                    size="small"
+                    type="primary"
+                    @click="handleSave(index as number)"
+                  >
+                    儲存
+                  </ElButton>
                   <ElButton size="small" @click="handleCancel">取消</ElButton>
                 </template>
                 <template v-else>
-                  <ElButton size="small" type="primary" plain @click="handleEdit(index as number, item.email || item)">編輯</ElButton>
-                  <ElButton size="small" type="danger" plain @click="handleDelete(index as number)">刪除</ElButton>
+                  <ElButton
+                    size="small"
+                    type="primary"
+                    plain
+                    @click="handleEdit(index as number, item.email || item)"
+                  >
+                    編輯
+                  </ElButton>
+                  <ElButton
+                    size="small"
+                    type="danger"
+                    plain
+                    @click="handleDelete(index as number)"
+                  >
+                    刪除
+                  </ElButton>
                 </template>
               </td>
             </tr>
@@ -441,7 +527,10 @@ function handleBack() {
           </thead>
           <tbody>
             <tr v-for="(item, index) in memberData.groups" :key="index">
-              <td class="cursor-pointer text-blue-500" @click="router.push(`/group/detail/${item.id || item}`)">
+              <td
+                class="cursor-pointer text-blue-500"
+                @click="router.push(`/group/detail/${item.id || item}`)"
+              >
                 {{ formatValue(item.name) }}
               </td>
               <td>
@@ -451,7 +540,10 @@ function handleBack() {
                 {{ formatValue(item.creator?.name) }}
               </td>
               <td>
-                <ElTag :type="item.status === 1 ? 'success' : 'danger'" size="small">
+                <ElTag
+                  :type="item.status === 1 ? 'success' : 'danger'"
+                  size="small"
+                >
                   {{ item.status === 1 ? '啟動' : '禁用' }}
                 </ElTag>
               </td>

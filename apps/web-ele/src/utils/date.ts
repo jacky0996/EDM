@@ -5,7 +5,9 @@ import dayjs from 'dayjs';
  * @param date 日期資料
  * @returns 格式化後的字串，若無值則回傳「尚無資料」
  */
-export function formatDateTime(date: string | number | Date | null | undefined) {
+export function formatDateTime(
+  date: Date | null | number | string | undefined,
+) {
   if (!date) return '尚無資料';
   return dayjs(date).format('YYYY-MM-DD HH:mm:ss');
 }

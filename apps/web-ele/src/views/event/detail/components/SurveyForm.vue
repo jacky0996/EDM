@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
+
 import {
   ElButton,
   ElCard,
@@ -8,12 +9,13 @@ import {
   ElInput,
   ElMessage,
   ElMessageBox,
-  ElSelect,
   ElOption,
+  ElSelect,
   ElSwitch,
   ElTable,
   ElTableColumn,
 } from 'element-plus';
+
 import { requestClient } from '#/api/request';
 
 const props = defineProps<{
@@ -21,7 +23,7 @@ const props = defineProps<{
 }>();
 
 const loading = ref(false);
-const isCreated = ref(false); 
+const isCreated = ref(false);
 const formUrl = ref('');
 const editUrl = ref('');
 const displayList = ref<any[]>([
@@ -40,21 +42,22 @@ interface Question {
 
 const config = reactive({
   title: `${props.eventData?.title} - 活動滿意度調查`,
-  description: '謝謝您參加本次活動！為了讓我們未來做得更好，請撥冗填寫以下回饋。',
+  description:
+    '謝謝您參加本次活動！為了讓我們未來做得更好，請撥冗填寫以下回饋。',
   customQuestions: [
-    { 
-      label: '您對本次活動的整體滿意度如何？', 
-      type: 'dropdown', 
-      required: true, 
-      options: ['非常滿意', '滿意', '普通', '不滿意', '非常不滿意']
+    {
+      label: '您對本次活動的整體滿意度如何？',
+      type: 'dropdown',
+      required: true,
+      options: ['非常滿意', '滿意', '普通', '不滿意', '非常不滿意'],
     },
     {
       label: '未來您是否願意參加類似活動？',
       type: 'radio',
       required: true,
-      options: ['是', '否', '考慮中']
-    }
-  ] as Question[]
+      options: ['是', '否', '考慮中'],
+    },
+  ] as Question[],
 });
 
 const typeOptions = [
@@ -67,7 +70,8 @@ const typeOptions = [
   { label: '時間 (Time)', value: 'time' },
 ];
 
-const hasOptions = (type: string) => ['radio', 'checkbox', 'dropdown'].includes(type);
+const hasOptions = (type: string) =>
+  ['checkbox', 'dropdown', 'radio'].includes(type);
 
 onMounted(() => {
   if (props.eventData?.survey_url) {
@@ -81,15 +85,17 @@ function openExternalLink(url: string) {
 }
 
 function handleCopy() {
-  navigator.clipboard.writeText(formUrl.value).then(() => ElMessage.success('已複製連結'));
+  navigator.clipboard
+    .writeText(formUrl.value)
+    .then(() => ElMessage.success('已複製連結'));
 }
 
 function addQuestion() {
-  config.customQuestions.push({ 
-    label: '', 
-    type: 'text', 
-    required: false, 
-    options: [] 
+  config.customQuestions.push({
+    label: '',
+    type: 'text',
+    required: false,
+    options: [],
   });
 }
 
@@ -101,23 +107,31 @@ function removeQuestion(index: number) {
 
 async function handleCreateSurvey() {
   try {
-    await ElMessageBox.confirm('將依據目前配置產製 Google 問卷表單？', '產製問卷', {
-      confirmButtonText: '確定產製',
-      cancelButtonText: '取消',
-      type: 'info'
-    });
-    
+    await ElMessageBox.confirm(
+      '將依據目前配置產製 Google 問卷表單？',
+      '產製問卷',
+      {
+        confirmButtonText: '確定產製',
+        cancelButtonText: '取消',
+        type: 'info',
+      },
+    );
+
     loading.value = true;
-    
+
     // 呼叫後端 API (假設共用同一接口，或傳入 type=survey)
-    const res: any = await requestClient.post('/edm/event/createGoogleForm', {
-      event_id: props.eventData.id,
-      type: 'survey', // 指定為問券類型
-      config: config
-    }, {
-      responseReturn: 'body',
-      timeout: 60000
-    } as any);
+    const res: any = await requestClient.post(
+      '/edm/event/createGoogleForm',
+      {
+        event_id: props.eventData.id,
+        type: 'survey', // 指定為問券類型
+        config,
+      },
+      {
+        responseReturn: 'body',
+        timeout: 60_000,
+      } as any,
+    );
 
     if (res && (res.code === 200 || res.code === 0 || res.status === true)) {
       isCreated.value = true;
@@ -129,7 +143,7 @@ async function handleCreateSurvey() {
     }
   } catch (error: any) {
     if (error !== 'cancel') {
-       ElMessage.error(error.message || '發生異常');
+      ElMessage.error(error.message || '發生異常');
     }
   } finally {
     loading.value = false;
@@ -139,156 +153,329 @@ async function handleCreateSurvey() {
 
 <template>
   <div v-loading="loading" class="survey-form-config p-2">
-    
     <!-- A. 頂部狀態列 (已產製時顯示管理清單) -->
     <div v-if="isCreated" class="animate-fade-in group">
-      <ElCard shadow="never" class="!rounded-2xl border border-indigo-100 bg-white p-1 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      <ElCard
+        shadow="never"
+        class="relative overflow-hidden !rounded-2xl border border-indigo-100 bg-white p-1 shadow-sm transition-shadow hover:shadow-md"
+      >
         <!-- 裝飾微光 -->
-        <div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-50/50 blur-3xl rounded-full"></div>
-        
-        <div class="flex flex-wrap items-center justify-between gap-6 p-3 relative z-10">
+        <div
+          class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-indigo-50/50 blur-3xl"
+        ></div>
+
+        <div
+          class="relative z-10 flex flex-wrap items-center justify-between gap-6 p-3"
+        >
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center border border-indigo-100 transition-transform group-hover:scale-105 shadow-sm">
-              <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-xl border border-indigo-100 bg-indigo-50 text-indigo-500 shadow-sm transition-transform group-hover:scale-105"
+            >
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path
+                  fill="currentColor"
+                  d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"
+                />
+              </svg>
             </div>
             <div class="flex flex-col">
               <div class="flex items-center gap-2">
-                <span class="text-gray-800 font-bold text-lg tracking-tight">Google 問卷已產製</span>
-                <span class="bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-md font-black uppercase shadow-sm">Live</span>
+                <span class="text-lg font-bold tracking-tight text-gray-800"
+                  >Google 問卷已產製</span
+                >
+                <span
+                  class="rounded-md bg-indigo-500 px-2 py-0.5 text-[10px] font-black uppercase text-white shadow-sm"
+                  >Live</span
+                >
               </div>
-              <span class="text-gray-400 text-xs mt-0.5 font-medium">專屬表單與編輯器皆已配置就緒，可開始收集回饋</span>
+              <span class="mt-0.5 text-xs font-medium text-gray-400"
+                >專屬表單與編輯器皆已配置就緒，可開始收集回饋</span
+              >
             </div>
           </div>
 
-          <div class="flex-1 min-w-[280px] flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-100 group-hover:border-indigo-200 transition-all shadow-inner">
-            <code class="text-indigo-700 text-[11px] px-2 truncate flex-1 font-mono font-bold">{{ formUrl }}</code>
-            <ElButton type="primary" size="small" circle plain @click="handleCopy" class="!bg-white border-gray-200 hover:!border-indigo-500 font-bold">
-              <template #icon><svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" /></svg></template>
+          <div
+            class="flex min-w-[280px] flex-1 items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 p-2 shadow-inner transition-all group-hover:border-indigo-200"
+          >
+            <code
+              class="flex-1 truncate px-2 font-mono text-[11px] font-bold text-indigo-700"
+              >{{ formUrl }}</code
+            >
+            <ElButton
+              type="primary"
+              size="small"
+              circle
+              plain
+              @click="handleCopy"
+              class="border-gray-200 !bg-white font-bold hover:!border-indigo-500"
+            >
+              <template #icon>
+                <svg viewBox="0 0 24 24" width="14" height="14">
+                  <path
+                    fill="currentColor"
+                    d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"
+                  />
+                </svg>
+              </template>
             </ElButton>
           </div>
 
           <div class="flex items-center gap-3">
-            <ElButton type="primary" class="!rounded-xl px-5 !h-10 font-bold shadow-md shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-95 transition-all" @click="openExternalLink(formUrl)">
+            <ElButton
+              type="primary"
+              class="!h-10 !rounded-xl px-5 font-bold shadow-md shadow-indigo-500/10 transition-all hover:shadow-indigo-500/20 active:scale-95"
+              @click="openExternalLink(formUrl)"
+            >
               開啟預覽 ↗
             </ElButton>
-            <div class="h-6 w-[1px] bg-gray-200 mx-1"></div>
-            <ElButton v-if="editUrl" type="success" class="!rounded-xl px-4 !h-10 font-bold shadow-sm" @click="openExternalLink(editUrl)">雲端編輯器</ElButton>
-            <ElButton type="danger" class="!rounded-xl px-4 !h-10 font-bold shadow-sm" @click="isCreated = false">重新配置</ElButton>
+            <div class="mx-1 h-6 w-[1px] bg-gray-200"></div>
+            <ElButton
+              v-if="editUrl"
+              type="success"
+              class="!h-10 !rounded-xl px-4 font-bold shadow-sm"
+              @click="openExternalLink(editUrl)"
+            >
+              雲端編輯器
+            </ElButton>
+            <ElButton
+              type="danger"
+              class="!h-10 !rounded-xl px-4 font-bold shadow-sm"
+              @click="isCreated = false"
+            >
+              重新配置
+            </ElButton>
           </div>
         </div>
       </ElCard>
     </div>
 
     <!-- 配置器區塊 (未產製/重新配置時顯示) -->
-    <div v-if="!isCreated" class="space-y-6 animate-fade-in mt-4">
+    <div v-if="!isCreated" class="animate-fade-in mt-4 space-y-6">
       <div class="flex items-center justify-between px-2">
-         <div class="flex flex-col">
-            <h3 class="text-xl font-bold text-gray-800">設計問卷內容</h3>
-            <p class="text-sm text-gray-500">設定完畢後點擊下方按鈕，系統將自動在雲端建立問卷表單</p>
-         </div>
-         <div class="flex items-center gap-2">
-            <span class="text-indigo-500 text-sm font-bold">* 問卷支援後續持續擴充選項</span>
-         </div>
+        <div class="flex flex-col">
+          <h3 class="text-xl font-bold text-gray-800">設計問卷內容</h3>
+          <p class="text-sm text-gray-500">
+            設定完畢後點擊下方按鈕，系統將自動在雲端建立問卷表單
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold text-indigo-500"
+            >* 問卷支援後續持續擴充選項</span
+          >
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <!-- 左側：基礎設定 -->
-        <div class="lg:col-span-4 space-y-6">
+        <div class="space-y-6 lg:col-span-4">
           <ElCard shadow="never" class="!rounded-2xl border-gray-200">
-             <template #header><span class="font-bold">1. 問卷資訊</span></template>
-             <ElForm label-position="top">
-                <ElFormItem label="問卷主標題"><ElInput v-model="config.title" /></ElFormItem>
-                <ElFormItem label="問卷前言說明"><ElInput v-model="config.description" type="textarea" :rows="3" /></ElFormItem>
-             </ElForm>
+            <template #header>
+              <span class="font-bold">1. 問卷資訊</span>
+            </template>
+            <ElForm label-position="top">
+              <ElFormItem label="問卷主標題">
+                <ElInput v-model="config.title" />
+              </ElFormItem>
+              <ElFormItem label="問卷前言說明">
+                <ElInput
+                  v-model="config.description"
+                  type="textarea"
+                  :rows="3"
+                />
+              </ElFormItem>
+            </ElForm>
           </ElCard>
         </div>
 
         <!-- 右側：自訂問項 -->
         <div class="lg:col-span-8">
-          <ElCard shadow="never" class="!rounded-2xl border-gray-200 min-h-[500px]">
-             <template #header>
-                <div class="flex justify-between items-center">
-                  <span class="font-bold">2. 問項設計區</span>
-                  <ElButton type="primary" size="small" @click="addQuestion">+ 新增題目</ElButton>
-                </div>
-             </template>
-             
-             <div class="space-y-4">
-                <div v-for="(q, index) in config.customQuestions" :key="index" class="p-6 border-2 border-gray-100 rounded-xl bg-white relative hover:border-indigo-300 transition-colors shadow-sm">
-                  <div class="flex gap-4 items-start">
-                    <div class="flex-1"><ElInput v-model="q.label" placeholder="題目標題..." /></div>
-                    <div class="w-40"><ElSelect v-model="q.type"><ElOption v-for="o in typeOptions" :key="o.value" :label="o.label" :value="o.value" /></ElSelect></div>
-                    <div class="flex items-center gap-2 pt-1 font-medium text-xs"><span class="text-gray-500">必填</span><ElSwitch v-model="q.required" size="small" /></div>
-                    <ElButton type="danger" link @click="removeQuestion(index)">移除</ElButton>
+          <ElCard
+            shadow="never"
+            class="min-h-[500px] !rounded-2xl border-gray-200"
+          >
+            <template #header>
+              <div class="flex items-center justify-between">
+                <span class="font-bold">2. 問項設計區</span>
+                <ElButton type="primary" size="small" @click="addQuestion">
+                  + 新增題目
+                </ElButton>
+              </div>
+            </template>
+
+            <div class="space-y-4">
+              <div
+                v-for="(q, index) in config.customQuestions"
+                :key="index"
+                class="relative rounded-xl border-2 border-gray-100 bg-white p-6 shadow-sm transition-colors hover:border-indigo-300"
+              >
+                <div class="flex items-start gap-4">
+                  <div class="flex-1">
+                    <ElInput v-model="q.label" placeholder="題目標題..." />
                   </div>
-                  
-                  <div v-if="hasOptions(q.type)" class="mt-4 pl-4 border-l-2 border-indigo-200 space-y-2">
-                     <div v-for="(_, oi) in q.options" :key="oi" class="flex gap-2">
-                        <ElInput v-model="q.options[oi]" size="small" placeholder="選項文字..." />
-                        <ElButton type="danger" link @click="q.options.splice(oi,1)">x</ElButton>
-                     </div>
-                     <ElButton type="primary" link size="small" @click="q.options.push('')">+ 增加選項</ElButton>
+                  <div class="w-40">
+                    <ElSelect v-model="q.type">
+                      <ElOption
+                        v-for="o in typeOptions"
+                        :key="o.value"
+                        :label="o.label"
+                        :value="o.value"
+                      />
+                    </ElSelect>
                   </div>
+                  <div class="flex items-center gap-2 pt-1 text-xs font-medium">
+                    <span class="text-gray-500">必填</span
+                    ><ElSwitch v-model="q.required" size="small" />
+                  </div>
+                  <ElButton type="danger" link @click="removeQuestion(index)">
+                    移除
+                  </ElButton>
                 </div>
-                <div v-if="config.customQuestions.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-400">
-                  <svg viewBox="0 0 24 24" width="48" height="48" class="mb-2 opacity-20"><path fill="currentColor" d="M19,3H5C3.89,3 3,3.89 3,5V19C3,20.11 3.89,21 5,21H19C20.11,21 21,20.11 21,19V5C21,3.89 20.11,3 19,3M19,19H5V5H19V19M11,7H13V11H17V13H13V17H11V13H7V11H11V7Z" /></svg>
-                  <span>尚未增加任何問項</span>
+
+                <div
+                  v-if="hasOptions(q.type)"
+                  class="mt-4 space-y-2 border-l-2 border-indigo-200 pl-4"
+                >
+                  <div
+                    v-for="(_, oi) in q.options"
+                    :key="oi"
+                    class="flex gap-2"
+                  >
+                    <ElInput
+                      v-model="q.options[oi]"
+                      size="small"
+                      placeholder="選項文字..."
+                    />
+                    <ElButton
+                      type="danger"
+                      link
+                      @click="q.options.splice(oi, 1)"
+                    >
+                      x
+                    </ElButton>
+                  </div>
+                  <ElButton
+                    type="primary"
+                    link
+                    size="small"
+                    @click="q.options.push('')"
+                  >
+                    + 增加選項
+                  </ElButton>
                 </div>
-             </div>
+              </div>
+              <div
+                v-if="config.customQuestions.length === 0"
+                class="flex flex-col items-center justify-center py-20 text-gray-400"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="48"
+                  height="48"
+                  class="mb-2 opacity-20"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M19,3H5C3.89,3 3,3.89 3,5V19C3,20.11 3.89,21 5,21H19C20.11,21 21,20.11 21,19V5C21,3.89 20.11,3 19,3M19,19H5V5H19V19M11,7H13V11H17V13H13V17H11V13H7V11H11V7Z"
+                  />
+                </svg>
+                <span>尚未增加任何問項</span>
+              </div>
+            </div>
           </ElCard>
-          
+
           <div class="mt-8">
-            <ElButton type="primary" class="w-full !h-16 !rounded-2xl text-xl font-bold shadow-xl !bg-indigo-600 !border-indigo-600 hover:!bg-indigo-700 hover:!border-indigo-700" :loading="loading" @click="handleCreateSurvey">
-               🚀 同步雲端：產製 Google 活動回饋問卷
+            <ElButton
+              type="primary"
+              class="!h-16 w-full !rounded-2xl !border-indigo-600 !bg-indigo-600 text-xl font-bold shadow-xl hover:!border-indigo-700 hover:!bg-indigo-700"
+              :loading="loading"
+              @click="handleCreateSurvey"
+            >
+              🚀 同步雲端：產製 Google 活動回饋問卷
             </ElButton>
           </div>
         </div>
       </div>
     </div>
-    
+
     <!-- 產出後的 iframe 預覽區 -->
     <div v-if="isCreated" class="animate-fade-in pt-6">
-       <div class="h-[750px] bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-sm relative">
-          <!-- iframe placeholder or spinner if needed later -->
-          <iframe :src="formUrl" width="100%" height="100%" frameborder="0" class="absolute inset-0 z-10 bg-transparent">載入中...</iframe>
-       </div>
+      <div
+        class="relative h-[750px] overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm"
+      >
+        <!-- iframe placeholder or spinner if needed later -->
+        <iframe
+          :src="formUrl"
+          width="100%"
+          height="100%"
+          frameborder="0"
+          class="absolute inset-0 z-10 bg-transparent"
+          >載入中...</iframe
+        >
+      </div>
 
-       <!-- 下層部分: 問卷發送與回覆清單 -->
-       <div class="pt-6">
-         <ElCard shadow="never" class="!rounded-2xl border-gray-200">
-           <template #header>
-             <div class="flex justify-between items-center">
-               <div class="flex items-center gap-3">
-                  <div class="w-1.5 h-6 bg-indigo-500 rounded-full"></div>
-                  <span class="font-bold text-gray-800 text-lg">問卷發送與回覆清單</span>
-               </div>
-               <div class="flex items-center gap-4 text-sm">
-                  <span class="text-gray-500 font-medium">目前共 {{ displayList.length }} 筆發送對象</span>
-               </div>
-             </div>
-           </template>
-           <ElTable :data="displayList" stripe border class="w-full" empty-text="目前尚無發送目標資料">
-             <ElTableColumn prop="name" label="姓名" width="150"><template #default="{row}"><span class="font-bold text-indigo-600">{{ row.name }}</span></template></ElTableColumn>
-             <ElTableColumn prop="email" label="電子郵件" min-width="200" />
-             <ElTableColumn label="發送狀態" width="150" align="center">
-                <template #default="{row}">
-                  <div class="flex justify-center items-center gap-1">
-                     <div class="w-2 h-2 rounded-full" :class="row.status === 1 ? 'bg-green-500' : 'bg-gray-300'"></div>
-                     <span :class="row.status === 1 ? 'text-green-600 font-bold' : 'text-gray-400'">{{ row.status === 1 ? '已發送' : '待發送' }}</span>
-                  </div>
-                </template>
-             </ElTableColumn>
-             <ElTableColumn label="問卷回覆狀態" width="150" align="center">
-                <template #default="{row}">
-                  <span v-if="row.reply === 1" class="text-indigo-600 font-bold bg-indigo-50 px-3 py-1 rounded-full text-xs border border-indigo-100">已回覆填寫</span>
-                  <span v-else class="text-gray-400">尚未回覆</span>
-                </template>
-             </ElTableColumn>
-           </ElTable>
-         </ElCard>
-       </div>
+      <!-- 下層部分: 問卷發送與回覆清單 -->
+      <div class="pt-6">
+        <ElCard shadow="never" class="!rounded-2xl border-gray-200">
+          <template #header>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="h-6 w-1.5 rounded-full bg-indigo-500"></div>
+                <span class="text-lg font-bold text-gray-800"
+                  >問卷發送與回覆清單</span
+                >
+              </div>
+              <div class="flex items-center gap-4 text-sm">
+                <span class="font-medium text-gray-500"
+                  >目前共 {{ displayList.length }} 筆發送對象</span
+                >
+              </div>
+            </div>
+          </template>
+          <ElTable
+            :data="displayList"
+            stripe
+            border
+            class="w-full"
+            empty-text="目前尚無發送目標資料"
+          >
+            <ElTableColumn prop="name" label="姓名" width="150">
+              <template #default="{ row }">
+                <span class="font-bold text-indigo-600">{{ row.name }}</span>
+              </template>
+            </ElTableColumn>
+            <ElTableColumn prop="email" label="電子郵件" min-width="200" />
+            <ElTableColumn label="發送狀態" width="150" align="center">
+              <template #default="{ row }">
+                <div class="flex items-center justify-center gap-1">
+                  <div
+                    class="h-2 w-2 rounded-full"
+                    :class="row.status === 1 ? 'bg-green-500' : 'bg-gray-300'"
+                  ></div>
+                  <span
+                    :class="
+                      row.status === 1
+                        ? 'font-bold text-green-600'
+                        : 'text-gray-400'
+                    "
+                    >{{ row.status === 1 ? '已發送' : '待發送' }}</span
+                  >
+                </div>
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="問卷回覆狀態" width="150" align="center">
+              <template #default="{ row }">
+                <span
+                  v-if="row.reply === 1"
+                  class="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-600"
+                  >已回覆填寫</span
+                >
+                <span v-else class="text-gray-400">尚未回覆</span>
+              </template>
+            </ElTableColumn>
+          </ElTable>
+        </ElCard>
+      </div>
     </div>
-
   </div>
 </template>
 
@@ -298,14 +485,24 @@ async function handleCreateSurvey() {
   border: 1px solid #374151;
   box-shadow: none;
 }
+
 .custom-dark-input :deep(.el-input__inner) {
   color: #9ca3af;
 }
+
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
+  animation: fade-in 0.4s ease-out forwards;
 }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

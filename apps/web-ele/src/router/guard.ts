@@ -64,14 +64,14 @@ function setupAccessGuard(router: Router) {
         return { path: to.path, query: newQuery, replace: true };
       } else {
         console.error('[Guard] SSO 驗證失敗，10 秒後導回 HWS。');
-        
+
         // --- 10 秒跳轉與訊息通知 ---
         import('element-plus').then(({ ElMessage }) => {
           ElMessage.error('SSO 驗證失敗，將在 10 秒後導回核心系統首頁。');
         });
 
-        await new Promise((resolve) => setTimeout(resolve, 10000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 10_000));
+
         const hwsUrl = import.meta.env.VITE_HWS_URL;
         window.location.href = `${hwsUrl}login`;
         return false;

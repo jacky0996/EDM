@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Page } from '@vben/common-ui';
+
 import MermaidView from '#/components/common/mermaid-view.vue';
 
 const memberUml = `
@@ -146,30 +147,31 @@ graph LR
 
 <template>
   <Page title="UML 系統架構圖">
-    <div class="p-4 space-y-6">
+    <div class="space-y-6 p-4">
       <el-card shadow="never" class="uml-card">
         <el-tabs type="border-card">
           <el-tab-pane label="👤 人員管理">
             <div class="py-4">
-              <div class="mb-4 text-sm text-gray-500 italic">
-                人員管理－描述：包含人員搜尋、Excel 匯入流程、業務工號編輯（彈窗）及詳細資料更新邏輯。
+              <div class="mb-4 text-sm italic text-gray-500">
+                人員管理－描述：包含人員搜尋、Excel
+                匯入流程、業務工號編輯（彈窗）及詳細資料更新邏輯。
               </div>
               <MermaidView :content="memberUml" />
             </div>
           </el-tab-pane>
-          
+
           <el-tab-pane label="📁 群組管理">
             <div class="py-4">
-              <div class="mb-4 text-sm text-gray-500 italic">
+              <div class="mb-4 text-sm italic text-gray-500">
                 群組管理－描述：呈現群組列表、狀態即時同步開關以及新增群組之作業流程。
               </div>
               <MermaidView :content="groupUml" />
             </div>
           </el-tab-pane>
-          
+
           <el-tab-pane label="📅 活動管理">
             <div class="py-4">
-              <div class="mb-4 text-sm text-gray-500 italic">
+              <div class="mb-4 text-sm italic text-gray-500">
                 活動管理－描述：呈現編號/類型/名稱之建立順序、詳細頁編號鎖定規則以及邀請名單匯入邏輯。
               </div>
               <MermaidView :content="eventUml" />
@@ -178,11 +180,14 @@ graph LR
 
           <el-tab-pane label="📝 活動邀請表">
             <div class="py-4">
-              <div class="mb-4 text-sm text-gray-500 italic font-bold text-blue-600">
+              <div
+                class="mb-4 text-sm font-bold italic text-blue-600 text-gray-500"
+              >
                 Google 表單使用流程 (User Flow)
               </div>
               <div class="mb-4 text-xs text-gray-400">
-                管理員如何透過系統自動化管理 Google 表單，無需手動去 Google 後端操作。
+                管理員如何透過系統自動化管理 Google 表單，無需手動去 Google
+                後端操作。
               </div>
               <MermaidView :content="formUsageUml" />
             </div>
@@ -190,8 +195,9 @@ graph LR
 
           <el-tab-pane label="🔑 系統串接">
             <div class="py-4">
-              <div class="mb-4 text-sm text-gray-500 italic">
-                 登入與 SSO 串接－描述：呈現 EDM 系統與 Laravel HWS 之間的 SSO Token 交換與 Session 建立流程。
+              <div class="mb-4 text-sm italic text-gray-500">
+                登入與 SSO 串接－描述：呈現 EDM 系統與 Laravel HWS 之間的 SSO
+                Token 交換與 Session 建立流程。
               </div>
               <MermaidView :content="loginUml" />
             </div>
@@ -199,8 +205,9 @@ graph LR
 
           <el-tab-pane label="🧪 測試驗證流">
             <div class="py-4">
-              <div class="mb-4 text-sm text-gray-500 italic">
-                 Google 問卷測試驗證－描述：管理員從開啟功能到完成表單建立的端到端驗證路徑。
+              <div class="mb-4 text-sm italic text-gray-500">
+                Google
+                問卷測試驗證－描述：管理員從開啟功能到完成表單建立的端到端驗證路徑。
               </div>
               <MermaidView :content="formTestUml" />
             </div>
@@ -210,16 +217,19 @@ graph LR
 
       <!-- 新增：系統測試驗證區 -->
       <!-- 解析映射邏輯 (移動至最下方) -->
-      <el-card shadow="never" class="!border-gray-100 mb-4 bg-gray-50/30">
+      <el-card shadow="never" class="mb-4 !border-gray-100 bg-gray-50/30">
         <template #header>
-          <div class="font-bold text-lg flex items-center gap-2">
-            <span class="text-emerald-500 font-bold">⚙️</span> Google 表單解析映射邏輯 (Logic Deep-Dive)
+          <div class="flex items-center gap-2 text-lg font-bold">
+            <span class="font-bold text-emerald-500">⚙️</span> Google
+            表單解析映射邏輯 (Logic Deep-Dive)
           </div>
         </template>
         <div class="py-4">
           <div class="mb-6 border-l-4 border-emerald-500 pl-4">
-             <div class="text-sm font-bold text-gray-700">自動化解析原理</div>
-             <div class="text-xs text-gray-500 mt-1">系統如何將 Google 雲端的原始資料轉換成 EDM 介面可讀取的格式</div>
+            <div class="text-sm font-bold text-gray-700">自動化解析原理</div>
+            <div class="mt-1 text-xs text-gray-500">
+              系統如何將 Google 雲端的原始資料轉換成 EDM 介面可讀取的格式
+            </div>
           </div>
           <MermaidView :content="formLogicUml" />
         </div>
@@ -230,8 +240,8 @@ graph LR
 
 <style scoped>
 .uml-card {
-  border-radius: 12px;
   overflow: hidden;
+  border-radius: 12px;
 }
 
 :deep(.el-tabs--border-card) {

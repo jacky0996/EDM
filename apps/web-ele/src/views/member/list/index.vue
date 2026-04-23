@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Page } from '@vben/common-ui';
+
+import { Page, useVbenModal } from '@vben/common-ui';
 
 import { ElButton } from 'element-plus';
 
-import { useVbenModal } from '@vben/common-ui';
-
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
+import { importMemberApi } from '#/api/member';
+import ExcelImportModal from '#/components/common/excel-import-modal.vue';
+import { readExcel } from '#/utils/excel';
 
 import { formOptions, gridOptions } from './member.data';
-import ExcelImportModal from '#/components/common/excel-import-modal.vue';
-import { importMemberApi } from '#/api/member';
-import { readExcel } from '#/utils/excel';
 
 const [Grid, gridApi] = useVbenVxeGrid({ formOptions, gridOptions });
 
@@ -37,14 +36,14 @@ async function handleImportProcess(formData: FormData) {
   try {
     // 解析 Excel
     const rawData = await readExcel(file, { skipRows: 0 });
-    
+
     // 整理成要求格式並發送 API
     await importMemberApi({
       group_id: groupId,
-      data: rawData
+      data: rawData,
     });
-    
-    return true; 
+
+    return true;
   } catch (error) {
     console.error('人員匯入失敗:', error);
     throw error;

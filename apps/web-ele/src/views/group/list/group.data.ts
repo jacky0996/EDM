@@ -2,11 +2,12 @@ import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 
 import { h } from 'vue';
-import { router } from '#/router';
 
-import { ElTag, ElLink } from 'element-plus';
-import { formatDateTime } from '#/utils/date';
+import { ElLink, ElTag } from 'element-plus';
+
 import { getGroupListApi } from '#/api/group';
+import { router } from '#/router';
+import { formatDateTime } from '#/utils/date';
 
 interface RowType {
   id: number;
@@ -58,7 +59,6 @@ const formOptions: VbenFormProps = {
   // 按下回車時是否提交表單
   submitOnEnter: true,
 };
-
 
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
@@ -142,7 +142,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
         try {
           const res = await getGroupListApi(params);
           const items = res.items ?? [];
-          const total = res.total !== undefined ? res.total : items.length;
+          const total = res.total === undefined ? items.length : res.total;
 
           return {
             items,

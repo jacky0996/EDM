@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useVbenModal } from '@vben/common-ui';
-import { useVbenForm } from '#/adapter/form';
+
 import { ElMessage } from 'element-plus';
+
+import { useVbenForm } from '#/adapter/form';
 import { createGroupApi } from '#/api/group';
 
 const emit = defineEmits(['success']);
@@ -41,7 +43,7 @@ const [Modal, modalApi] = useVbenModal({
 
       const values = await formApi.getValues();
       await createGroupApi(values as any);
-      
+
       ElMessage.success('群組建立成功');
       emit('success');
       modalApi.close();

@@ -55,7 +55,6 @@ const formSchema = computed((): VbenFormSchema[] => {
  * @param values 登入表單資料
  */
 async function handleLogin(values: Recordable<any>) {
-  // eslint-disable-next-line no-console
   console.log(values);
 }
 </script>

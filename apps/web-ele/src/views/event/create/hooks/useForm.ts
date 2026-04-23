@@ -1,14 +1,18 @@
+import type { FormRules, UploadFile, UploadProps } from 'element-plus';
+
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { ElMessage } from 'element-plus';
-import type { FormRules, UploadFile, UploadProps } from 'element-plus';
-import { requestClient } from '#/api/request';
+
 import { useUserStore } from '@vben/stores';
+
+import { ElMessage } from 'element-plus';
+
+import { requestClient } from '#/api/request';
 
 export function useForm(formRef: any) {
   const router = useRouter();
   const userStore = useUserStore();
-  
+
   const form = reactive({
     title: '',
     event_number: '', // 活動編號
@@ -30,10 +34,16 @@ export function useForm(formRef: any) {
   /** 表單驗證規則 */
   const rules: FormRules = {
     title: [{ required: true, message: '請輸入活動名稱', trigger: 'blur' }],
-    activity_type: [{ required: true, message: '請選擇活動類型', trigger: 'change' }],
+    activity_type: [
+      { required: true, message: '請選擇活動類型', trigger: 'change' },
+    ],
     summary: [{ required: true, message: '請輸入活動簡介', trigger: 'blur' }],
-    start_time: [{ required: true, message: '請選擇開始時間', trigger: 'change' }],
-    end_time: [{ required: true, message: '請選擇結束時間', trigger: 'change' }],
+    start_time: [
+      { required: true, message: '請選擇開始時間', trigger: 'change' },
+    ],
+    end_time: [
+      { required: true, message: '請選擇結束時間', trigger: 'change' },
+    ],
     landmark: [{ required: true, message: '請輸入活動地標', trigger: 'blur' }],
     address: [{ required: true, message: '請輸入活動地址', trigger: 'blur' }],
     img_url: [{ required: true, message: '請上傳活動橫幅', trigger: 'change' }],
@@ -67,23 +77,23 @@ export function useForm(formRef: any) {
   async function handleSubmit() {
     try {
       await formRef.value?.validate();
-      
+
       const userInfo: any = userStore.userInfo || {};
-      
-      const { event_number, ...formWithoutNumber } = form;
+
+      const { event_number: _event_number, ...formWithoutNumber } = form;
       const payload = {
         ...formWithoutNumber,
-        type: form.activity_type, 
-        user_id: userInfo?.id || userInfo?.userId || '', 
-        creator_name: userInfo?.realName || userInfo?.username || '', 
+        type: form.activity_type,
+        user_id: userInfo?.id || userInfo?.userId || '',
+        creator_name: userInfo?.realName || userInfo?.username || '',
         is_registration: form.is_registration ? 1 : 0,
         is_approval: form.is_approval ? 1 : 0,
       };
-      
+
       const res: any = await requestClient.post('/edm/event/create', payload, {
         responseReturn: 'body',
       });
-      
+
       if (res && (res.code === 200 || res.code === 0)) {
         ElMessage.success('建立成功');
         router.push('/event/list');
@@ -93,9 +103,9 @@ export function useForm(formRef: any) {
     } catch (error: any) {
       console.error(error);
       if (error && typeof error === 'object' && !error.message) {
-         ElMessage.warning('請檢查表單必填項是否正確填寫');
+        ElMessage.warning('請檢查表單必填項是否正確填寫');
       } else {
-         ElMessage.error(error.message || '連線異常，請稍後再試');
+        ElMessage.error(error.message || '連線異常，請稍後再試');
       }
     }
   }
@@ -106,12 +116,17 @@ export function useForm(formRef: any) {
 
   /** 預覽相關數據生成 */
   const previewVisible = ref(false);
-  const previewDevice = ref<'web' | 'mobile'>('web');
+  const previewDevice = ref<'mobile' | 'web'>('web');
 
   function generatePreviewHtml() {
     const banner = form.img_url || '/event_default.png';
     const typeMap: Record<string, string> = {
-      '0': '會議', '1': '工作坊', '2': '記者會', '3': '標準制定會議', '4': '創意競賽', '5': '其他活動',
+      '0': '會議',
+      '1': '工作坊',
+      '2': '記者會',
+      '3': '標準制定會議',
+      '4': '創意競賽',
+      '5': '其他活動',
     };
     const typeName = typeMap[String(form.activity_type)] || '-';
 

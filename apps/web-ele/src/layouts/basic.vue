@@ -1,16 +1,14 @@
 ```
 <script lang="ts" setup>
-
 import { computed, watch } from 'vue';
+
 import { useWatermark } from '@vben/hooks';
-import {
-  BasicLayout,
-  LockScreen,
-  UserDropdown,
-} from '@vben/layouts';
+import { BasicLayout, LockScreen, UserDropdown } from '@vben/layouts';
 import { preferences } from '@vben/preferences';
 import { useUserStore } from '@vben/stores';
+
 import { useAuthStore } from '#/store';
+
 const userStore = useUserStore();
 const authStore = useAuthStore();
 const { destroyWatermark, updateWatermark } = useWatermark();
@@ -27,13 +25,11 @@ async function handleLogout() {
   await authStore.logout(false);
 }
 
-
 // 診斷：監聽人員資訊變動，確保資料載入後能立即看到內容
 watch(
   () => userStore.userInfo,
-  (info) => {
-  },
-  { immediate: true, deep: true }
+  (_info) => {},
+  { immediate: true, deep: true },
 );
 
 watch(
@@ -69,7 +65,7 @@ watch(
         @logout="handleLogout"
       />
       <!-- 測試用：在選單下面直接印出一段字確認 -->
-      <div v-if="userStore.userInfo" style="display:none">
+      <div v-if="userStore.userInfo" style="display: none">
         Debug Info: {{ userStore.userInfo?.email }}
       </div>
     </template>

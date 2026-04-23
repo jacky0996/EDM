@@ -1,13 +1,32 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
 import { Page, useVbenModal } from '@vben/common-ui';
-import { ElCard, ElDescriptions, ElDescriptionsItem, ElTag, ElButton, ElMessage, ElTabs, ElTabPane, ElSwitch, ElTable, ElTableColumn } from 'element-plus';
-import { getGroupDetailApi, updateGroupStatusApi, getGroupEventListApi } from '#/api/group';
+
+import {
+  ElButton,
+  ElCard,
+  ElDescriptions,
+  ElDescriptionsItem,
+  ElMessage,
+  ElSwitch,
+  ElTable,
+  ElTableColumn,
+  ElTabPane,
+  ElTabs,
+  ElTag,
+} from 'element-plus';
+
+import {
+  getGroupDetailApi,
+  getGroupEventListApi,
+  updateGroupStatusApi,
+} from '#/api/group';
 import { importMemberApi } from '#/api/member';
+import ExcelImportModal from '#/components/common/excel-import-modal.vue';
 import { formatDateTime } from '#/utils/date';
 import { readExcel } from '#/utils/excel';
-import ExcelImportModal from '#/components/common/excel-import-modal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -28,7 +47,7 @@ const groupData = ref<any>({
   members: [],
   creator: null,
   created_at: '',
-  updated_at: ''
+  updated_at: '',
 });
 
 const loading = ref(false);
@@ -96,14 +115,14 @@ async function handleImportProcess(formData: FormData) {
   try {
     // 解析 Excel
     const rawData = await readExcel(file, { skipRows: 0 });
-    
+
     // 整理成要求格式並發送 API
     await importMemberApi({
       group_id: targetGroupId || groupId,
-      data: rawData
+      data: rawData,
     });
-    
-    return true; 
+
+    return true;
   } catch (error) {
     console.error('人員匯入失敗:', error);
     throw error;
@@ -147,9 +166,9 @@ function formatValue(val: any) {
           {{ groupData.name }}
         </ElDescriptionsItem>
         <ElDescriptionsItem label="狀態">
-          <ElSwitch 
-            v-model="groupData.status" 
-            :active-value="1" 
+          <ElSwitch
+            v-model="groupData.status"
+            :active-value="1"
             :inactive-value="0"
             active-text="啟動"
             inactive-text="停用"
@@ -172,21 +191,31 @@ function formatValue(val: any) {
       </ElDescriptions>
     </ElCard>
 
-
     <!-- 標籤頁資料呈現 -->
     <ElCard shadow="never">
       <ElTabs v-model="activeTab">
         <!-- 人員列表標籤 -->
         <ElTabPane label="人員列表" name="members">
           <div class="mb-4 flex items-center justify-between">
-            <span class="font-bold">成員列表 ({{ groupData.members?.length ?? 0 }} 人)</span>
-            <ElButton type="primary" @click="handleImport"> 匯入人員名單 </ElButton>
+            <span class="font-bold"
+              >成員列表 ({{ groupData.members?.length ?? 0 }} 人)</span
+            >
+            <ElButton type="primary" @click="handleImport">
+              匯入人員名單
+            </ElButton>
           </div>
-          
-          <div v-if="groupData.members && groupData.members.length > 0" class="overflow-x-auto border rounded border-lighter">
-            <table class="w-full border-collapse text-sm bg-background min-w-max">
+
+          <div
+            v-if="groupData.members && groupData.members.length > 0"
+            class="border-lighter overflow-x-auto rounded border"
+          >
+            <table
+              class="w-full min-w-max border-collapse bg-background text-sm"
+            >
               <thead>
-                <tr class="bg-slate-600 text-white font-semibold text-left border-b-2 border-light">
+                <tr
+                  class="border-light border-b-2 bg-slate-600 text-left font-semibold text-white"
+                >
                   <th class="p-3">姓名</th>
                   <th class="p-3">狀態</th>
                   <th class="p-3">建立時間</th>
@@ -194,17 +223,24 @@ function formatValue(val: any) {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="member in groupData.members" :key="member.id" class="border-b border-lighter hover:bg-fill-hover">
+                <tr
+                  v-for="member in groupData.members"
+                  :key="member.id"
+                  class="border-lighter hover:bg-fill-hover border-b"
+                >
                   <td class="p-3">
-                    <span 
-                      class="text-primary cursor-pointer hover:underline" 
+                    <span
+                      class="cursor-pointer text-primary hover:underline"
                       @click="router.push(`/member/detail/${member.id}`)"
                     >
                       {{ member.name }}
                     </span>
                   </td>
                   <td class="p-3">
-                    <ElTag :type="member.status === 1 ? 'success' : 'danger'" size="small">
+                    <ElTag
+                      :type="member.status === 1 ? 'success' : 'danger'"
+                      size="small"
+                    >
                       {{ member.status === 1 ? '啟動' : '禁用' }}
                     </ElTag>
                   </td>
@@ -212,10 +248,10 @@ function formatValue(val: any) {
                     {{ formatDateTime(member.created_at) }}
                   </td>
                   <td class="p-3">
-                    <ElButton 
-                      size="small" 
-                      type="primary" 
-                      link 
+                    <ElButton
+                      size="small"
+                      type="primary"
+                      link
                       @click="router.push(`/member/detail/${member.id}`)"
                     >
                       查看詳情
@@ -225,13 +261,17 @@ function formatValue(val: any) {
               </tbody>
             </table>
           </div>
-          <div v-else class="text-secondary text-center py-10">尚無成員資料</div>
+          <div v-else class="py-10 text-center text-secondary">
+            尚無成員資料
+          </div>
         </ElTabPane>
 
         <!-- 活動列表標籤 -->
         <ElTabPane label="活動列表" name="activities">
           <div class="mb-4">
-            <span class="font-bold text-lg">相關活動 ({{ eventList.length }} 個)</span>
+            <span class="text-lg font-bold"
+              >相關活動 ({{ eventList.length }} 個)</span
+            >
           </div>
 
           <ElTable
@@ -244,8 +284,8 @@ function formatValue(val: any) {
           >
             <ElTableColumn label="活動名稱" min-width="200">
               <template #default="{ row }">
-                <span 
-                  class="text-primary cursor-pointer hover:underline font-medium" 
+                <span
+                  class="cursor-pointer font-medium text-primary hover:underline"
                   @click="router.push(`/event/detail/${row.id}`)"
                 >
                   {{ row.title || row.name || '-' }}
@@ -264,10 +304,10 @@ function formatValue(val: any) {
             </ElTableColumn>
             <ElTableColumn label="操作" width="100" align="center">
               <template #default="{ row }">
-                <ElButton 
-                  size="small" 
-                  type="primary" 
-                  link 
+                <ElButton
+                  size="small"
+                  type="primary"
+                  link
                   @click="router.push(`/event/detail/${row.id}`)"
                 >
                   查看
@@ -279,7 +319,9 @@ function formatValue(val: any) {
 
         <!-- 群組分析標籤 -->
         <ElTabPane label="群組分析" name="analysis">
-          <div class="text-secondary text-center py-10">群組分析功能開發中...</div>
+          <div class="py-10 text-center text-secondary">
+            群組分析功能開發中...
+          </div>
         </ElTabPane>
       </ElTabs>
     </ElCard>
@@ -288,7 +330,7 @@ function formatValue(val: any) {
       title="匯入人員名單"
       sample-url="/example/範例-人員名單.xlsx"
       :upload-api="handleImportProcess"
-      :extra-params="{ type: 'member', groupId: groupId }"
+      :extra-params="{ type: 'member', groupId }"
       :default-group-id="groupId"
       group-disabled
       @success="handleImportSuccess"
@@ -300,12 +342,15 @@ function formatValue(val: any) {
 .border-lighter {
   border-color: var(--el-border-color-lighter);
 }
+
 .border-light {
   border-color: var(--el-border-color-light);
 }
+
 .bg-fill-light {
   background-color: var(--el-fill-color-light);
 }
+
 .bg-fill-hover:hover {
   background-color: var(--el-fill-color-hover);
 }

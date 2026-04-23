@@ -2,10 +2,11 @@ import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 
 import { h } from 'vue';
-import { router } from '#/router';
 
-import { ElTag, ElLink } from 'element-plus';
+import { ElLink, ElTag } from 'element-plus';
+
 import { getMemberListApi } from '#/api/member';
+import { router } from '#/router';
 
 interface RowType {
   id: string;
@@ -57,7 +58,6 @@ const formOptions: VbenFormProps = {
   submitOnEnter: true,
 };
 
-
 const gridOptions: VxeTableGridOptions<RowType> = {
   checkboxConfig: {
     highlight: true,
@@ -87,7 +87,8 @@ const gridOptions: VxeTableGridOptions<RowType> = {
       title: '狀態',
       slots: {
         default: ({ row }) => {
-          const statusConfig = STATUS_MAP[row.status as keyof typeof STATUS_MAP] || STATUS_MAP[0];
+          const statusConfig =
+            STATUS_MAP[row.status as keyof typeof STATUS_MAP] || STATUS_MAP[0];
           return h(
             ElTag,
             { type: statusConfig.type },
@@ -105,12 +106,14 @@ const gridOptions: VxeTableGridOptions<RowType> = {
         },
       },
     },
-    { 
-      field: 'created_at', 
-      title: '註冊時間', 
+    {
+      field: 'created_at',
+      title: '註冊時間',
       slots: {
         default: ({ row }) => {
-          return (row.created_at ? row.created_at.replace('T', ' ').split('.')[0] : '') as string;
+          return (
+            row.created_at ? row.created_at.replace('T', ' ').split('.')[0] : ''
+          ) as string;
         },
       },
     },
@@ -134,7 +137,7 @@ const gridOptions: VxeTableGridOptions<RowType> = {
           // 獲取數據列表
           const items = res.items ?? [];
           // 獲取總筆數 (優先從 res.total 拿，如果沒有才拿 items 長度)
-          const total = res.total !== undefined ? res.total : items.length;
+          const total = res.total === undefined ? items.length : res.total;
 
           return {
             items,

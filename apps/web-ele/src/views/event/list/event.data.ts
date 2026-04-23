@@ -2,21 +2,23 @@ import type { VbenFormProps } from '#/adapter/form';
 import type { VxeTableGridOptions } from '#/adapter/vxe-table';
 
 import { h } from 'vue';
-import { ElTag, ElLink } from 'element-plus';
+
+import { ElLink } from 'element-plus';
+
+import { getEventListApi } from '#/api/event';
 import { router } from '#/router';
 import { formatDateTime } from '#/utils/date';
-import { getEventListApi } from '#/api/event';
 
 interface RowType {
   id: number;
-  event_number: string | null;
+  event_number: null | string;
   title: string;
   status: number;
-  start_time: string | null;
-  end_time: string | null;
-  landmark: string | null;
-  type: string | null;
-  schedule_at: string | null;
+  start_time: null | string;
+  end_time: null | string;
+  landmark: null | string;
+  type: null | string;
+  schedule_at: null | string;
   created_at: string;
 }
 
@@ -26,7 +28,7 @@ const STATUS_MAP = {
   2: { label: '已完成', type: 'success' },
   3: { label: '失敗', type: 'danger' },
 } as const;
- 
+
 const EVENT_TYPE_MAP = {
   0: { label: '會議', type: 'primary' },
   1: { label: '工作坊', type: 'success' },
@@ -77,7 +79,11 @@ export const gridOptions: VxeTableGridOptions<RowType> = {
       width: 120,
       slots: {
         default: ({ row }) => {
-          return h('span', { class: 'text-gray-400 font-mono' }, row.event_number || '-');
+          return h(
+            'span',
+            { class: 'text-gray-400 font-mono' },
+            row.event_number || '-',
+          );
         },
       },
     },
@@ -97,7 +103,7 @@ export const gridOptions: VxeTableGridOptions<RowType> = {
                 router.push(`/event/detail/${row.id}`);
               },
             },
-            { default: () => row.title }
+            { default: () => row.title },
           );
         },
       },
@@ -169,7 +175,7 @@ export const gridOptions: VxeTableGridOptions<RowType> = {
         try {
           const res = await getEventListApi(params);
           const items = res.items ?? [];
-          const total = res.total !== undefined ? res.total : items.length;
+          const total = res.total === undefined ? items.length : res.total;
           return { items, total };
         } catch (error) {
           console.error('Event list API failed:', error);

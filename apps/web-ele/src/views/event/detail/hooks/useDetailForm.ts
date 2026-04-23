@@ -1,15 +1,19 @@
-import { reactive, ref, computed, watch } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { ElMessage } from 'element-plus';
 import type { FormRules, UploadFile, UploadProps } from 'element-plus';
+
+import { computed, reactive, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
 import { useUserStore } from '@vben/stores';
+
+import { ElMessage } from 'element-plus';
+
 import { getEventDetailApi, updateEventApi } from '#/api/event';
 
 export function useDetailForm(formRef: any) {
   const router = useRouter();
   const route = useRoute();
   const userStore = useUserStore();
-  
+
   const eventId = computed(() => route.params.id as string);
   const isReadonly = ref(true);
   const loading = ref(false);
@@ -36,10 +40,16 @@ export function useDetailForm(formRef: any) {
   /** 表單驗證規則 */
   const rules: FormRules = {
     title: [{ required: true, message: '請輸入活動名稱', trigger: 'blur' }],
-    activity_type: [{ required: true, message: '請選擇活動類型', trigger: 'change' }],
+    activity_type: [
+      { required: true, message: '請選擇活動類型', trigger: 'change' },
+    ],
     summary: [{ required: true, message: '請輸入活動簡介', trigger: 'blur' }],
-    start_time: [{ required: true, message: '請選擇開始時間', trigger: 'change' }],
-    end_time: [{ required: true, message: '請選擇結束時間', trigger: 'change' }],
+    start_time: [
+      { required: true, message: '請選擇開始時間', trigger: 'change' },
+    ],
+    end_time: [
+      { required: true, message: '請選擇結束時間', trigger: 'change' },
+    ],
     landmark: [{ required: true, message: '請輸入活動地標', trigger: 'blur' }],
     address: [{ required: true, message: '請輸入活動地址', trigger: 'blur' }],
     img_url: [{ required: true, message: '請上傳活動橫幅', trigger: 'change' }],
@@ -53,21 +63,26 @@ export function useDetailForm(formRef: any) {
       loading.value = true;
       const res: any = await getEventDetailApi({ id: eventId.value });
       const detail = res?.data || res || {};
-      
+
       form.title = detail.title || '';
       form.event_number = detail.event_number || '';
-      form.activity_type = detail.type !== undefined ? detail.type : (detail.activity_type !== undefined ? detail.activity_type : '');
+      const fallbackActivityType =
+        detail.activity_type === undefined ? '' : detail.activity_type;
+      form.activity_type =
+        detail.type === undefined ? fallbackActivityType : detail.type;
       form.summary = detail.summary || detail.description || '';
       form.start_time = detail.start_time || '';
       form.end_time = detail.end_time || '';
       form.landmark = detail.landmark || '';
       form.address = detail.address || '';
-      form.img_url = detail.img_url || detail.banner_url || '/event_default.png';
+      form.img_url =
+        detail.img_url || detail.banner_url || '/event_default.png';
       form.content = detail.content || '';
-      
+
       // 轉換數據格式 (因應後端 GET 回傳為 is_display，但 UPDATE 接收 is_registration)
-      form.is_registration = detail.is_display !== undefined ? detail.is_display : 0;
-      form.is_approve = detail.is_approve !== undefined ? detail.is_approve : 0;
+      form.is_registration =
+        detail.is_display === undefined ? 0 : detail.is_display;
+      form.is_approve = detail.is_approve === undefined ? 0 : detail.is_approve;
 
       bannerPreviewUrl.value = form.img_url;
     } catch (error) {
@@ -116,7 +131,7 @@ export function useDetailForm(formRef: any) {
 
   function cancelEdit() {
     isReadonly.value = true;
-    fetchEventDetail(); 
+    fetchEventDetail();
     formRef.value?.clearValidate();
   }
 
@@ -124,9 +139,9 @@ export function useDetailForm(formRef: any) {
     try {
       await formRef.value?.validate();
       loading.value = true;
-      
+
       const userInfo: any = userStore.userInfo || {};
-      const { event_number, ...formWithoutNumber } = form;
+      const { event_number: _event_number, ...formWithoutNumber } = form;
 
       const payload = {
         ...formWithoutNumber,
@@ -135,13 +150,13 @@ export function useDetailForm(formRef: any) {
         is_registration: form.is_registration,
         is_approve: form.is_approve,
       };
-      
+
       const res: any = await updateEventApi(payload);
-      
+
       if (res && (res.code === 200 || res.code === 0 || !res.code)) {
         ElMessage.success('更新成功');
         isReadonly.value = true;
-        await fetchEventDetail(); 
+        await fetchEventDetail();
       } else {
         throw new Error(res?.msg || res?.message || '更新失敗');
       }
@@ -158,12 +173,17 @@ export function useDetailForm(formRef: any) {
   }
 
   const previewVisible = ref(false);
-  const previewDevice = ref<'web' | 'mobile'>('web');
+  const previewDevice = ref<'mobile' | 'web'>('web');
 
   function generatePreviewHtml() {
     const banner = form.img_url || '/event_default.png';
     const typeMap: Record<string, string> = {
-      '0': '會議', '1': '工作坊', '2': '記者會', '3': '標準制定會議', '4': '創意競賽', '5': '其他活動',
+      '0': '會議',
+      '1': '工作坊',
+      '2': '記者會',
+      '3': '標準制定會議',
+      '4': '創意競賽',
+      '5': '其他活動',
     };
     const typeName = typeMap[String(form.activity_type)] || '-';
 

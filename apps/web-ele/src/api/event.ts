@@ -35,7 +35,10 @@ export async function getInviteListApi(params: any) {
 /**
  * 匯入群組至活動的邀請名單
  */
-export async function importEventGroupApi(data: { event_id: string | number; group_id: string | number }) {
+export async function importEventGroupApi(data: {
+  event_id: number | string;
+  group_id: number | string;
+}) {
   return requestClient.post('/edm/event/importGroup', data, {
     responseReturn: 'body',
   });
@@ -44,7 +47,10 @@ export async function importEventGroupApi(data: { event_id: string | number; gro
 /**
  * 寄送活動邀請信
  */
-export async function sendInviteMailApi(data: { event_id: string | number; emails: string[] }) {
+export async function sendInviteMailApi(data: {
+  emails: string[];
+  event_id: number | string;
+}) {
   return requestClient.post('/edm/mail/inviteMail', data, {
     responseReturn: 'body',
   });

@@ -1,8 +1,8 @@
 import { ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { requestClient } from '#/api/request';
+
 import {
   Bold,
+  ButtonView,
   ClassicEditor,
   Essentials,
   FontBackgroundColor,
@@ -21,12 +21,14 @@ import {
   Paragraph,
   Plugin,
   Table,
-  TableToolbar,
-  TableColumnResize,
   TableCaption,
+  TableColumnResize,
+  TableToolbar,
   Undo,
-  ButtonView
 } from 'ckeditor5';
+import { ElMessage } from 'element-plus';
+
+import { requestClient } from '#/api/request';
 
 /** 自定義上傳適配器 */
 class MyUploadAdapter {
@@ -35,6 +37,8 @@ class MyUploadAdapter {
     this.loader = loader;
     console.log('Adapter created');
   }
+
+  abort() {}
 
   upload() {
     console.log('Upload method triggered');
@@ -53,18 +57,16 @@ class MyUploadAdapter {
                 console.log('Upload success:', res.previewPath);
                 resolve({ default: res.previewPath });
               } else {
-                reject('上傳失敗：伺服器未返回 previewPath');
+                reject(new Error('上傳失敗：伺服器未返回 previewPath'));
               }
             })
-            .catch((err: any) => {
-              console.error('Upload failed:', err);
-              reject(err.message || '上傳發生錯誤');
+            .catch((error: any) => {
+              console.error('Upload failed:', error);
+              reject(error.message || '上傳發生錯誤');
             });
         }),
     );
   }
-
-  abort() {}
 }
 
 export function useCkeditor() {
@@ -76,7 +78,9 @@ export function useCkeditor() {
   /** 註冊適配器插件 */
   function MyCustomUploadAdapterPlugin(editor: any) {
     console.log('Registering UploadAdapter');
-    editor.plugins.get('FileRepository').createUploadAdapter = (loader: any) => {
+    editor.plugins.get('FileRepository').createUploadAdapter = (
+      loader: any,
+    ) => {
       return new MyUploadAdapter(loader);
     };
   }
@@ -86,11 +90,15 @@ export function useCkeditor() {
     try {
       libraryLoading.value = true;
       console.log('Fetching library images from /edm/event/getImage...');
-      
+
       // 設定 responseReturn: 'body' 以避開全域攔截器對 code: 0 的強制檢查
-      const res: any = await requestClient.post('/edm/event/getImage', {}, {
-        responseReturn: 'body',
-      });
+      const res: any = await requestClient.post(
+        '/edm/event/getImage',
+        {},
+        {
+          responseReturn: 'body',
+        },
+      );
 
       console.log('API Response received:', res);
 
@@ -108,17 +116,16 @@ export function useCkeditor() {
 
       console.log('Extracted raw image data:', rawData);
 
-      if (rawData.length > 0) {
-        libraryImages.value = rawData.map((item: any) => {
-          // 如果項目的屬性是字串（純 URL），直接回傳
-          if (typeof item === 'string') return item;
-          // 如果是物件（如您提供的結構），則拼接 baseUrl + name
-          const name = item.name || item.url || '';
-          return name.startsWith('http') ? name : `${baseUrl}${name}`;
-        });
-      } else {
-        libraryImages.value = [];
-      }
+      libraryImages.value =
+        rawData.length > 0
+          ? rawData.map((item: any) => {
+              // 如果項目的屬性是字串（純 URL），直接回傳
+              if (typeof item === 'string') return item;
+              // 如果是物件（如您提供的結構），則拼接 baseUrl + name
+              const name = item.name || item.url || '';
+              return name.startsWith('http') ? name : `${baseUrl}${name}`;
+            })
+          : [];
 
       console.log('Final libraryImages state:', libraryImages.value);
     } catch (error: any) {
@@ -229,7 +236,7 @@ export function useCkeditor() {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-        }
+        },
       );
       console.log('Library response:', res);
       if (res.previewPath || res.url || res.data?.url) {

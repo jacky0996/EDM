@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
+
 import mermaid from 'mermaid';
 
 interface Props {
   content: string;
-  theme?: 'default' | 'forest' | 'dark' | 'neutral';
+  theme?: 'dark' | 'default' | 'forest' | 'neutral';
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -12,7 +13,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const container = ref<HTMLElement | null>(null);
-const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
+const id = `mermaid-${Math.random().toString(36).slice(2, 11)}`;
 
 // 初始化 mermaid
 mermaid.initialize({
@@ -23,7 +24,7 @@ mermaid.initialize({
 
 async function renderChart() {
   if (!container.value || !props.content) return;
-  
+
   try {
     const { svg } = await mermaid.render(id, props.content);
     container.value.innerHTML = svg;
@@ -37,13 +38,19 @@ onMounted(() => {
   renderChart();
 });
 
-watch(() => props.content, () => {
-  renderChart();
-});
+watch(
+  () => props.content,
+  () => {
+    renderChart();
+  },
+);
 </script>
 
 <template>
-  <div ref="container" class="mermaid-container flex justify-center py-4 overflow-x-auto">
+  <div
+    ref="container"
+    class="mermaid-container flex justify-center overflow-x-auto py-4"
+  >
     <!-- SVG will be injected here -->
   </div>
 </template>

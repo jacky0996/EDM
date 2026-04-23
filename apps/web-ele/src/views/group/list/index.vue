@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Page } from '@vben/common-ui';
+
+import { Page, useVbenModal } from '@vben/common-ui';
 
 import { ElButton } from 'element-plus';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { useVbenModal } from '@vben/common-ui';
 
-import { formOptions, gridOptions } from './group.data';
 import CreateGroupModal from './create-group-modal.vue';
+import { formOptions, gridOptions } from './group.data';
 
 const [Grid, gridApi] = useVbenVxeGrid({ formOptions, gridOptions });
 
@@ -24,16 +24,6 @@ function handleCreate() {
 
 function handleCreateSuccess() {
   gridApi.query();
-}
-
-function handleEdit(row: any) {
-  // TODO: 實作編輯群組功能
-  console.debug('編輯群組:', row);
-}
-
-function handleDelete(row: any) {
-  // TODO: 實作刪除群組功能
-  console.debug('刪除群組:', row);
 }
 </script>
 

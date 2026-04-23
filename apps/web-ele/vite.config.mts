@@ -1,7 +1,9 @@
+import process from 'node:process';
+
 import { defineConfig } from '@vben/vite-config';
-import { loadEnv } from 'vite';
 
 import ElementPlus from 'unplugin-element-plus/vite';
+import { loadEnv } from 'vite';
 
 export default defineConfig(async ({ mode }) => {
   // 動態載應當前環境檔
@@ -12,7 +14,9 @@ export default defineConfig(async ({ mode }) => {
   const ssoTarget = env.VITE_PROXY_SSO_TARGET;
 
   if (!apiTarget || !ssoTarget) {
-    throw new Error(`[ViteConfig] 關鍵環境變數缺失：請在 .env.${mode} 中設定 VITE_PROXY_API_TARGET 與 VITE_PROXY_SSO_TARGET。系統拒絕啟動。`);
+    throw new Error(
+      `[ViteConfig] 關鍵環境變數缺失：請在 .env.${mode} 中設定 VITE_PROXY_API_TARGET 與 VITE_PROXY_SSO_TARGET。系統拒絕啟動。`,
+    );
   }
 
   return {

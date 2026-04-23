@@ -3,7 +3,6 @@ import type { Recordable, UserInfo } from '@vben/types';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { LOGIN_PATH } from '@vben/constants';
 import { preferences } from '@vben/preferences';
 import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 
@@ -101,18 +100,19 @@ export const useAuthStore = defineStore('auth', () => {
 
         // --- 多層級相容性處理 ---
         // 1. 判斷是否為 Axios Response 物件 (如果是，取其 .data)
-        const jsonRoot = res?.status !== undefined ? res.data : res;
-        
+        const jsonRoot = res?.status === undefined ? res : res.data;
+
         // 2. 判斷 payload 位址 (有些結構會把 Token 放在 jsonRoot.data 裡面)
-        const payload = (jsonRoot?.data?.accessToken) ? jsonRoot.data : jsonRoot;
+        const payload = jsonRoot?.data?.accessToken ? jsonRoot.data : jsonRoot;
 
         // 成功判定：檢查 code 是否為 0 且 payload 裡擁有 accessToken
         if (jsonRoot && jsonRoot.code === 0 && payload?.accessToken) {
           accessStore.setAccessToken(payload.accessToken);
-          
+
           // 💡 取得使用者資訊 (相容各種回傳巢狀結構)
-          const userInfo = payload.userInfo || payload.data?.userInfo || jsonRoot.data;
-          
+          const userInfo =
+            payload.userInfo || payload.data?.userInfo || jsonRoot.data;
+
           if (userInfo) {
             // 🌟 2. 存入 Pinia (用於 UI)
             userStore.setUserInfo({
@@ -121,21 +121,29 @@ export const useAuthStore = defineStore('auth', () => {
             });
 
             // 🌟 3. 持久化存入 localStorage (用於 request Header 抓取，防止 Store 循環引用)
-            localStorage.setItem('ACCESS_TOKEN_USER_INFO', JSON.stringify({
-              ...userInfo,
-              realName: userInfo.realName || userInfo.name || 'SSO User',
-            }));
+            localStorage.setItem(
+              'ACCESS_TOKEN_USER_INFO',
+              JSON.stringify({
+                ...userInfo,
+                realName: userInfo.realName || userInfo.name || 'SSO User',
+              }),
+            );
 
             console.log(`[SSO] 登錄成功:`, userStore.userInfo?.realName);
             return true;
           }
           throw new Error('回傳中找不到使用者資訊');
         }
-        
-        throw new Error(`驗證未通過 (Code: ${jsonRoot?.code}, Message: ${jsonRoot?.message})`);
+
+        throw new Error(
+          `驗證未通過 (Code: ${jsonRoot?.code}, Message: ${jsonRoot?.message})`,
+        );
       } catch (error: any) {
         retryCount++;
-        console.warn(`[SSO] 驗證失敗 (嘗試 ${retryCount}/${maxRetries}):`, error.message || error);
+        console.warn(
+          `[SSO] 驗證失敗 (嘗試 ${retryCount}/${maxRetries}):`,
+          error.message || error,
+        );
 
         if (retryCount >= maxRetries) {
           return false;
@@ -157,16 +165,18 @@ export const useAuthStore = defineStore('auth', () => {
     } catch {
       // 靜默處理
     }
-    
+
     // 1. 各項 Store 與緩存清空
     resetAllStores();
     accessStore.setAccessToken(null);
     localStorage.removeItem('ACCESS_TOKEN_USER_INFO');
-    
+
     // 2. 🌟 SSO 全環境動態跳轉
     if (redirect) {
       // 優先讀取環境變數 (例如: http://127.0.0.1:8000, https://uathws.hwacom.com, https://hws.hwacom.com)
-      const hwsBaseUrl = (import.meta.env.VITE_HWS_URL || 'http://127.0.0.1:8000/').replace(/\/+$/, '/');
+      const hwsBaseUrl = (
+        import.meta.env.VITE_HWS_URL || 'http://127.0.0.1:8000/'
+      ).replace(/\/+$/, '/');
       const redirectParam = encodeURIComponent(window.location.href);
 
       console.log(`[SSO] 正在導回 SSO 認證中心: ${hwsBaseUrl}`);

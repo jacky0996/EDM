@@ -112,8 +112,8 @@ If you need to add a new language pack, follow these steps:
   ```ts
   export interface LanguageOption {
     label: string;
-    value: 'en-US' | 'zh-CN'; 
-    value: 'en-US' | 'zh-CN' | 'zh-TW'; 
+    value: 'en-US' | 'zh-CN';
+    value: 'en-US' | 'zh-CN' | 'zh-TW';
   }
   export const SUPPORT_LANGUAGES: LanguageOption[] = [
     {
@@ -121,8 +121,8 @@ If you need to add a new language pack, follow these steps:
       value: 'en-US',
     },
     {
-      label: '繁体中文', 
-      value: 'zh-TW', 
+      label: '繁体中文',
+      value: 'zh-TW',
     },
   ];
   ```
@@ -130,8 +130,8 @@ If you need to add a new language pack, follow these steps:
 - In `packages/locales/typing.ts`, add a new TypeScript type:
 
   ```ts
-  export type SupportedLanguagesType = 'en-US' | 'zh-CN'; 
-  export type SupportedLanguagesType = 'en-US' | 'zh-CN' | 'zh-TW'; 
+  export type SupportedLanguagesType = 'en-US' | 'zh-CN';
+  export type SupportedLanguagesType = 'en-US' | 'zh-CN' | 'zh-TW';
   ```
 
 At this point, you can use the newly added language pack in the project.
@@ -215,8 +215,8 @@ Firstly, it is not recommended to remove internationalization, as it is a good d
     await coreSetup(app, {
       defaultLocale: preferences.app.locale,
       loadMessages,
-      missingWarn: !import.meta.env.PROD, 
-      missingWarn: false, 
+      missingWarn: !import.meta.env.PROD,
+      missingWarn: false,
       ...options,
     });
   }

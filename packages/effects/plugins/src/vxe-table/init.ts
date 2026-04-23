@@ -104,7 +104,7 @@ export function setupVbenVxeTable(setupOptions: SetupVxeTable) {
   const { configVxeTable, useVbenForm } = setupOptions;
 
   initVxeTable();
-  // eslint-disable-next-line @typescript-eslint/no-shadow
+
   useTableForm = useVbenForm;
 
   const { isDark, locale } = usePreferences();

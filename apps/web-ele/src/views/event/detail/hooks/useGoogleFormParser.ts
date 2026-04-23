@@ -18,22 +18,22 @@ export function useGoogleFormParser() {
 
     // 標準欄位關鍵字定義 (對應 RegistrationForm 的 fieldOptions)
     const standardMap: Record<string, string> = {
-      '姓名': 'name',
-      '行動電話': 'mobile',
-      '手機': 'mobile',
-      '電子郵件': 'email',
-      'Email': 'email',
-      '公司名稱': 'company',
-      '公司單位': 'company',
-      '職稱': 'job_title',
-      '餐旅需求': 'dietary',
+      姓名: 'name',
+      行動電話: 'mobile',
+      手機: 'mobile',
+      電子郵件: 'email',
+      Email: 'email',
+      公司名稱: 'company',
+      公司單位: 'company',
+      職稱: 'job_title',
+      餐旅需求: 'dietary',
     };
 
     // 2. 遍歷項目進行解析
     items.forEach((item: any) => {
       const title = item.title || '';
       const question = item.questionItem?.question;
-      
+
       if (!question) return;
 
       // 檢查是否為標準欄位
@@ -59,9 +59,20 @@ export function useGoogleFormParser() {
       } else if (question.choiceQuestion) {
         const cq = question.choiceQuestion;
         // 映射類型
-        if (cq.type === 'RADIO') customQ.type = 'radio';
-        else if (cq.type === 'CHECKBOX') customQ.type = 'checkbox';
-        else if (cq.type === 'DROP_DOWN') customQ.type = 'dropdown';
+        switch (cq.type) {
+          case 'CHECKBOX': {
+            customQ.type = 'checkbox';
+            break;
+          }
+          case 'DROP_DOWN': {
+            customQ.type = 'dropdown';
+            break;
+          }
+          case 'RADIO': {
+            customQ.type = 'radio';
+            break;
+          }
+        }
 
         // 提取選項
         if (cq.options) {

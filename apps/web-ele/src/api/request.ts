@@ -19,14 +19,19 @@ import { useAuthStore } from '#/store';
 
 import { refreshTokenApi } from './core';
 
-const { apiURL: originalApiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
+const { apiURL: originalApiURL } = useAppConfig(
+  import.meta.env,
+  import.meta.env.PROD,
+);
 
 // --- [API 分流設定] ---
 // 1. 一般業務網址：UAT/正式環境強制走相對路徑 /api/ (隱藏實體 IP)
 const apiURL = import.meta.env.DEV ? originalApiURL : '/api/';
 
 // 2. SSO 核心驗證網址：優先讀取 VITE_SSO_VERIFY_URL 環境變數
-const ssoApiURL = (import.meta.env.VITE_SSO_VERIFY_URL as string) || (import.meta.env.DEV ? originalApiURL : '/api/');
+const ssoApiURL =
+  (import.meta.env.VITE_SSO_VERIFY_URL as string) ||
+  (import.meta.env.DEV ? originalApiURL : '/api/');
 
 interface AdditionalOptions {
   skipAuthenticate?: boolean;
@@ -34,7 +39,7 @@ interface AdditionalOptions {
 
 function createRequestClient(
   baseURL: string,
-  options?: RequestClientOptions & AdditionalOptions,
+  options?: AdditionalOptions & RequestClientOptions,
 ) {
   const client = new RequestClient({
     ...options,
@@ -49,7 +54,7 @@ function createRequestClient(
     const accessStore = useAccessStore();
     const authStore = useAuthStore();
     accessStore.setAccessToken(null);
-    
+
     // 因為我們使用 SSO，所以不顯示預設的登入彈窗，而是直接登出並導回 SSO
     await authStore.logout();
   }
@@ -83,10 +88,12 @@ function createRequestClient(
         const userStorage = localStorage.getItem('ACCESS_TOKEN_USER_INFO');
         if (userStorage) {
           // 直接轉 Base64 送出
-          config.headers['X-User-Info'] = window.btoa(unescape(encodeURIComponent(userStorage)));
+          config.headers['X-User-Info'] = window.btoa(
+            unescape(encodeURIComponent(userStorage)),
+          );
         }
-      } catch (e) {
-        console.warn('[Request] UserInfo 讀取或編碼失敗', e);
+      } catch (error) {
+        console.warn('[Request] UserInfo 讀取或編碼失敗', error);
       }
 
       // 每次發送請求時同步更新最後活動時間 (Session 續期)
@@ -144,7 +151,7 @@ export const requestClient = createRequestClient(apiURL, {
  * 專屬 SSO 驗證客戶端 (直連核心系統，accessToken 在外層)
  */
 export const ssoRequestClient = createRequestClient(ssoApiURL, {
-  responseReturn: 'raw',   // ✅ 必定使用 RAW 以讀取外層 accessToken
+  responseReturn: 'raw', // ✅ 必定使用 RAW 以讀取外層 accessToken
   skipAuthenticate: true, // ✅ 跳過自動登出邏輯
 });
 

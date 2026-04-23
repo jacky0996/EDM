@@ -230,7 +230,7 @@ export type FieldMappingTime = [
     | null
     | string
   )?,
- ][];
+][];
 
 export type ArrayToStringFields = Array<
   | [string[], string?] // 嵌套陣列格式，可選分隔符
@@ -349,7 +349,7 @@ export interface ActionButtonOptions extends VbenButtonProps {
 
 export interface VbenFormProps<
   T extends BaseFormComponentType = BaseFormComponentType,
- > extends Omit<
+> extends Omit<
   FormRenderProps<T>,
   'componentBindEventMap' | 'componentMap' | 'form'
 > {

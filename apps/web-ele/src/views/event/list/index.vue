@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+
 import { Page } from '@vben/common-ui';
+
 import { ElButton } from 'element-plus';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 
 import { formOptions, gridOptions } from './event.data';

@@ -1,41 +1,42 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
+
 import { Ckeditor } from '@ckeditor/ckeditor5-vue';
-import 'ckeditor5/ckeditor5.css';
 import {
   ElButton,
   ElDatePicker,
   ElDialog,
+  ElEmpty,
   ElForm,
   ElFormItem,
-  ElInput,
-  ElUpload,
   ElIcon,
-  ElTabs,
-  ElTabPane,
-  ElEmpty,
+  ElInput,
+  ElOption,
   ElRadioButton,
   ElRadioGroup,
   ElSelect,
-  ElOption,
   ElSwitch,
+  ElTabPane,
+  ElTabs,
+  ElUpload,
 } from 'element-plus';
-
-// Hooks (重用列表元件或新寫的 hook)
-import { useDetailForm } from './hooks/useDetailForm';
-
-// 子元件
-import InvitationList from './components/InvitationList.vue';
-import RegistrationForm from './components/RegistrationForm.vue';
-import ApprovalList from './components/ApprovalList.vue';
-import EventAnalytics from './components/EventAnalytics.vue';
-import SurveyForm from './components/SurveyForm.vue';
-import ThankyouForm from './components/ThankyouForm.vue';
 
 // 注意：若 useCkeditor 在 create 內，建議移出共用，此處暫以相對路徑或重寫處理。
 // 為了避免路徑混淆，臨時引入原本的 (假設能正確解析，若報錯後續再修正)
 import { useCkeditor } from '../create/hooks/useCkeditor';
+import ApprovalList from './components/ApprovalList.vue';
+import EventAnalytics from './components/EventAnalytics.vue';
+// 子元件
+import InvitationList from './components/InvitationList.vue';
+import RegistrationForm from './components/RegistrationForm.vue';
+import SurveyForm from './components/SurveyForm.vue';
+import ThankyouForm from './components/ThankyouForm.vue';
+// Hooks (重用列表元件或新寫的 hook)
+import { useDetailForm } from './hooks/useDetailForm';
+
+import 'ckeditor5/ckeditor5.css';
 
 const formRef = ref<any>(null);
 
@@ -57,11 +58,7 @@ const {
   handlePreview,
 } = useDetailForm(formRef);
 
-const {
-  editorConfig,
-  ClassicEditor,
-  onEditorReady,
-} = useCkeditor();
+const { editorConfig, ClassicEditor, onEditorReady } = useCkeditor();
 
 const activeTab = ref('detail');
 
@@ -78,14 +75,15 @@ function updateIframeHeight(e: any) {
 
 <template>
   <!-- 外層 Loading 遮罩 -->
-  <Page :title="isReadonly ? '活動資料檢視' : '編輯活動資料'" v-loading="loading">
-    
+  <Page
+    :title="isReadonly ? '活動資料檢視' : '編輯活動資料'"
+    v-loading="loading"
+  >
     <div class="p-4">
       <el-card shadow="never" class="border-0 bg-transparent">
-        <el-tabs v-model="activeTab" type="border-card">
+        <ElTabs v-model="activeTab" type="border-card">
           <!-- ===== 1. 活動預覽 (詳細頁) ===== -->
-          <el-tab-pane label="活動預覽(詳細頁)" name="detail">
-            
+          <ElTabPane label="活動預覽(詳細頁)" name="detail">
             <div class="p-6">
               <ElForm
                 ref="formRef"
@@ -96,7 +94,11 @@ function updateIframeHeight(e: any) {
                 :disabled="isReadonly"
               >
                 <!-- Banner 上傳 -->
-                <ElFormItem label="活動橫幅(預設夾帶華電標誌，點選後可以替換圖片)" prop="img_url" required>
+                <ElFormItem
+                  label="活動橫幅(預設夾帶華電標誌，點選後可以替換圖片)"
+                  prop="img_url"
+                  required
+                >
                   <ElUpload
                     class="banner-uploader w-full"
                     :show-file-list="false"
@@ -107,25 +109,42 @@ function updateIframeHeight(e: any) {
                     :on-change="handleBannerChange"
                     :disabled="isReadonly"
                   >
-                    <div class="relative w-full overflow-hidden rounded-lg group">
+                    <div
+                      class="group relative w-full overflow-hidden rounded-lg"
+                    >
                       <img
                         v-if="bannerPreviewUrl"
                         :src="bannerPreviewUrl"
                         class="h-72 w-full object-cover transition-opacity"
-                        :class="{'group-hover:opacity-80': !isReadonly}"
+                        :class="{ 'group-hover:opacity-80': !isReadonly }"
                         alt="Banner 預覽"
                       />
                       <div
                         v-else
                         class="flex h-72 w-full cursor-pointer flex-col items-center justify-center border-2 border-dashed border-gray-300 transition-colors hover:border-blue-400"
                       >
-                        <ElIcon class="mb-2 text-4xl text-gray-400"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M480 480V128a32 32 0 0 1 64 0v352h352a32 32 0 1 1 0 64H544v352a32 32 0 1 1-64 0V544H128a32 32 0 1 1 0-64h352z"></path></svg></ElIcon>
-                        <span class="text-sm text-gray-500">點擊上傳活動橫幅</span>
+                        <ElIcon class="mb-2 text-4xl text-gray-400">
+                          <svg
+                            viewBox="0 0 1024 1024"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M480 480V128a32 32 0 0 1 64 0v352h352a32 32 0 1 1 0 64H544v352a32 32 0 1 1-64 0V544H128a32 32 0 1 1 0-64h352z"
+                            />
+                          </svg>
+                        </ElIcon>
+                        <span class="text-sm text-gray-500"
+                          >點擊上傳活動橫幅</span
+                        >
                       </div>
-                      
+
                       <!-- 遮罩提示 -->
-                      <div v-if="!isReadonly && bannerPreviewUrl" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span class="text-white font-medium">點擊更換圖片</span>
+                      <div
+                        v-if="!isReadonly && bannerPreviewUrl"
+                        class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 transition-opacity group-hover:opacity-100"
+                      >
+                        <span class="font-medium text-white">點擊更換圖片</span>
                       </div>
                     </div>
                   </ElUpload>
@@ -146,7 +165,7 @@ function updateIframeHeight(e: any) {
                   <ElSelect
                     v-model="form.activity_type"
                     placeholder="請選擇活動類型"
-                    class="w-full custom-height"
+                    class="custom-height w-full"
                     clearable
                   >
                     <ElOption label="會議" :value="0" />
@@ -171,41 +190,70 @@ function updateIframeHeight(e: any) {
                 </ElFormItem>
 
                 <!-- 報名表與審核設定 -->
-                <div class="grid grid-cols-2 gap-4 bg-blue-50/30 p-6 rounded-2xl border border-blue-100 mb-6 font-bold">
-                  <ElFormItem label="是否需要報名表" prop="is_registration" class="mb-0 text-primary">
+                <div
+                  class="mb-6 grid grid-cols-2 gap-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-6 font-bold"
+                >
+                  <ElFormItem
+                    label="是否需要報名表"
+                    prop="is_registration"
+                    class="mb-0 text-primary"
+                  >
                     <template #label>
                       <span class="flex items-center gap-2">
-                        <ElIcon><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M128 832V128h640v192h192v512H128zm640-512H512V128H192v640h704V320H768z"></path></svg></ElIcon>
+                        <ElIcon
+                          ><svg
+                            viewBox="0 0 1024 1024"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M128 832V128h640v192h192v512H128zm640-512H512V128H192v640h704V320H768z"
+                            /></svg
+                        ></ElIcon>
                         是否需要報名表
                       </span>
                     </template>
-                    <ElSwitch 
-                      v-model="form.is_registration" 
-                      :active-value="1" 
+                    <ElSwitch
+                      v-model="form.is_registration"
+                      :active-value="1"
                       :inactive-value="0"
                       active-text="需報名"
                       inactive-text="不需報名"
                       inline-prompt
-                      :disabled="isReadonly" 
+                      :disabled="isReadonly"
                     />
                   </ElFormItem>
 
-                  <ElFormItem v-if="form.is_registration === 1" label="報名人員需審核" prop="is_approve" class="mb-0 text-orange-600">
+                  <ElFormItem
+                    v-if="form.is_registration === 1"
+                    label="報名人員需審核"
+                    prop="is_approve"
+                    class="mb-0 text-orange-600"
+                  >
                     <template #label>
                       <span class="flex items-center gap-2 text-orange-600">
-                        <ElIcon><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M512 512a160 160 0 1 0 0-320 160 160 0 0 0 0 320zm0 64a256 256 0 1 1 0-512 256 256 0 0 1 0 512zm320 320v-32a96 96 0 0 0-96-96H288a96 96 0 0 0-96 96v32a32 32 0 1 1-64 0v-32a160 160 0 0 1 160-160h448a160 160 0 0 1 160 160v32a32 32 0 1 1-64 0z"></path></svg></ElIcon>
+                        <ElIcon
+                          ><svg
+                            viewBox="0 0 1024 1024"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M512 512a160 160 0 1 0 0-320 160 160 0 0 0 0 320zm0 64a256 256 0 1 1 0-512 256 256 0 0 1 0 512zm320 320v-32a96 96 0 0 0-96-96H288a96 96 0 0 0-96 96v32a32 32 0 1 1-64 0v-32a160 160 0 0 1 160-160h448a160 160 0 0 1 160 160v32a32 32 0 1 1-64 0z"
+                            /></svg
+                        ></ElIcon>
                         報名人員需審核
                       </span>
                     </template>
-                    <ElSwitch 
-                      v-model="form.is_approve" 
-                      :active-value="1" 
+                    <ElSwitch
+                      v-model="form.is_approve"
+                      :active-value="1"
                       :inactive-value="0"
                       active-text="需審核"
                       inactive-text="免審核"
                       inline-prompt
                       active-color="#ea580c"
-                      :disabled="isReadonly" 
+                      :disabled="isReadonly"
                     />
                   </ElFormItem>
                 </div>
@@ -231,7 +279,7 @@ function updateIframeHeight(e: any) {
                       placeholder="請選擇開始時間"
                       format="YYYY/MM/DD HH:mm"
                       value-format="YYYY-MM-DD HH:mm:ss"
-                      class="w-full custom-height"
+                      class="custom-height w-full"
                     />
                   </ElFormItem>
 
@@ -242,8 +290,13 @@ function updateIframeHeight(e: any) {
                       placeholder="請選擇結束時間"
                       format="YYYY/MM/DD HH:mm"
                       value-format="YYYY-MM-DD HH:mm:ss"
-                      :disabled-date="(time: Date) => form.start_time ? time < new Date(form.start_time) : false"
-                      class="w-full custom-height"
+                      :disabled-date="
+                        (time: Date) =>
+                          form.start_time
+                            ? time < new Date(form.start_time)
+                            : false
+                      "
+                      class="custom-height w-full"
                     />
                   </ElFormItem>
                 </div>
@@ -270,7 +323,10 @@ function updateIframeHeight(e: any) {
 
                 <!-- CKEditor 活動內容 -->
                 <ElFormItem label="活動內容" prop="content" required>
-                  <div class="w-full" :class="{ 'pointer-events-none opacity-80': isReadonly }">
+                  <div
+                    class="w-full"
+                    :class="{ 'pointer-events-none opacity-80': isReadonly }"
+                  >
                     <Ckeditor
                       v-model="form.content"
                       :editor="ClassicEditor"
@@ -285,94 +341,107 @@ function updateIframeHeight(e: any) {
               <!-- 按鈕區 -->
               <div class="mt-8 flex items-center justify-between border-t py-4">
                 <ElButton size="large" @click="handleBack">返回列表</ElButton>
-                
+
                 <div class="flex gap-4">
-                  <ElButton size="large" @click="handlePreview" :disabled="false"> 測試預覽 </ElButton>
+                  <ElButton
+                    size="large"
+                    @click="handlePreview"
+                    :disabled="false"
+                  >
+                    測試預覽
+                  </ElButton>
 
                   <template v-if="isReadonly">
-                    <ElButton type="primary" size="large" @click="toggleEdit"> 編輯 </ElButton>
+                    <ElButton type="primary" size="large" @click="toggleEdit">
+                      編輯
+                    </ElButton>
                   </template>
-                  
+
                   <template v-else>
-                    <ElButton type="danger" size="large" @click="cancelEdit" plain> 取消 </ElButton>
-                    <ElButton type="success" size="large" @click="handleSubmit"> 儲存更新 </ElButton>
+                    <ElButton
+                      type="danger"
+                      size="large"
+                      @click="cancelEdit"
+                      plain
+                    >
+                      取消
+                    </ElButton>
+                    <ElButton type="success" size="large" @click="handleSubmit">
+                      儲存更新
+                    </ElButton>
                   </template>
                 </div>
               </div>
-
             </div>
-
-          </el-tab-pane>
+          </ElTabPane>
 
           <!-- ===== 2. 報名表 ===== -->
-          <el-tab-pane label="報名表" name="registration">
+          <ElTabPane label="報名表" name="registration">
             <div class="py-6">
-              <RegistrationForm 
+              <RegistrationForm
                 v-if="activeTab === 'registration' && form.id"
                 :event-data="form"
               />
             </div>
-          </el-tab-pane>
+          </ElTabPane>
 
           <!-- ===== 3. 邀請名單 ===== -->
-          <el-tab-pane label="邀請名單" name="invitation">
+          <ElTabPane label="邀請名單" name="invitation">
             <div class="py-6">
               <InvitationList
                 v-if="activeTab === 'invitation' && form.id"
                 :event-id="form.id"
               />
             </div>
-          </el-tab-pane>
+          </ElTabPane>
 
           <!-- ===== 4. 審核名單 ===== -->
-          <el-tab-pane label="審核名單" name="approval">
+          <ElTabPane label="審核名單" name="approval">
             <div class="py-6">
               <ApprovalList
                 v-if="activeTab === 'approval' && form.id"
                 :event-data="form"
               />
             </div>
-          </el-tab-pane>
+          </ElTabPane>
 
           <!-- ===== 5. 問券 ===== -->
-          <el-tab-pane label="問券" name="survey">
+          <ElTabPane label="問券" name="survey">
             <div class="py-6">
               <SurveyForm
                 v-if="activeTab === 'survey' && form.id"
                 :event-data="form"
               />
             </div>
-          </el-tab-pane>
+          </ElTabPane>
 
           <!-- ===== 6. 活動分析 ===== -->
-          <el-tab-pane label="活動分析" name="analytics">
+          <ElTabPane label="活動分析" name="analytics">
             <div class="py-6">
               <EventAnalytics
                 v-if="activeTab === 'analytics' && form.id"
                 :event-id="form.id"
               />
             </div>
-          </el-tab-pane>
+          </ElTabPane>
 
           <!-- ===== 7. 感謝函 ===== -->
-          <el-tab-pane label="感謝函" name="thankyou">
+          <ElTabPane label="感謝函" name="thankyou">
             <div class="py-6">
               <ThankyouForm
                 v-if="activeTab === 'thankyou' && form.id"
                 :event-data="form"
               />
             </div>
-          </el-tab-pane>
-
+          </ElTabPane>
 
           <!-- ===== 9. 設定 ===== -->
-          <el-tab-pane label="設定" name="settings">
+          <ElTabPane label="設定" name="settings">
             <div class="py-10">
               <ElEmpty description="設定功能建置中" />
             </div>
-          </el-tab-pane>
-
-        </el-tabs>
+          </ElTabPane>
+        </ElTabs>
       </el-card>
 
       <!-- 預覽 Dialog -->
@@ -384,9 +453,13 @@ function updateIframeHeight(e: any) {
         destroy-on-close
         class="gmail-preview-dialog"
       >
-        <div class="bg-gray-100 min-h-[85vh] flex flex-col rounded-xl overflow-hidden shadow-inner border border-gray-200">
+        <div
+          class="flex min-h-[85vh] flex-col overflow-hidden rounded-xl border border-gray-200 bg-gray-100 shadow-inner"
+        >
           <!-- 裝置切換列 -->
-          <div class="device-switcher flex items-center justify-center gap-4 py-4 bg-white border-b sticky top-0 z-10">
+          <div
+            class="device-switcher sticky top-0 z-10 flex items-center justify-center gap-4 border-b bg-white py-4"
+          >
             <ElRadioGroup v-model="previewDevice">
               <ElRadioButton label="web">電腦瀏覽器</ElRadioButton>
               <ElRadioButton label="mobile">移動端手機</ElRadioButton>
@@ -394,49 +467,98 @@ function updateIframeHeight(e: any) {
           </div>
 
           <!-- Web 模式 -->
-          <div v-if="previewDevice === 'web'" class="gmail-web-shell flex flex-col flex-1">
+          <div
+            v-if="previewDevice === 'web'"
+            class="gmail-web-shell flex flex-1 flex-col"
+          >
             <!-- Gmail 頂部搜尋欄模擬 -->
-            <div class="h-16 bg-white border-b flex items-center px-8 justify-between shrink-0">
+            <div
+              class="flex h-16 shrink-0 items-center justify-between border-b bg-white px-8"
+            >
               <div class="flex items-center gap-6">
-                <span class="text-2xl font-bold text-gray-700 bg-gray-100 px-3 py-1 rounded">Gmail</span>
-                <div class="bg-blue-50 w-[600px] h-11 rounded-xl flex items-center px-4 text-gray-500 border border-transparent hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all">
+                <span
+                  class="rounded bg-gray-100 px-3 py-1 text-2xl font-bold text-gray-700"
+                  >Gmail</span
+                >
+                <div
+                  class="flex h-11 w-[600px] items-center rounded-xl border border-transparent bg-blue-50 px-4 text-gray-500 transition-all hover:border-gray-200 hover:bg-white hover:shadow-sm"
+                >
                   搜尋郵件
                 </div>
               </div>
               <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-full bg-blue-500 shadow-sm border-2 border-white"></div>
+                <div
+                  class="h-10 w-10 rounded-full border-2 border-white bg-blue-500 shadow-sm"
+                ></div>
               </div>
             </div>
 
             <div class="flex flex-1 overflow-hidden">
               <!-- 左側選單 -->
-              <div class="w-64 p-4 flex flex-col gap-1">
-                <div class="bg-[#c2e7ff] text-[#001d35] px-6 py-4 rounded-2xl font-medium mb-4 w-32 text-center shadow-sm">撰寫</div>
-                <div class="bg-[#d3e3fd] text-[#041e49] px-6 py-1.5 rounded-full font-bold">收件匣</div>
-                <div class="px-6 py-1.5 text-gray-700 hover:bg-gray-100 rounded-full cursor-pointer">星號郵件</div>
-                <div class="px-6 py-1.5 text-gray-700 hover:bg-gray-100 rounded-full cursor-pointer">已傳送</div>
-                <div class="px-6 py-1.5 text-gray-700 hover:bg-gray-100 rounded-full cursor-pointer">草稿</div>
+              <div class="flex w-64 flex-col gap-1 p-4">
+                <div
+                  class="mb-4 w-32 rounded-2xl bg-[#c2e7ff] px-6 py-4 text-center font-medium text-[#001d35] shadow-sm"
+                >
+                  撰寫
+                </div>
+                <div
+                  class="rounded-full bg-[#d3e3fd] px-6 py-1.5 font-bold text-[#041e49]"
+                >
+                  收件匣
+                </div>
+                <div
+                  class="cursor-pointer rounded-full px-6 py-1.5 text-gray-700 hover:bg-gray-100"
+                >
+                  星號郵件
+                </div>
+                <div
+                  class="cursor-pointer rounded-full px-6 py-1.5 text-gray-700 hover:bg-gray-100"
+                >
+                  已傳送
+                </div>
+                <div
+                  class="cursor-pointer rounded-full px-6 py-1.5 text-gray-700 hover:bg-gray-100"
+                >
+                  草稿
+                </div>
               </div>
 
               <!-- 右側郵件內容區 -->
-              <div class="flex-1 bg-white m-4 rounded-2xl shadow-sm overflow-auto p-8 relative">
-                <div class="text-2xl mb-6 font-normal text-gray-800">{{ form.title || '（無主旨）' }}</div>
+              <div
+                class="relative m-4 flex-1 overflow-auto rounded-2xl bg-white p-8 shadow-sm"
+              >
+                <div class="mb-6 text-2xl font-normal text-gray-800">
+                  {{ form.title || '（無主旨）' }}
+                </div>
 
-                <div class="flex items-center gap-3 mb-8 border-b pb-8">
-                  <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg">H</div>
+                <div class="mb-8 flex items-center gap-3 border-b pb-8">
+                  <div
+                    class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-lg font-bold text-white"
+                  >
+                    H
+                  </div>
                   <div class="flex flex-col">
-                    <div class="font-bold text-sm">華電管理員 <span class="font-normal text-xs text-secondary">&lt;admin@hwacom.com&gt;</span></div>
+                    <div class="text-sm font-bold">
+                      華電管理員
+                      <span class="text-xs font-normal text-secondary"
+                        >&lt;admin@hwacom.com&gt;</span
+                      >
+                    </div>
                     <div class="text-xs text-secondary">寄給「我」</div>
                   </div>
                 </div>
 
-                <div class="iframe-wrapper flex justify-center w-full">
+                <div class="iframe-wrapper flex w-full justify-center">
                   <iframe
                     title="Gmail Web Preview"
                     :srcdoc="generatePreviewHtml()"
                     scrolling="no"
                     @load="updateIframeHeight"
-                    style="width: 100%; border: none; background-color: transparent;"
+                    style="
+                      width: 100%;
+                      background-color: transparent;
+                      border: none;
+                    "
                   ></iframe>
                 </div>
               </div>
@@ -444,21 +566,38 @@ function updateIframeHeight(e: any) {
           </div>
 
           <!-- Mobile 模式 -->
-          <div v-else class="gmail-mobile-shell flex flex-col items-center py-8 h-[85vh] overflow-y-auto">
-            <div class="mobile-device-frame relative w-[412px] h-[820px] bg-black rounded-[60px] p-4 shadow-2xl border-[8px] border-gray-800">
-              <div class="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-black rounded-b-3xl"></div>
-              <div class="bg-white w-full h-full rounded-[40px] overflow-hidden flex flex-col">
-                <div class="h-12 border-b flex items-center px-4 justify-between mt-4">
+          <div
+            v-else
+            class="gmail-mobile-shell flex h-[85vh] flex-col items-center overflow-y-auto py-8"
+          >
+            <div
+              class="mobile-device-frame relative h-[820px] w-[412px] rounded-[60px] border-[8px] border-gray-800 bg-black p-4 shadow-2xl"
+            >
+              <div
+                class="absolute left-1/2 top-0 h-7 w-40 -translate-x-1/2 rounded-b-3xl bg-black"
+              ></div>
+              <div
+                class="flex h-full w-full flex-col overflow-hidden rounded-[40px] bg-white"
+              >
+                <div
+                  class="mt-4 flex h-12 items-center justify-between border-b px-4"
+                >
                   <span class="font-bold">Gmail</span>
-                  <div class="w-8 h-8 rounded-full bg-blue-500"></div>
+                  <div class="h-8 w-8 rounded-full bg-blue-500"></div>
                 </div>
                 <div class="flex-1 overflow-auto p-4">
-                  <div class="text-xl font-medium mb-4">{{ form.title || '（無主旨）' }}</div>
-                  <div class="flex items-center gap-2 mb-4">
-                    <div class="w-8 h-8 rounded-full bg-blue-500"></div>
+                  <div class="mb-4 text-xl font-medium">
+                    {{ form.title || '（無主旨）' }}
+                  </div>
+                  <div class="mb-4 flex items-center gap-2">
+                    <div class="h-8 w-8 rounded-full bg-blue-500"></div>
                     <div>
-                      <div class="text-sm font-bold">管理員 <span class="font-normal text-xs">12:30</span></div>
-                      <div class="text-xs text-secondary font-normal">寄給 我</div>
+                      <div class="text-sm font-bold">
+                        管理員 <span class="text-xs font-normal">12:30</span>
+                      </div>
+                      <div class="text-xs font-normal text-secondary">
+                        寄給 我
+                      </div>
                     </div>
                   </div>
                   <div class="iframe-wrapper">
@@ -468,7 +607,7 @@ function updateIframeHeight(e: any) {
                       scrolling="no"
                       @load="updateIframeHeight"
                       class="w-full border-none"
-                      style="min-height: 400px;"
+                      style="min-height: 400px"
                     ></iframe>
                   </div>
                 </div>
@@ -487,6 +626,7 @@ function updateIframeHeight(e: any) {
   height: 48px;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 :deep(.ck-editor__editable_inline) {
   min-height: 400px;
 }
@@ -495,6 +635,7 @@ function updateIframeHeight(e: any) {
   border: none;
   box-shadow: none;
 }
+
 :deep(.el-tabs--border-card > .el-tabs__header) {
   background-color: transparent;
   border-bottom: 1px solid #e4e7ed;
@@ -504,14 +645,17 @@ function updateIframeHeight(e: any) {
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
+  background-color: rgb(156 163 175 / 50%);
   border-radius: 4px;
 }
+
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.8);
+  background-color: rgb(156 163 175 / 80%);
 }
 </style>

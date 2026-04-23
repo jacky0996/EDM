@@ -1,4 +1,8 @@
-import { baseRequestClient, requestClient, ssoRequestClient } from '#/api/request';
+import {
+  baseRequestClient,
+  requestClient,
+  ssoRequestClient,
+} from '#/api/request';
 
 export namespace AuthApi {
   /** 登入參數 */

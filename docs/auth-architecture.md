@@ -27,14 +27,14 @@ sequenceDiagram
     Browser->>EDM_Frontend: 攜帶 Token 進入 EDM 頁面
     EDM_Frontend->>EDM_Frontend: 路由守衛 (guard.ts) 攔截網址參數
     EDM_Frontend->>EDM_Backend: [POST] /api/sso/verify-token<br/>(Payload: { token: 'sso_token_123' })
-    
+
     Note over EDM_Backend: 驗證過程不讀取 Cookie (No Credentials)
     EDM_Backend->>EDM_Backend: 驗證 SSO Token 是否存在且未過期
     EDM_Backend->>EDM_Backend: 銷毀 SSO Token (一次性使用)
     EDM_Backend->>EDM_Backend: 生成正式 AccessToken (Sanctum/JWT)
-    
+
     EDM_Backend-->>EDM_Frontend: 回傳 AccessToken + UserInfo (Roles/Permissions)
-    
+
     Note over EDM_Frontend: 3. 狀態確立
     EDM_Frontend->>EDM_Frontend: 將 AccessToken 存入 LocalStorage
     EDM_Frontend->>Browser: 移除網址 ?token 參數 (URL 清理)
@@ -46,10 +46,12 @@ sequenceDiagram
 ## 2. 元件職責說明 (System Components)
 
 ### A. HWS (Laravel) - 認證發起端
+
 - **職責**：集中管理使用者帳號，確認登入狀態。
 - **關鍵行為**：在跳轉至 EDM 時產生 **短期 (60s)**、**一次性 (Cache::pull)** 的 Token。
 
 ### B. EDM Frontend (Vue 3 / Vben) - 認證接收端
+
 - **職責**：攔截入口參數，維持本地登入狀態。
 - **關鍵行為**：
   - `guard.ts`：攔截 URL 參數。
@@ -57,6 +59,7 @@ sequenceDiagram
   - **安全性限制**：API 請求不傳遞 `withCredentials`，不依賴網域 Cookie。
 
 ### C. EDM / HWS API - 認證驗證端
+
 - **職責**：將臨時鑰匙 (SSO Token) 轉換為正式門票 (Access Token)。
 - **關鍵行為**：回傳使用者的角色 (Roles)，供前端動態產生路由選單。
 
@@ -65,7 +68,7 @@ sequenceDiagram
 ## 3. 安全性分析 (Security Audit)
 
 | 安全控制項 | 實作細節 |
-| :--- | :--- |
+| :-- | :-- |
 | **CSRF 防禦** | 完全不使用 Cookie 進行認證。請求頭使用 `Authorization: Bearer`。 |
 | **Token 洩漏防禦** | SSO Token 為一次性使用，且透過 HTTPS 傳輸。 |
 | **URL 清理** | 前端在換到 Token 後立即 `router.replace` 移除參數，防止重新整理或分享網址時洩漏。 |

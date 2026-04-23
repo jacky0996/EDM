@@ -1,22 +1,28 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+
 import {
   ElButton,
   ElDialog,
+  ElInput,
+  ElLink,
+  ElMessage,
+  ElOption,
+  ElPagination,
+  ElSelect,
   ElTable,
   ElTableColumn,
-  ElSelect,
-  ElOption,
-  ElMessage,
-  ElLink,
-  ElPagination,
-  ElInput,
 } from 'element-plus';
-import { getInviteListApi, importEventGroupApi, sendInviteMailApi } from '#/api/event';
+
+import {
+  getInviteListApi,
+  importEventGroupApi,
+  sendInviteMailApi,
+} from '#/api/event';
 
 const props = defineProps<{
-  eventId: string | number;
+  eventId: number | string;
 }>();
 
 const router = useRouter();
@@ -58,13 +64,13 @@ async function handleSendSelected() {
     ElMessage.warning('請先勾選要寄送的人員');
     return;
   }
-  
+
   try {
     loading.value = true;
     const emails = selectedRows.value
-      .map(row => row.email?.email)
+      .map((row) => row.email?.email)
       .filter(Boolean);
-      
+
     if (emails.length === 0) {
       ElMessage.warning('選取的人員中沒有電子郵件資訊');
       return;
@@ -72,15 +78,15 @@ async function handleSendSelected() {
 
     await sendInviteMailApi({
       event_id: props.eventId,
-      emails: emails,
+      emails,
     });
-    
+
     ElMessage.success(`已成功寄送 ${emails.length} 封邀請信`);
     cancelSelectionMode();
     await fetchList();
   } catch (error: any) {
     console.error('Send selected error:', error);
-    ElMessage.error('寄送發生錯誤：' + (error.message || '未知錯誤'));
+    ElMessage.error(`寄送發生錯誤：${error.message || '未知錯誤'}`);
   } finally {
     loading.value = false;
   }
@@ -91,12 +97,12 @@ async function handleSendAll() {
   try {
     loading.value = true;
     // 為了獲取完整的 Email 清單，我們呼叫 API 不分頁取得所有資料
-    const res: any = await getInviteListApi({ 
+    const res: any = await getInviteListApi({
       event_id: props.eventId,
       page: 1,
-      pageSize: 99999, // 取得該活動所有受邀者
+      pageSize: 99_999, // 取得該活動所有受邀者
     });
-    
+
     const dataObj = res?.data || res || {};
     const allMembers = dataObj.member || dataObj.items || dataObj.list || [];
     const allEmails = allMembers
@@ -112,13 +118,13 @@ async function handleSendAll() {
       event_id: props.eventId,
       emails: allEmails,
     });
-    
+
     ElMessage.success(`已開始寄送全體邀請信，共 ${allEmails.length} 封`);
     cancelSelectionMode();
     await fetchList();
   } catch (error: any) {
     console.error('Send all error:', error);
-    ElMessage.error('寄送發生錯誤：' + (error.message || '未知錯誤'));
+    ElMessage.error(`寄送發生錯誤：${error.message || '未知錯誤'}`);
   } finally {
     loading.value = false;
   }
@@ -129,7 +135,7 @@ async function fetchList() {
   if (!props.eventId) return;
   try {
     loading.value = true;
-    const res: any = await getInviteListApi({ 
+    const res: any = await getInviteListApi({
       event_id: props.eventId,
       page: currentPage.value,
       pageSize: pageSize.value,
@@ -138,7 +144,8 @@ async function fetchList() {
     const dataObj = res?.data || res || {};
     listData.value = dataObj.member || dataObj.items || dataObj.list || [];
     groupOptions.value = dataObj.group || [];
-    total.value = (dataObj.total !== undefined) ? dataObj.total : listData.value.length;
+    total.value =
+      dataObj.total === undefined ? listData.value.length : dataObj.total;
   } catch (error: any) {
     console.error('Fetch invite list error:', error);
     ElMessage.error(error.message || '無法取得邀請名單');
@@ -169,7 +176,7 @@ function handleSearch() {
 // ================= 匯入群組相關 =================
 const importDialogVisible = ref(false);
 const importLoading = ref(false);
-const selectedGroup = ref<string | number>('');
+const selectedGroup = ref<number | string>('');
 
 // 開啟彈窗
 function openImportDialog() {
@@ -183,27 +190,34 @@ async function handleImportSubmit() {
     ElMessage.warning('請先選擇一個群組');
     return;
   }
-  
+
   try {
     importLoading.value = true;
     const res: any = await importEventGroupApi({
       event_id: props.eventId,
       group_id: selectedGroup.value,
     });
-    
+
     // 只要 code 為 0 或 status 為 true 並非 undefined，都視為成功
     console.log('[Import Result]', res);
-    
+
     // 優先檢查後端提供的 status，其次檢查 code 是否為 0 (含字串或數字)
-    const isSuccess = res && (res.status === true || String(res.code) === '0' || String(res.code) === '200');
-    
+    const isSuccess =
+      res &&
+      (res.status === true ||
+        String(res.code) === '0' ||
+        String(res.code) === '200');
+
     if (isSuccess) {
       ElMessage.success('群組人員已成功匯入');
       importDialogVisible.value = false;
       await fetchList(); // 重新拉取最新的邀請名單
     } else {
       // 輸出更明確的報錯資訊，避免 0 || falsy 導致顯示預設文字
-      const errorMsg = res?.msg || res?.message || (res?.code !== undefined ? `Error Code: ${res.code}` : '匯入失敗');
+      const errorMsg =
+        res?.msg ||
+        res?.message ||
+        (res?.code === undefined ? '匯入失敗' : `Error Code: ${res.code}`);
       throw new Error(errorMsg);
     }
   } catch (error: any) {
@@ -220,11 +234,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="invitation-container bg-white rounded-lg p-6">
+  <div class="invitation-container rounded-lg bg-white p-6">
     <!-- 頂部區塊 -->
-    <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
-      <div class="flex items-center gap-2 flex-nowrap">
-        <h3 class="text-sm font-bold text-gray-500 whitespace-nowrap shrink-0">姓名：</h3>
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-nowrap items-center gap-2">
+        <h3 class="shrink-0 whitespace-nowrap text-sm font-bold text-gray-500">
+          姓名：
+        </h3>
         <ElInput
           v-model="searchName"
           placeholder="搜尋人員姓名..."
@@ -241,22 +257,28 @@ onMounted(() => {
           </template>
         </ElInput>
       </div>
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="flex shrink-0 items-center gap-2">
         <!-- 正常模式 -->
         <template v-if="!isSelectionMode">
-          <ElButton type="success" @click="enterSelectionMode">寄送活動邀請</ElButton>
-          <ElButton type="primary" @click="openImportDialog">匯入群組人員</ElButton>
+          <ElButton type="success" @click="enterSelectionMode">
+            寄送活動邀請
+          </ElButton>
+          <ElButton type="primary" @click="openImportDialog">
+            匯入群組人員
+          </ElButton>
         </template>
-        
+
         <!-- 勾選模式 -->
         <template v-else>
           <ElButton @click="cancelSelectionMode">取消</ElButton>
           <ElButton type="info" @click="handleSendAll">全部寄送</ElButton>
-          <ElButton 
-            type="primary" 
+          <ElButton
+            type="primary"
             :disabled="selectedRows.length === 0"
             @click="handleSendSelected"
-          >確認寄送 ({{ selectedRows.length }})</ElButton>
+          >
+            確認寄送 ({{ selectedRows.length }})
+          </ElButton>
         </template>
       </div>
     </div>
@@ -272,15 +294,22 @@ onMounted(() => {
       @selection-change="handleSelectionChange"
     >
       <!-- 勾選欄位 (僅在寄送模式顯示) -->
-      <ElTableColumn v-if="isSelectionMode" type="selection" width="55" align="center" />
-      
+      <ElTableColumn
+        v-if="isSelectionMode"
+        type="selection"
+        width="55"
+        align="center"
+      />
+
       <ElTableColumn type="index" label="序號" width="60" align="center" />
       <ElTableColumn prop="name" label="姓名" min-width="120">
         <template #default="{ row }">
           <ElLink
             v-if="row.member?.name"
             type="primary"
-            @click="router.push(`/member/detail/${row.member_id || row.member?.id}`)"
+            @click="
+              router.push(`/member/detail/${row.member_id || row.member?.id}`)
+            "
           >
             {{ row.member?.name }}
           </ElLink>
@@ -300,7 +329,7 @@ onMounted(() => {
     </ElTable>
 
     <!-- 分頁器：一左一右設計 -->
-    <div class="mt-6 flex justify-between items-center">
+    <div class="mt-6 flex items-center justify-between">
       <!-- 左：呈現筆數與總條數 -->
       <ElPagination
         v-model:current-page="currentPage"
@@ -328,7 +357,9 @@ onMounted(() => {
       destroy-on-close
     >
       <div class="py-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">請選擇來源群組：</label>
+        <label class="mb-2 block text-sm font-medium text-gray-700"
+          >請選擇來源群組：</label
+        >
         <ElSelect
           v-model="selectedGroup"
           placeholder="請選擇群組"
@@ -343,13 +374,19 @@ onMounted(() => {
             :value="group.id"
           />
         </ElSelect>
-        <p class="text-xs text-gray-500 mt-2">提示：匯入後，該群組內的所有人員都會被加入此活動的邀請名單中。</p>
+        <p class="mt-2 text-xs text-gray-500">
+          提示：匯入後，該群組內的所有人員都會被加入此活動的邀請名單中。
+        </p>
       </div>
-      
+
       <template #footer>
         <div class="flex justify-end gap-2">
           <ElButton @click="importDialogVisible = false">取消</ElButton>
-          <ElButton type="primary" :loading="importLoading" @click="handleImportSubmit">
+          <ElButton
+            type="primary"
+            :loading="importLoading"
+            @click="handleImportSubmit"
+          >
             確認匯入
           </ElButton>
         </div>
