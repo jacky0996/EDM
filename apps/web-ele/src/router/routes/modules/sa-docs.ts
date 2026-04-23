@@ -23,7 +23,7 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'SADocsRequirement',
         path: 'requirement',
-        component: () => import('#/views/sa-docs/placeholder.vue'),
+        component: () => import('#/views/sa-docs/requirement/index.vue'),
         meta: {
           icon: 'lucide:clipboard-list',
           title: '需求規格書',
@@ -32,7 +32,7 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'SADocsUseCase',
         path: 'use-case',
-        component: () => import('#/views/sa-docs/placeholder.vue'),
+        component: () => import('#/views/sa-docs/use-case/index.vue'),
         meta: {
           icon: 'lucide:user-check',
           title: '使用案例圖',
@@ -41,7 +41,7 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'SADocsArchitecture',
         path: 'architecture',
-        component: () => import('#/views/sa-docs/placeholder.vue'),
+        component: () => import('#/views/sa-docs/architecture/index.vue'),
         meta: {
           icon: 'lucide:network',
           title: '系統架構圖',
@@ -50,7 +50,7 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'SADocsERDiagram',
         path: 'er-diagram',
-        component: () => import('#/views/sa-docs/placeholder.vue'),
+        component: () => import('#/views/sa-docs/er-diagram/index.vue'),
         meta: {
           icon: 'lucide:database',
           title: 'ER 圖',
@@ -59,7 +59,7 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'SADocsApi',
         path: 'api',
-        component: () => import('#/views/sa-docs/placeholder.vue'),
+        component: () => import('#/views/sa-docs/api/index.vue'),
         meta: {
           icon: 'lucide:plug',
           title: 'API 文件',
