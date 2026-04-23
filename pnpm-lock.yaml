@@ -15,6 +15,48 @@ catalogs:
     '@changesets/git':
       specifier: ^3.0.4
       version: 3.0.4
+    '@ckeditor/ckeditor5-basic-styles':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-block-quote':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-editor-classic':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-essentials':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-font':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-heading':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-image':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-link':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-list':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-paragraph':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-table':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-undo':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-upload':
+      specifier: ^47.6.0
+      version: 47.6.0
+    '@ckeditor/ckeditor5-vue':
+      specifier: 7.3.1
+      version: 7.3.1
     '@clack/prompts':
       specifier: ^0.11.0
       version: 0.11.0
@@ -171,6 +213,9 @@ catalogs:
     circular-dependency-scanner:
       specifier: ^2.3.0
       version: 2.3.0
+    ckeditor5:
+      specifier: 47.6.0
+      version: 47.6.0
     class-variance-authority:
       specifier: ^0.7.1
       version: 0.7.1
@@ -208,7 +253,7 @@ catalogs:
       specifier: ^16.6.1
       version: 16.6.1
     echarts:
-      specifier: 'catalog:'
+      specifier: ^6.0.0
       version: 6.0.0
     element-plus:
       specifier: ^2.13.1
@@ -315,6 +360,9 @@ catalogs:
     medium-zoom:
       specifier: ^1.1.0
       version: 1.1.0
+    mermaid:
+      specifier: ^11.13.0
+      version: 11.13.0
     nitropack:
       specifier: ^2.13.1
       version: 2.13.1
@@ -504,6 +552,9 @@ catalogs:
     watermark-js-plus:
       specifier: ^1.6.3
       version: 1.6.3
+    xlsx:
+      specifier: ^0.18.5
+      version: 0.18.5
     yaml-eslint-parser:
       specifier: ^1.3.2
       version: 1.3.2
@@ -646,46 +697,46 @@ importers:
   apps/web-ele:
     dependencies:
       '@ckeditor/ckeditor5-basic-styles':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-block-quote':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-editor-classic':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-essentials':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-font':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-heading':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-image':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-link':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-list':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-paragraph':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-table':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-undo':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-upload':
-        specifier: ^47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       '@ckeditor/ckeditor5-vue':
-        specifier: 7.3.1
+        specifier: 'catalog:'
         version: 7.3.1(ckeditor5@47.6.0)(vue@3.5.27(typescript@5.9.3))
       '@vben/access':
         specifier: workspace:*
@@ -733,7 +784,7 @@ importers:
         specifier: 'catalog:'
         version: 14.2.0(vue@3.5.27(typescript@5.9.3))
       ckeditor5:
-        specifier: 47.6.0
+        specifier: 'catalog:'
         version: 47.6.0
       dayjs:
         specifier: 'catalog:'
@@ -745,7 +796,7 @@ importers:
         specifier: 'catalog:'
         version: 2.13.2(vue@3.5.27(typescript@5.9.3))
       mermaid:
-        specifier: ^11.13.0
+        specifier: 'catalog:'
         version: 11.13.0
       pinia:
         specifier: ^3.0.4
@@ -757,7 +808,7 @@ importers:
         specifier: 'catalog:'
         version: 4.6.4(vue@3.5.27(typescript@5.9.3))
       xlsx:
-        specifier: ^0.18.5
+        specifier: 'catalog:'
         version: 0.18.5
     devDependencies:
       unplugin-element-plus:
@@ -12675,6 +12726,8 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 47.6.0
       '@ckeditor/ckeditor5-widget': 47.6.0
       es-toolkit: 1.39.5
+    transitivePeerDependencies:
+      - supports-color
 
   '@ckeditor/ckeditor5-cloud-services@47.6.0':
     dependencies:
@@ -12790,6 +12843,8 @@ snapshots:
     dependencies:
       '@ckeditor/ckeditor5-utils': 47.6.0
       es-toolkit: 1.39.5
+    transitivePeerDependencies:
+      - supports-color
 
   '@ckeditor/ckeditor5-enter@47.6.0':
     dependencies:
@@ -12886,8 +12941,6 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 47.6.0
       '@ckeditor/ckeditor5-widget': 47.6.0
       ckeditor5: 47.6.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-html-support@47.6.0':
     dependencies:
@@ -13037,6 +13090,8 @@ snapshots:
       '@ckeditor/ckeditor5-ui': 47.6.0
       '@ckeditor/ckeditor5-utils': 47.6.0
       ckeditor5: 47.6.0
+    transitivePeerDependencies:
+      - supports-color
 
   '@ckeditor/ckeditor5-page-break@47.6.0':
     dependencies:
@@ -13054,8 +13109,6 @@ snapshots:
       '@ckeditor/ckeditor5-icons': 47.6.0
       '@ckeditor/ckeditor5-ui': 47.6.0
       '@ckeditor/ckeditor5-utils': 47.6.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-paste-from-office@47.6.0':
     dependencies:
@@ -13071,6 +13124,8 @@ snapshots:
       '@ckeditor/ckeditor5-ui': 47.6.0
       '@ckeditor/ckeditor5-utils': 47.6.0
       ckeditor5: 47.6.0
+    transitivePeerDependencies:
+      - supports-color
 
   '@ckeditor/ckeditor5-restricted-editing@47.6.0':
     dependencies:
@@ -13126,6 +13181,8 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 47.6.0
       ckeditor5: 47.6.0
       es-toolkit: 1.39.5
+    transitivePeerDependencies:
+      - supports-color
 
   '@ckeditor/ckeditor5-table@47.6.0':
     dependencies:
@@ -13174,8 +13231,6 @@ snapshots:
       '@ckeditor/ckeditor5-icons': 47.6.0
       '@ckeditor/ckeditor5-ui': 47.6.0
       '@ckeditor/ckeditor5-utils': 47.6.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-upload@47.6.0':
     dependencies:
@@ -13203,6 +13258,8 @@ snapshots:
       '@ckeditor/ckeditor5-engine': 47.6.0
       '@ckeditor/ckeditor5-utils': 47.6.0
       es-toolkit: 1.39.5
+    transitivePeerDependencies:
+      - supports-color
 
   '@ckeditor/ckeditor5-widget@47.6.0':
     dependencies:
