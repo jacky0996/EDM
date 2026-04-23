@@ -136,10 +136,10 @@ docker-compose up -d
 
 ### 4. 環境變數對應表 (.env.uat)
 
-| 變數名稱 | 說明 |
-| :-- | :-- |
-| `VITE_HWS_URL` | HWS 登入頁面網址 |
-| `VITE_EDM_URL` | 本系統 UAT 接收回傳網址 |
-| `VITE_SSO_VERIFY_URL` | 觸發 Nginx 代理的虛擬路徑 |
-| `VITE_PROXY_API_TARGET` | Vite 開發用 API 目標 |
-| `VITE_PROXY_SSO_TARGET` | Vite 開發用 SSO 目標 |
+| 變數名稱                | 說明                      |
+| :---------------------- | :------------------------ |
+| `VITE_HWS_URL`          | HWS 登入頁面網址          |
+| `VITE_EDM_URL`          | 本系統 UAT 接收回傳網址   |
+| `VITE_SSO_VERIFY_URL`   | 觸發 Nginx 代理的虛擬路徑 |
+| `VITE_PROXY_API_TARGET` | Vite 開發用 API 目標      |
+| `VITE_PROXY_SSO_TARGET` | Vite 開發用 SSO 目標      |
