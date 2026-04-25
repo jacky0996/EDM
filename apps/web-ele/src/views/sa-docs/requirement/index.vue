@@ -41,8 +41,8 @@ const modules: Module[] = [
       },
       {
         id: 'FR-MEM-04',
-        title: '業務工號編輯',
-        description: '彈窗輸入業務工號，送出後強制重新整理頁面保證資料一致',
+        title: '業務 Email 綁定',
+        description: '彈窗輸入業務 Email，送出後強制重新整理頁面保證資料一致',
         priority: '中',
       },
       {
@@ -254,7 +254,7 @@ const roles = [
   {
     name: '業務人員',
     icon: '💼',
-    description: '負責個人負責的客戶名單與關聯業務工號',
+    description: '負責個人負責的客戶名單與關聯業務 Email',
     permissions: ['人員（受限）', '群組（受限）'],
   },
   {

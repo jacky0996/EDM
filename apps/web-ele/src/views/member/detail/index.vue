@@ -57,7 +57,7 @@ async function fetchMemberData() {
     const res = await getMemberDetailApi(memberId.value);
     // 處理業務資訊
     const sales = res.sales || {};
-    const salesText = (sales.enumber || '') + (sales.name || '');
+    const salesText = [sales.email, sales.name].filter(Boolean).join(' / ');
 
     memberData.value = {
       ...res,
@@ -205,16 +205,16 @@ async function handleStatusChange(val: any) {
 
 // 業務編輯相關
 const salesEditVisible = ref(false);
-const salesEditEnumber = ref('');
+const salesEditEmail = ref('');
 
 function handleSalesEdit() {
   salesEditVisible.value = true;
-  salesEditEnumber.value = ''; // 每次開啟重置，或是預填目前工號
+  salesEditEmail.value = ''; // 每次開啟重置，或是預填目前 Email
 }
 
 async function handleSalesSave() {
-  if (!salesEditEnumber.value) {
-    ElMessage.warning('請輸入工號');
+  if (!salesEditEmail.value) {
+    ElMessage.warning('請輸入電子郵件');
     return;
   }
 
@@ -224,7 +224,7 @@ async function handleSalesSave() {
       '/edm/member/editSales',
       {
         member_id: memberId.value,
-        enumber: salesEditEnumber.value,
+        email: salesEditEmail.value,
       },
       { responseReturn: 'body' },
     );
@@ -312,10 +312,10 @@ function handleBack() {
       destroy-on-close
     >
       <ElForm label-position="top">
-        <ElFormItem label="工號" required>
+        <ElFormItem label="電子郵件" required>
           <ElInput
-            v-model="salesEditEnumber"
-            placeholder="請輸入工號 "
+            v-model="salesEditEmail"
+            placeholder="請輸入業務電子郵件"
             clearable
           />
         </ElFormItem>

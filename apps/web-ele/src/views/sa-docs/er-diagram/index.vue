@@ -21,7 +21,7 @@ erDiagram
       string name
       string mobile
       string email
-      string sales_no "業務工號"
+      string sales_email "業務 Email"
       tinyint status "啟用 / 停用"
       int owner_user_id FK
     }

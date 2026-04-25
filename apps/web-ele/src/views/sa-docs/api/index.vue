@@ -65,7 +65,7 @@ const modules: Module[] = [
   {
     name: '人員 (member)',
     icon: '👤',
-    summary: '人員名單 CRUD、聯絡資訊編輯、業務工號綁定',
+    summary: '人員名單 CRUD、聯絡資訊編輯、業務 Email 綁定',
     endpoints: [
       {
         method: 'POST',
@@ -99,9 +99,9 @@ const modules: Module[] = [
       {
         method: 'POST',
         path: '/edm/member/editSales',
-        title: '綁定業務工號',
+        title: '綁定業務 Email',
         desc: '彈窗提交；前端於回傳後強制重新整理以保證狀態一致',
-        params: '{ id: number, sales_no: string }',
+        params: '{ member_id: number, email: string }',
       },
       {
         method: 'POST',

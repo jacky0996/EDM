@@ -18,7 +18,7 @@ graph TD
     EditBase --> SubmitBase[行內即時同步更新]
 
     Detail --> EditSales[點選業務編輯按鈕]
-    EditSales --> SalesPop[出現彈窗輸入業務工號]
+    EditSales --> SalesPop[出現彈窗輸入業務 Email]
     SalesPop --> SubmitSales[送出並強制重新整理頁面]
     
     Detail --> JumpGroup[點選關聯群組名稱]
@@ -153,8 +153,8 @@ graph LR
           <el-tab-pane label="👤 人員管理">
             <div class="py-4">
               <div class="mb-4 text-sm italic text-gray-500">
-                人員管理－描述：包含人員搜尋、Excel
-                匯入流程、業務工號編輯（彈窗）及詳細資料更新邏輯。
+                人員管理－描述：包含人員搜尋、Excel 匯入流程、業務 Email
+                綁定（彈窗）及詳細資料更新邏輯。
               </div>
               <MermaidView :content="memberUml" />
             </div>

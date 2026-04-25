@@ -55,7 +55,7 @@ graph LR
 
     UC1([查看名下客戶])
     UC2([編輯客戶聯絡資訊])
-    UC3([為客戶綁定業務工號])
+    UC3([為客戶綁定業務 Email])
     UC4([查看客戶所屬群組])
 
     Sales --- UC1
@@ -146,7 +146,7 @@ sequenceDiagram
           <el-tab-pane label="💼 業務人員">
             <div class="py-3">
               <div class="mb-3 text-xs italic text-gray-500">
-                業務人員對名下客戶進行聯絡資訊維護與業務工號綁定。
+                業務人員對名下客戶進行聯絡資訊維護與業務 Email 綁定。
               </div>
               <MermaidView :content="salesUseCase" />
             </div>
