@@ -54,7 +54,7 @@ flowchart LR
 ## 3. 核心業務概念
 
 | 業務名詞 | 對應後端 entity | UI 對應 |
-|---|---|---|
+| --- | --- | --- |
 | **活動 (Event)** | `EDM\Event` | 活動列表、活動建立/編輯、活動詳細、邀請名單管理 |
 | **人員 (Member)** | `EDM\Member` | 人員列表、Excel 批次匯入、通訊資料維護 |
 | **群組 (Group)** | `EDM\Group` | 群組列表、群組詳細(含成員 + 活動)、新增群組 |
@@ -63,6 +63,7 @@ flowchart LR
 | **業務歸屬** | `member.sales_email` | 業務人員可看 / 編輯名下客戶 |
 
 **核心 UI 流程**(由活動管理員主導):
+
 ```
 建群組 → 匯入 Member(Excel)
        → 建活動(內容、時間、地點、圖片)
@@ -103,7 +104,7 @@ flowchart LR
 ## 5. Stakeholders
 
 | Stakeholder | 訴求 | 本系統如何回應 |
-|---|---|---|
+| --- | --- | --- |
 | **活動管理員 (主要 End User)** | 從建群組到看成效的全流程操作 | 完整覆蓋業務流程的 UI |
 | **業務人員** | 維護名下客戶聯絡資訊、業務 Email 綁定 | 業務專屬 view |
 | **受邀者(外部)** | 收信 → 點連結 → 填表單 → 收感謝信 | 不進入本系統,透過 Email + Google Form 互動 |
@@ -148,7 +149,7 @@ flowchart LR
 > 本專案為作品集 / Portfolio 性質,以下 NFR 是「設計時有考量」而非「壓測通過」的承諾。
 
 | 類別 | 目標 | 設計回應 |
-|---|---|---|
+| --- | --- | --- |
 | **可用性** | 中台短暫不可用時,**已登入使用者不立即被踢** | JWT 在本地 + localStorage,只要 token 沒過期還能用 |
 | **資安** | 中台真實位址不對外暴露 | Nginx 隱身代理 (`/api-sso/*`) |
 | **大量資料 UX** | 人員清單千筆不卡 | VXE Table virtual scroll;`Loading` 狀態回饋 |
@@ -160,7 +161,7 @@ flowchart LR
 ## 9. Glossary
 
 | 術語 | 中文 | 說明 |
-|---|---|---|
+| --- | --- | --- |
 | **SPA** (Single-Page Application) | 單頁應用 | 整個 app 一次載入,後續 router 切頁不重整 |
 | **IdP** (Identity Provider) | 身分提供者 | 簽 JWT 的中台,本系統的對手 |
 | **Vben Admin** | — | Vue 3 企業級後台模板,提供 layout / access / locale 等基礎建設 |

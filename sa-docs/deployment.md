@@ -93,7 +93,7 @@ flowchart LR
 **設計重點**
 
 | Stage | 為什麼這樣設計 |
-|---|---|
+| --- | --- |
 | Stage 1 用 `node:22-slim` | -slim 比完整版小很多,build 用足夠 |
 | `corepack` 啟用 pnpm | 避免外部 npm install pnpm 的 timeout 問題 |
 | `--no-frozen-lockfile` | 容忍 lockfile 不完全同步,作品集場景容忍度較高(prod 應該 `--frozen-lockfile`) |
@@ -109,7 +109,7 @@ flowchart LR
 ### 3.1 `edm-web-ele`(production container)
 
 | 項目 | 值 | 出處 |
-|---|---|---|
+| --- | --- | --- |
 | Base image | `nginx:stable-alpine` | [Dockerfile](../Dockerfile) |
 | 對外 port | **82** → 80(80 保留給中台) | [docker-compose.yml](../docker-compose.yml) |
 | 靜態檔位置 | `/usr/share/nginx/html` | Dockerfile |
@@ -138,10 +138,10 @@ docker build --build-arg APP_ENV=development -t edm-image .
 
 **對應 .env 檔**
 
-| `APP_ENV` | 讀取的 .env | 主要差異 |
-|---|---|---|
-| `production` | `.env.production` | 正式 EDM URL、正式中台 URL |
-| `uat` | `.env.uat` | UAT 測試環境 URL |
+| `APP_ENV`     | 讀取的 .env        | 主要差異                    |
+| ------------- | ------------------ | --------------------------- |
+| `production`  | `.env.production`  | 正式 EDM URL、正式中台 URL  |
+| `uat`         | `.env.uat`         | UAT 測試環境 URL            |
 | `development` | `.env.development` | localhost / docker.internal |
 
 ---
@@ -151,7 +151,7 @@ docker build --build-arg APP_ENV=development -t edm-image .
 `.env.[mode]` 檔的關鍵變數(完整見 [`.env.example`](../.env.example) 或各環境檔):
 
 | 變數 | 用途 | 例 |
-|---|---|---|
+| --- | --- | --- |
 | `VITE_APP_TITLE` | 瀏覽器標籤 | `EDM 行銷管理` |
 | `VITE_HWS_URL` | 中台登入頁,redirect 用 | `http://localhost/sso/login/` |
 | `VITE_EDM_URL` | EDM 自己的對外 URL,redirect 回來時用 | `http://localhost:82/` |
@@ -200,11 +200,11 @@ docker compose down -v --remove-orphans
 
 啟動後:
 
-| 服務 | 網址 |
-|---|---|
-| EDM Frontend | http://localhost:82/ |
-| (對中台) | http://localhost/ — 由中台容器提供 |
-| (對 EDM-BE) | http://localhost:81/ — 由 edm-backend 容器提供 |
+| 服務         | 網址                                           |
+| ------------ | ---------------------------------------------- |
+| EDM Frontend | http://localhost:82/                           |
+| (對中台)     | http://localhost/ — 由中台容器提供             |
+| (對 EDM-BE)  | http://localhost:81/ — 由 edm-backend 容器提供 |
 
 ### 6.3 三系統一起跑
 
@@ -268,7 +268,7 @@ server {
 ## 8. 健康檢查
 
 | 檢查 | 方式 | 預期 |
-|---|---|---|
+| --- | --- | --- |
 | Container alive | docker-compose `healthcheck: ls /usr/share/nginx/html/index.html` | ok |
 | Web 是否服務 | `curl http://localhost:82/` | HTML 200 |
 | 跨容器通 | container 內 `curl http://edm-backend/api/health` | 200 |
@@ -278,7 +278,7 @@ server {
 ## 9. 已知部署限制
 
 | 限制 | 影響 | 緩解 |
-|---|---|---|
+| --- | --- | --- |
 | `--no-frozen-lockfile` | 不同人 build 出來的 deps 可能略不同 | Production 改 `--frozen-lockfile`,本機開發可保留容忍 |
 | Healthcheck 用檔案檢查 | 無法偵測 nginx 真的能服務 | 加 HTTP 探活(`curl http://localhost/`),但 nginx alpine 沒裝 curl,要先裝 |
 | 中台位址 hardcode 在 nginx.conf | 換環境要改 .conf 重 build | 改用環境變數(envsubst)或在 build 時注入 |

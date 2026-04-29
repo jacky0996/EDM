@@ -5,7 +5,7 @@
 ## 索引
 
 | # | 標題 | 狀態 | 影響範圍 |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [0001](./0001-vben-admin.md) | 採用 Vben Admin 5.0 取代自建 Vue 後台 | Accepted | 整個 frontend 架構 / 開發速度 |
 | [0002](./0002-token-storage.md) | JWT 儲存採 Pinia + localStorage 雙層 | Accepted | SSO 機制 / 安全模型 |
 | [0003](./0003-nginx-proxy.md) | Nginx 反向代理隱藏中台真實位址 | Accepted | 資安 / 部署架構 |

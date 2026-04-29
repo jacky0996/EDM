@@ -11,7 +11,7 @@
 ## 1. 整合對象一覽
 
 | 對象 | 流量出口 | 認證方式 | 對應契約文件 |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **中台 (Middle Platform)** | nginx `/api-sso/*` (隱身代理) | 無(僅 token 交換) | [Middle Platform api-spec.md](../../Middle_Platform/docs/api-spec.md) |
 | **EDM Backend (Laravel)** | nginx `/api/edm/*` | `Authorization: Bearer <jwt>` + `X-User-Info` | [edm_backend api-spec.md](../../edm_backend/docs/api-spec.md) |
 | **Google Forms** | (不直接呼叫) | — | 由 EDM Backend 代理,前端透過 `/api/edm/event/*googleForm*` 操作 |
@@ -27,12 +27,12 @@
 
 ```ts
 // 使用範例
-import { requestClient } from '#/api/request'
+import { requestClient } from '#/api/request';
 
 const result = await requestClient.post('/api/edm/event/list', {
   page: 1,
   per_page: 20,
-})
+});
 // result = { items: [...], total: 123, page: 1, per_page: 20 }
 ```
 
@@ -51,27 +51,27 @@ const result = await requestClient.post('/api/edm/event/list', {
 ```ts
 // 簡化示意
 requestClient.interceptors.request.use((config) => {
-  const authStore = useAuthStore()
-  const userStore = useUserStore()
+  const authStore = useAuthStore();
+  const userStore = useUserStore();
 
   // 1. 加 Authorization header
   if (authStore.accessToken) {
-    config.headers.Authorization = `Bearer ${authStore.accessToken}`
+    config.headers.Authorization = `Bearer ${authStore.accessToken}`;
   }
 
   // 2. 加 X-User-Info header (Base64 編碼)
   if (userStore.userInfo) {
     config.headers['X-User-Info'] = btoa(
-      unescape(encodeURIComponent(JSON.stringify(userStore.userInfo)))
-    )
+      unescape(encodeURIComponent(JSON.stringify(userStore.userInfo))),
+    );
   }
 
-  return config
-})
+  return config;
+});
 ```
 
 | Header | 來源 | 用途 |
-|---|---|---|
+| --- | --- | --- |
 | `Authorization` | `useAuthStore().accessToken` | 標準 JWT,後端驗 |
 | `X-User-Info` | `useUserStore().userInfo` (Base64) | 後端取使用者 metadata,**不需自己 decode JWT** |
 
@@ -83,34 +83,34 @@ requestClient.interceptors.request.use((config) => {
 // 簡化示意
 requestClient.interceptors.response.use(
   (response) => {
-    const { code, data, message } = response.data
+    const { code, data, message } = response.data;
 
     if (code === 0) {
-      return data  // 業務成功,只回 data
+      return data; // 業務成功,只回 data
     }
 
     // 業務錯誤
-    ElMessage.error(message || '操作失敗')
-    return Promise.reject(new Error(message))
+    ElMessage.error(message || '操作失敗');
+    return Promise.reject(new Error(message));
   },
   (error) => {
     // HTTP 層錯誤
     if (error.response?.status === 401) {
-      handleUnauthorized()  // 清 token + 跳中台
+      handleUnauthorized(); // 清 token + 跳中台
     } else if (error.code === 'ECONNABORTED') {
-      ElMessage.error('請求逾時,請稍後再試')
+      ElMessage.error('請求逾時,請稍後再試');
     } else {
-      ElMessage.error(error.response?.data?.message || '網路錯誤')
+      ElMessage.error(error.response?.data?.message || '網路錯誤');
     }
-    return Promise.reject(error)
-  }
-)
+    return Promise.reject(error);
+  },
+);
 ```
 
 **錯誤分類**
 
 | 來源 | 表現 | 處理 |
-|---|---|---|
+| --- | --- | --- |
 | Business `code !== 0` | response 200 但 body 標記失敗 | ElMessage.error + reject |
 | HTTP 401 | JWT 失效 | 清 state + 跳中台 |
 | HTTP 403 | IP 不在白名單 | ElMessage.error,通常不會發生(內網) |
@@ -165,16 +165,16 @@ server {
 // 前端永遠用 /api-sso/...,不知道 192.168.3.5 存在
 const result = await requestClient.post('/api-sso/edm/sso/verify-token', {
   token: jwtFromUrl,
-})
+});
 ```
 
 ### 4.3 環境變數對應
 
 | 變數 | 用途 | dev 預設 | prod / uat |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `VITE_HWS_URL` | 中台登入頁(redirect 用) | `http://localhost/sso/login/` | 中台對外網址 |
 | `VITE_EDM_URL` | 本系統的對外網址(redirect 回來時用) | `http://localhost:82/` | EDM 對外網址 |
-| `VITE_SSO_VERIFY_URL` | 前端打的虛擬路徑(經 nginx 代理)| `/api-sso/edm/sso/verify-token` | 同左 |
+| `VITE_SSO_VERIFY_URL` | 前端打的虛擬路徑(經 nginx 代理) | `/api-sso/edm/sso/verify-token` | 同左 |
 | `VITE_PROXY_API_TARGET` | Vite dev server 代理 target(不經 nginx) | `http://localhost:81` | — |
 | `VITE_PROXY_SSO_TARGET` | 同上,SSO 用 | `http://host.docker.internal/` | — |
 
@@ -187,7 +187,7 @@ const result = await requestClient.post('/api-sso/edm/sso/verify-token', {
 把所有 EDM Backend endpoint 跟前端模組對應起來,方便追溯:
 
 | 前端模組 | 路徑 | 主要 API |
-|---|---|---|
+| --- | --- | --- |
 | 群組管理 | `views/group/` | `/api/edm/group/{list,view,create,editStatus,getEventList}` |
 | 人員管理 | `views/member/` | `/api/edm/member/{list,view,add,editStatus,editEmail,editMobile,editSales}` |
 | 活動列表 | `views/event/list/` | `/api/edm/event/list` |
@@ -205,7 +205,7 @@ const result = await requestClient.post('/api-sso/edm/sso/verify-token', {
 ## 6. 速率限制 / Retry 策略
 
 | 策略 | 現況 | Roadmap |
-|---|---|---|
+| --- | --- | --- |
 | 業務 API retry | **無** | 對「非寫入」操作可加 retry 1 次 |
 | Network timeout | Axios 預設(視 `timeout` 設定) | 統一抓 30s |
 | Loading 顯示 | 個別頁面自己控制 | 抽出 `<PageLoading>` 元件統一 |
@@ -216,6 +216,7 @@ const result = await requestClient.post('/api-sso/edm/sso/verify-token', {
 ## 7. 跨來源限制 (CORS)
 
 **EDM Frontend 不會遇到 CORS 問題**,因為:
+
 - 前端 → nginx 是同源(同網域)
 - nginx → 中台 / 後端是 server-side(不受 CORS 限制)
 
@@ -226,7 +227,7 @@ const result = await requestClient.post('/api-sso/edm/sso/verify-token', {
 ## 8. 已知整合限制
 
 | 限制 | 影響 | 緩解 |
-|---|---|---|
+| --- | --- | --- |
 | `X-User-Info` 是 client 自填的 | 後端不應該信任這個 header,要以 JWT 為準 | 約定:`X-User-Info` 只是 metadata 加速,**身分以 JWT 為唯一來源** |
 | 無 refresh token | Access 過期 = 重登 | 等中台支援 refresh token |
 | 無離線 / queue | 沒網路時操作丟失 | 不在 scope,純線上系統 |

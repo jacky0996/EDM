@@ -56,7 +56,7 @@ flowchart TD
 **關鍵設計細節**
 
 | 步驟 | 為什麼這樣做 |
-|---|---|
+| --- | --- |
 | 攔截 URL token | 避免 token 留在 browser history、Referer header、access log |
 | 走 `/api-sso/` 代理 | 對外隱藏中台真實位址(資安) |
 | 寫 Pinia + localStorage | Pinia(memory)用於 reactive UI 更新,localStorage 用於 refresh / 重開 tab 後維持 session |

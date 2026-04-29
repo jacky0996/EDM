@@ -62,6 +62,7 @@
 ### 選項 5 — Cookie + CSRF Token
 
 業界比較完整的安全方案,但需要:
+
 - 後端發 CSRF token
 - 前端在 header 帶 CSRF token
 - 中台改成發 cookie

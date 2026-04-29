@@ -88,7 +88,7 @@ graph TD
 **分層職責**
 
 | 層 | 路徑 / 套件 | 該做什麼 | 不該做什麼 |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **進入點** | `apps/web-ele/src/main.ts` + `bootstrap.ts` | App 初始化、掛載 plugins | 業務邏輯 |
 | **狀態管理** | `apps/web-ele/src/store/` (Pinia) | 全域狀態(auth、user、access) | 跨頁面短暫資料 |
 | **路由** | `apps/web-ele/src/router/routes/modules/` | 動態路由 + 守衛 | 業務邏輯 |
@@ -132,7 +132,7 @@ sequenceDiagram
 **攔截器設計重點**
 
 | 攔截器 | 功能 | 出處 |
-|---|---|---|
+| --- | --- | --- |
 | **request — Auth** | 從 Pinia 讀 `accessToken`,加進 `Authorization` header | `apps/web-ele/src/api/request.ts` |
 | **request — User Info** | 把 user metadata 用 Base64 編碼後放進 `X-User-Info` (因為 HTTP header 不能含中文,直接放會 parse 錯) | 同上 |
 | **response — Code** | 業務 `code !== 0` 視為錯誤,顯示 ElMessage | 同上 |
@@ -209,7 +209,7 @@ graph LR
 **部署細節**
 
 | 項目 | 值 | 出處 |
-|---|---|---|
+| --- | --- | --- |
 | Builder Stage | `node:22-slim` + pnpm 10.4 + corepack | [Dockerfile](../Dockerfile) |
 | Production Stage | `nginx:stable-alpine` + 客製 nginx.conf | 同上 |
 | Build Command | `pnpm run build:ele -- --mode ${VITE_APP_ENV}` | 同上 |
@@ -224,30 +224,31 @@ graph LR
 
 ## 6. 技術棧一覽
 
-| 類別 | 技術 |
-|---|---|
-| 框架 | Vue 3 (Composition API + `<script setup>`) |
-| 建置工具 | Vite 5 + Turborepo (Vben monorepo) |
-| 套件管理 | pnpm 10.4 |
-| 語言 | TypeScript 5.x |
-| UI | Element Plus |
-| CSS | Tailwind CSS + Element SCSS 客製 |
-| 狀態管理 | Pinia |
-| 路由 | vue-router 4 |
-| HTTP | Axios(封裝為 `requestClient`)|
-| 富文字 | CKEditor 5 |
-| 圖表 | ECharts |
-| 表格 | VXE Table(高效虛擬滾動) |
-| Excel I/O | ExcelJS / xlsx |
-| 圖表(文件) | Mermaid(經 `mermaid-view.vue` 元件渲染) |
-| Lint | ESLint 9 + Prettier + Stylelint |
-| 容器 | Docker 多階段 build + Nginx |
+| 類別       | 技術                                       |
+| ---------- | ------------------------------------------ |
+| 框架       | Vue 3 (Composition API + `<script setup>`) |
+| 建置工具   | Vite 5 + Turborepo (Vben monorepo)         |
+| 套件管理   | pnpm 10.4                                  |
+| 語言       | TypeScript 5.x                             |
+| UI         | Element Plus                               |
+| CSS        | Tailwind CSS + Element SCSS 客製           |
+| 狀態管理   | Pinia                                      |
+| 路由       | vue-router 4                               |
+| HTTP       | Axios(封裝為 `requestClient`)              |
+| 富文字     | CKEditor 5                                 |
+| 圖表       | ECharts                                    |
+| 表格       | VXE Table(高效虛擬滾動)                    |
+| Excel I/O  | ExcelJS / xlsx                             |
+| 圖表(文件) | Mermaid(經 `mermaid-view.vue` 元件渲染)    |
+| Lint       | ESLint 9 + Prettier + Stylelint            |
+| 容器       | Docker 多階段 build + Nginx                |
 
 ---
 
 ## 7. SSO 隱身代理(細節)
 
 中台真實位址(可能是內網 `192.168.x.x` 或不對外的 domain)**不能讓瀏覽器看到**,否則:
+
 - 攻擊者可以繞過前端直接打中台
 - 內網拓樸外洩
 
@@ -282,7 +283,7 @@ server {
 
 ```ts
 // 前端永遠呼叫 /api-sso/...,不知道 192.168.3.5 存在
-await requestClient.post('/api-sso/edm/sso/verify-token', { token })
+await requestClient.post('/api-sso/edm/sso/verify-token', { token });
 ```
 
 對應的 ADR 在規劃中(尚未獨立成檔),概念整合在本節。詳見 [api-integration.md 第 4 節](./api-integration.md#4-sso-隱身代理).
@@ -292,7 +293,7 @@ await requestClient.post('/api-sso/edm/sso/verify-token', { token })
 ## 8. Roadmap / 已知架構限制
 
 | 項目 | 現況 | 下一步 |
-|---|---|---|
+| --- | --- | --- |
 | Token 存 localStorage | XSS 風險 | 評估改用 httpOnly cookie + CSRF token(對應 [adr/0002](./adr/0002-token-storage.md)) |
 | Refresh token 機制 | 無(中台目前只簽 access) | 待中台支援 refresh token 後接入 |
 | 權限細分 | 所有登入者權限相同 | 加入 RBAC,Pinia 存 roles + meta |
