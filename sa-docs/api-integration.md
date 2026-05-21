@@ -125,7 +125,7 @@ requestClient.interceptors.response.use(
 
 ## 4. SSO 隱身代理
 
-中台真實位址(可能是內網 `192.168.3.5`,或不對外的 internal domain)**不能讓瀏覽器看到**。
+中台真實位址(可能是內網 `MiddlePlatform`,或不對外的 internal domain)**不能讓瀏覽器看到**。
 
 **解法**:Nginx 反向代理把 `/api-sso/*` 在伺服器內部轉到中台。
 
@@ -139,7 +139,7 @@ server {
     # SSO 隱身代理
     location /api-sso/ {
         # 中台真實位址,瀏覽器看不到
-        proxy_pass http://192.168.3.5/;
+        proxy_pass MiddlePlatform/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -162,7 +162,7 @@ server {
 ### 4.2 前端視角
 
 ```ts
-// 前端永遠用 /api-sso/...,不知道 192.168.3.5 存在
+// 前端永遠用 /api-sso/...,不知道 MiddlePlatform 存在
 const result = await requestClient.post('/api-sso/edm/sso/verify-token', {
   token: jwtFromUrl,
 });
@@ -172,11 +172,11 @@ const result = await requestClient.post('/api-sso/edm/sso/verify-token', {
 
 | 變數 | 用途 | dev 預設 | prod / uat |
 | --- | --- | --- | --- |
-| `VITE_HWS_URL` | 中台登入頁(redirect 用) | `http://localhost/sso/login/` | 中台對外網址 |
-| `VITE_EDM_URL` | 本系統的對外網址(redirect 回來時用) | `http://localhost:82/` | EDM 對外網址 |
+| `VITE_HWS_URL` | 中台登入頁(redirect 用) | `MiddlePlatform 登入頁` | 中台對外網址 |
+| `VITE_EDM_URL` | 本系統的對外網址(redirect 回來時用) | `EdmFront/` | EDM 對外網址 |
 | `VITE_SSO_VERIFY_URL` | 前端打的虛擬路徑(經 nginx 代理) | `/api-sso/edm/sso/verify-token` | 同左 |
-| `VITE_PROXY_API_TARGET` | Vite dev server 代理 target(不經 nginx) | `http://localhost:81` | — |
-| `VITE_PROXY_SSO_TARGET` | 同上,SSO 用 | `http://host.docker.internal/` | — |
+| `VITE_PROXY_API_TARGET` | Vite dev server 代理 target(不經 nginx) | `EdmBackend` | — |
+| `VITE_PROXY_SSO_TARGET` | 同上,SSO 用 | `MiddlePlatform/` | — |
 
 **dev mode 的代理機制不同** — Vite dev server 自己代理(`vite.config.ts` 的 `server.proxy`),不經 nginx。production 才走 nginx。
 

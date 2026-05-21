@@ -8,10 +8,8 @@ import {
   ElButton,
   ElDatePicker,
   ElDialog,
-  ElEmpty,
   ElForm,
   ElFormItem,
-  ElIcon,
   ElInput,
   ElOption,
   ElRadioButton,
@@ -20,7 +18,6 @@ import {
   ElSwitch,
   ElTabPane,
   ElTabs,
-  ElUpload,
 } from 'element-plus';
 
 // 注意：若 useCkeditor 在 create 內，建議移出共用，此處暫以相對路徑或重寫處理。
@@ -43,13 +40,10 @@ const formRef = ref<any>(null);
 const {
   form,
   rules,
-  bannerPreviewUrl,
   loading,
   isReadonly,
   previewVisible,
   previewDevice,
-  beforeBannerUpload,
-  handleBannerChange,
   toggleEdit,
   cancelEdit,
   handleSubmit,
@@ -93,63 +87,6 @@ function updateIframeHeight(e: any) {
                 class="space-y-6"
                 :disabled="isReadonly"
               >
-                <!-- Banner 上傳 -->
-                <ElFormItem
-                  label="活動橫幅(預設夾帶華電標誌，點選後可以替換圖片)"
-                  prop="img_url"
-                  required
-                >
-                  <ElUpload
-                    class="banner-uploader w-full"
-                    :show-file-list="false"
-                    :before-upload="beforeBannerUpload"
-                    action="#"
-                    :auto-upload="false"
-                    accept="image/*"
-                    :on-change="handleBannerChange"
-                    :disabled="isReadonly"
-                  >
-                    <div
-                      class="group relative w-full overflow-hidden rounded-lg"
-                    >
-                      <img
-                        v-if="bannerPreviewUrl"
-                        :src="bannerPreviewUrl"
-                        class="h-72 w-full object-cover transition-opacity"
-                        :class="{ 'group-hover:opacity-80': !isReadonly }"
-                        alt="Banner 預覽"
-                      />
-                      <div
-                        v-else
-                        class="flex h-72 w-full cursor-pointer flex-col items-center justify-center border-2 border-dashed border-gray-300 transition-colors hover:border-blue-400"
-                      >
-                        <ElIcon class="mb-2 text-4xl text-gray-400">
-                          <svg
-                            viewBox="0 0 1024 1024"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              fill="currentColor"
-                              d="M480 480V128a32 32 0 0 1 64 0v352h352a32 32 0 1 1 0 64H544v352a32 32 0 1 1-64 0V544H128a32 32 0 1 1 0-64h352z"
-                            />
-                          </svg>
-                        </ElIcon>
-                        <span class="text-sm text-gray-500"
-                          >點擊上傳活動橫幅</span
-                        >
-                      </div>
-
-                      <!-- 遮罩提示 -->
-                      <div
-                        v-if="!isReadonly && bannerPreviewUrl"
-                        class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 transition-opacity group-hover:opacity-100"
-                      >
-                        <span class="font-medium text-white">點擊更換圖片</span>
-                      </div>
-                    </div>
-                  </ElUpload>
-                </ElFormItem>
-
                 <!-- 1. 活動編號 -->
                 <ElFormItem label="活動編號" prop="event_number">
                   <ElInput
@@ -434,13 +371,6 @@ function updateIframeHeight(e: any) {
               />
             </div>
           </ElTabPane>
-
-          <!-- ===== 9. 設定 ===== -->
-          <ElTabPane label="設定" name="settings">
-            <div class="py-10">
-              <ElEmpty description="設定功能建置中" />
-            </div>
-          </ElTabPane>
         </ElTabs>
       </el-card>
 
@@ -539,7 +469,7 @@ function updateIframeHeight(e: any) {
                   </div>
                   <div class="flex flex-col">
                     <div class="text-sm font-bold">
-                      華電管理員
+                      EDM系統
                       <span class="text-xs font-normal text-secondary"
                         >&lt;admin@hwacom.com&gt;</span
                       >

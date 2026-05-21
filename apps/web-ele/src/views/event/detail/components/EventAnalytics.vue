@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { EchartsUIType } from '@vben/plugins/echarts';
 
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 
 import { EchartsUI, useEcharts } from '@vben/plugins/echarts';
 
 import { ElCol, ElProgress, ElRow } from 'element-plus';
+
+import { requestClient } from '#/api/request';
 
 /**
  * 定義分析數據的強型別介面
@@ -17,23 +19,33 @@ interface MailStats {
   deleted: number;
 }
 
-interface AnalyticsState {
-  invitation: MailStats; // 活動信件/EDM
-  ticket: MailStats; // 專屬報名表
-  survey: MailStats; // 問卷
-  thankyou: MailStats; // 感謝函
+interface SurveyStats {
+  total_invited: number;
+  filled_invited: number;
+  unfilled_invited: number;
+  non_invited_responses: number;
+  total_responses: number;
+  has_google_form: boolean;
 }
 
-defineProps<{
+const props = defineProps<{
   eventId: number | string;
 }>();
 
-const stats: AnalyticsState = {
-  invitation: { total: 120, read: 80, unopened: 30, deleted: 10 },
-  ticket: { total: 50, read: 42, unopened: 7, deleted: 1 },
-  survey: { total: 45, read: 20, unopened: 20, deleted: 5 },
-  thankyou: { total: 40, read: 35, unopened: 5, deleted: 0 },
-};
+const stats = reactive({
+  invitation: { total: 120, read: 80, unopened: 30, deleted: 10 } as MailStats,
+  ticket: { total: 50, read: 42, unopened: 7, deleted: 1 } as MailStats,
+  thankyou: { total: 40, read: 35, unopened: 5, deleted: 0 } as MailStats,
+});
+
+const survey = reactive<SurveyStats>({
+  total_invited: 0,
+  filled_invited: 0,
+  unfilled_invited: 0,
+  non_invited_responses: 0,
+  total_responses: 0,
+  has_google_form: false,
+});
 
 const invitationReadRate = computed<number>(() =>
   Math.round((stats.invitation.read / stats.invitation.total) * 100),
@@ -56,10 +68,14 @@ const ticketDeletedRate = computed<number>(() =>
 );
 
 const surveyFillRate = computed<number>(() =>
-  Math.round((stats.survey.read / stats.survey.total) * 100),
+  survey.total_invited > 0
+    ? Math.round((survey.filled_invited / survey.total_invited) * 100)
+    : 0,
 );
 const surveyUnopenedRate = computed<number>(() =>
-  Math.round((stats.survey.unopened / stats.survey.total) * 100),
+  survey.total_invited > 0
+    ? Math.round((survey.unfilled_invited / survey.total_invited) * 100)
+    : 0,
 );
 
 const thankyouReadRate = computed<number>(() =>
@@ -74,7 +90,72 @@ const { renderEcharts: renderInvitation } = useEcharts(invitationChartRef);
 const { renderEcharts: renderTicket } = useEcharts(ticketChartRef);
 const { renderEcharts: renderSurvey } = useEcharts(surveyChartRef);
 
-onMounted(() => {
+async function loadSurveyStats() {
+  if (!props.eventId) return;
+  try {
+    const res: any = await requestClient.post(
+      '/edm/event/getSurveyStats',
+      { event_id: props.eventId },
+      { responseReturn: 'raw', timeout: 30_000 } as any,
+    );
+    const data = res?.data?.data || res?.data;
+    if (data) {
+      survey.total_invited = data.total_invited ?? 0;
+      survey.filled_invited = data.filled_invited ?? 0;
+      survey.unfilled_invited = data.unfilled_invited ?? 0;
+      survey.non_invited_responses = data.non_invited_responses ?? 0;
+      survey.total_responses = data.total_responses ?? 0;
+      survey.has_google_form = data.has_google_form ?? false;
+    }
+  } catch (error) {
+    console.error('getSurveyStats failed:', error);
+  }
+}
+
+function renderSurveyChart() {
+  renderSurvey({
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: '#334155',
+      textStyle: { color: '#f8fafc' },
+      borderWidth: 0,
+    },
+    legend: { show: false },
+    title: {
+      text: `${survey.total_responses}`,
+      subtext: '總填寫數',
+      left: 'center',
+      top: 'center',
+      textStyle: { fontSize: 32, fontWeight: 'bold', color: '#334155' },
+      subtextStyle: { fontSize: 13, color: '#94a3b8', fontWeight: 'bold' },
+    },
+    series: [
+      {
+        name: '問卷狀態',
+        type: 'pie',
+        radius: ['65%', '80%'],
+        center: ['50%', '50%'],
+        itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
+        label: { show: false },
+        data: [
+          {
+            value: survey.filled_invited,
+            name: '已填寫',
+            itemStyle: { color: '#14b8a6' },
+          },
+          {
+            value: survey.unfilled_invited,
+            name: '未填寫',
+            itemStyle: { color: '#e2e8f0' },
+          },
+        ],
+      },
+    ],
+  });
+}
+
+onMounted(async () => {
+  await loadSurveyStats();
   // 1. 活動信件圖表 - 靛藍色系
   renderInvitation({
     tooltip: {
@@ -167,51 +248,8 @@ onMounted(() => {
     ],
   });
 
-  // 3. 問卷回收圖表 - 薄荷綠色系
-  renderSurvey({
-    tooltip: {
-      trigger: 'item',
-      backgroundColor: '#334155',
-      textStyle: { color: '#f8fafc' },
-      borderWidth: 0,
-    },
-    legend: { show: false },
-    title: {
-      text: `${stats.survey.total}`,
-      subtext: '總計出',
-      left: 'center',
-      top: 'center',
-      textStyle: { fontSize: 32, fontWeight: 'bold', color: '#334155' },
-      subtextStyle: { fontSize: 13, color: '#94a3b8', fontWeight: 'bold' },
-    },
-    series: [
-      {
-        name: '問卷狀態',
-        type: 'pie',
-        radius: ['65%', '80%'],
-        center: ['50%', '50%'],
-        itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
-        label: { show: false },
-        data: [
-          {
-            value: stats.survey.read,
-            name: '已填寫',
-            itemStyle: { color: '#14b8a6' },
-          },
-          {
-            value: stats.survey.unopened,
-            name: '未填寫',
-            itemStyle: { color: '#e2e8f0' },
-          },
-          {
-            value: stats.survey.deleted,
-            name: '拒絕參與',
-            itemStyle: { color: '#f1f5f9' },
-          },
-        ],
-      },
-    ],
-  });
+  // 3. 問卷回收圖表 - 薄荷綠色系（使用真實統計）
+  renderSurveyChart();
 });
 </script>
 
@@ -474,7 +512,7 @@ onMounted(() => {
                     class="progress-bar flex-1 transition-opacity group-hover:opacity-80"
                   />
                   <span class="w-12 text-right font-bold text-slate-400">{{
-                    stats.survey.read
+                    survey.filled_invited
                   }}</span>
                 </div>
               </div>
@@ -501,9 +539,23 @@ onMounted(() => {
                     class="progress-bar flex-1 transition-opacity group-hover:opacity-80"
                   />
                   <span class="w-12 text-right font-bold text-slate-400">{{
-                    stats.survey.unopened
+                    survey.unfilled_invited
                   }}</span>
                 </div>
+              </div>
+
+              <div
+                v-if="survey.non_invited_responses > 0"
+                class="mt-2 rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-sm"
+              >
+                <span class="font-bold text-amber-700">提醒：</span>
+                <span class="text-amber-600">
+                  另有
+                  <span class="font-black">{{
+                    survey.non_invited_responses
+                  }}</span>
+                  位 <strong>邀請名單外</strong> 的人員填寫此問卷
+                </span>
               </div>
             </div>
           </ElCol>

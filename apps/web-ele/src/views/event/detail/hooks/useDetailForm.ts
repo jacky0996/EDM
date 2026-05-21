@@ -1,4 +1,4 @@
-import type { FormRules, UploadFile, UploadProps } from 'element-plus';
+import type { FormRules } from 'element-plus';
 
 import { computed, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -28,13 +28,11 @@ export function useDetailForm(formRef: any) {
     end_time: '' as null | string,
     landmark: '',
     address: '',
-    img_url: '/event_default.png',
     content: '',
     is_registration: 0,
     is_approve: 0,
   });
 
-  const bannerPreviewUrl = ref<string>('/event_default.png');
   const uploading = ref(false);
 
   /** 表單驗證規則 */
@@ -52,7 +50,6 @@ export function useDetailForm(formRef: any) {
     ],
     landmark: [{ required: true, message: '請輸入活動地標', trigger: 'blur' }],
     address: [{ required: true, message: '請輸入活動地址', trigger: 'blur' }],
-    img_url: [{ required: true, message: '請上傳活動橫幅', trigger: 'change' }],
     content: [{ required: true, message: '請輸入活動內容', trigger: 'blur' }],
   };
 
@@ -75,16 +72,12 @@ export function useDetailForm(formRef: any) {
       form.end_time = detail.end_time || '';
       form.landmark = detail.landmark || '';
       form.address = detail.address || '';
-      form.img_url =
-        detail.img_url || detail.banner_url || '/event_default.png';
       form.content = detail.content || '';
 
       // 轉換數據格式 (因應後端 GET 回傳為 is_display，但 UPDATE 接收 is_registration)
       form.is_registration =
         detail.is_display === undefined ? 0 : detail.is_display;
       form.is_approve = detail.is_approve === undefined ? 0 : detail.is_approve;
-
-      bannerPreviewUrl.value = form.img_url;
     } catch (error) {
       console.error('Failed to fetch event detail:', error);
       ElMessage.error('無法取得活動詳細資料');
@@ -103,27 +96,6 @@ export function useDetailForm(formRef: any) {
     },
     { immediate: true },
   );
-
-  const beforeBannerUpload: UploadProps['beforeUpload'] = (rawFile) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!allowedTypes.includes(rawFile.type)) {
-      ElMessage.error('僅支援 JPG、PNG、GIF、WebP 格式');
-      return false;
-    }
-    if (rawFile.size / 1024 / 1024 > 5) {
-      ElMessage.error('圖片大小不得超過 5MB');
-      return false;
-    }
-    return true;
-  };
-
-  function handleBannerChange(file: UploadFile) {
-    if (file.raw) {
-      bannerPreviewUrl.value = URL.createObjectURL(file.raw);
-      form.img_url = bannerPreviewUrl.value;
-      formRef.value?.validateField('img_url');
-    }
-  }
 
   function toggleEdit() {
     isReadonly.value = false;
@@ -176,7 +148,6 @@ export function useDetailForm(formRef: any) {
   const previewDevice = ref<'mobile' | 'web'>('web');
 
   function generatePreviewHtml() {
-    const banner = form.img_url || '/event_default.png';
     const typeMap: Record<string, string> = {
       '0': '會議',
       '1': '工作坊',
@@ -194,7 +165,6 @@ export function useDetailForm(formRef: any) {
           <style>
             body { font-family: 'Arial', sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; color: #333; overflow: hidden; }
             .container { width: 100%; max-width: ${previewDevice.value === 'web' ? '100%' : '375px'}; margin: 0 auto; background: #fff; padding: 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-            .banner { width: 100%; height: auto; display: block; }
             .body { padding: 30px; }
             .title { font-size: 24px; font-weight: bold; margin-bottom: 10px; color: #1a73e8; }
             .info { background: #f8f9fa; border-left: 4px solid #1a73e8; padding: 15px; margin: 20px 0; font-size: 14px; }
@@ -206,7 +176,6 @@ export function useDetailForm(formRef: any) {
         </head>
         <body>
           <div class="container">
-            <img src="${banner}" class="banner" alt="Banner" />
             <div class="body">
               <div class="title">${form.title || '（未輸入名稱）'}</div>
               <div class="info">
@@ -217,7 +186,7 @@ export function useDetailForm(formRef: any) {
               </div>
               <div class="content">${form.content || '請輸入活動內容...'}</div>
             </div>
-            <div class="footer">本郵件由 華電聯網 系統自動發送</div>
+            <div class="footer">本郵件由 EDM系統 系統自動發送</div>
           </div>
         </body>
       </html>
@@ -231,14 +200,11 @@ export function useDetailForm(formRef: any) {
   return {
     form,
     rules,
-    bannerPreviewUrl,
     uploading,
     loading,
     isReadonly,
     previewVisible,
     previewDevice,
-    beforeBannerUpload,
-    handleBannerChange,
     toggleEdit,
     cancelEdit,
     handleSubmit,

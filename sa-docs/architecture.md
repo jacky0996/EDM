@@ -216,7 +216,7 @@ graph LR
 | Build-time Env | `--build-arg APP_ENV=production\|uat` 切換 `.env.[mode]` | 同上 |
 | Container Port | 82 (host) → 80 (container) | [docker-compose.yml](../docker-compose.yml) |
 | Network | `edm-network` (本身) + `backend-net` (跟後端共用) | 同上 |
-| 跨 Compose 整合 | `host.docker.internal` 連 host 的中台 | 同上 |
+| 跨 Compose 整合 | `MiddlePlatform` 連 host 的中台 | 同上 |
 
 完整部署流程見 [deployment.md](./deployment.md)。
 
@@ -267,7 +267,7 @@ server {
 
     # 2. SSO 隱身代理:對外是 /api-sso/,對內接中台
     location /api-sso/ {
-        proxy_pass http://192.168.3.5/;  # 中台真實位址,只有伺服器知道
+        proxy_pass MiddlePlatform/;  # 中台真實位址,只有伺服器知道
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
@@ -282,7 +282,7 @@ server {
 **前端視角**
 
 ```ts
-// 前端永遠呼叫 /api-sso/...,不知道 192.168.3.5 存在
+// 前端永遠呼叫 /api-sso/...,不知道 MiddlePlatform 存在
 await requestClient.post('/api-sso/edm/sso/verify-token', { token });
 ```
 

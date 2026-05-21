@@ -74,3 +74,17 @@ Vue 3 + Vben Admin 5.0 打造的**電子郵件行銷 (EDM) 前端**。負責**�
 - **決策必留 ADR**:任何「為什麼選 A 不選 B」的判斷,新增一份 ADR(模板見 [`sa-docs/adr/`](./sa-docs/adr/))
 - **與中台 / 後端對齊**:本系統是 [Middle Platform](../Middle_Platform) + [edm_backend](../edm_backend) 生態的一份子,SA 文件結構與術語(Actor / IdP / SP / ADR)刻意三 repo 一致,讓跨 repo 閱讀體驗連貫
 - **詞彙統一**:本文件統一稱「中台 (Middle Platform)」,程式碼與部分歷史文件可能仍稱「HWS」(內部代號),兩者指同一系統
+
+---
+
+## 近期變更
+
+| 日期 | 變更 | 影響檔案 |
+|---|---|---|
+| 2026-05-19 | `SurveyForm` 補上 開啟問卷 / 編輯問卷 / 解除綁定 三按鈕,並改為從 `getDisplayList` 載入綁定狀態 | [SurveyForm.vue](./apps/web-ele/src/views/event/detail/components/SurveyForm.vue) |
+| 2026-05-19 | `EventAnalytics` 問卷區塊接 `getSurveyStats` 真實統計,圓餅圖中央顯示總填寫數,並提示邀請名單外填寫人數 | [EventAnalytics.vue](./apps/web-ele/src/views/event/detail/components/EventAnalytics.vue) |
+| 2026-05-18 | 建立活動 / 活動詳細頁移除「活動橫幅」上傳區塊與預設圖 | [event/create/index.vue](./apps/web-ele/src/views/event/create/index.vue) · [event/detail/index.vue](./apps/web-ele/src/views/event/detail/index.vue) |
+| 2026-05-18 | 表單 hook 移除 `img_url` / `bannerPreviewUrl` / 預覽 banner | [create/hooks/useForm.ts](./apps/web-ele/src/views/event/create/hooks/useForm.ts) · [detail/hooks/useDetailForm.ts](./apps/web-ele/src/views/event/detail/hooks/useDetailForm.ts) |
+| 2026-05-18 | 活動詳細頁移除「設定」tab | [event/detail/index.vue](./apps/web-ele/src/views/event/detail/index.vue) |
+
+對應後端變更見 [edm_backend README — 近期變更](../edm_backend/README.md#近期變更)。

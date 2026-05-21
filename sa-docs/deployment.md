@@ -15,9 +15,9 @@
 ```mermaid
 flowchart LR
     dev["💻 開發者 Browser"]
-    vite["📦 Vite dev server<br/>(localhost:5173)"]
-    proxy_sso["Vite proxy: /api-sso/* → host.docker.internal/"]
-    proxy_api["Vite proxy: /api/* → localhost:81/"]
+    vite["📦 Vite dev server<br/>(EdmFront (dev))"]
+    proxy_sso["Vite proxy: /api-sso/* → MiddlePlatform/"]
+    proxy_api["Vite proxy: /api/* → EdmBackend/"]
 
     dev --> vite
     vite --> proxy_sso
@@ -47,8 +47,8 @@ flowchart TB
         mp["📦 middle_platform_web :80"]
     end
 
-    user -- "http://localhost:82/" --> edm
-    edm -- "/api-sso/*<br/>(經 host.docker.internal)" --> mp
+    user -- "EdmFront/" --> edm
+    edm -- "/api-sso/*<br/>(經 MiddlePlatform)" --> mp
     edm -- "/api/edm/*<br/>(共 backend-net)" --> be_nginx
     be_nginx --> be_app
 ```
@@ -56,7 +56,7 @@ flowchart TB
 **重點**
 
 - 三個系統(中台 / EDM-FE / EDM-BE)各有自己的 docker-compose,**獨立啟停**
-- EDM-FE 透過 `host.docker.internal` 訪問 host 上的中台
+- EDM-FE 透過 `MiddlePlatform` 訪問 host 上的中台
 - EDM-FE 透過 **共用 docker network**(`backend-net`)訪問 EDM-BE,不必經過 host
 - Production 容器內 **只有 nginx + 靜態檔**,沒有 Node、沒有 build tool
 
@@ -115,7 +115,7 @@ flowchart LR
 | 靜態檔位置 | `/usr/share/nginx/html` | Dockerfile |
 | Nginx config | `/etc/nginx/nginx.conf` (來自 `scripts/deploy/nginx.conf`) | Dockerfile |
 | Network | `edm-network` (本身) + `backend-net` (external,跟後端共用) | docker-compose.yml |
-| extra_hosts | `host.docker.internal:host-gateway`(連 host 的中台) | docker-compose.yml |
+| extra_hosts | `MiddlePlatform:host-gateway`(連 host 的中台) | docker-compose.yml |
 | Healthcheck | `ls /usr/share/nginx/html/index.html`(改用檔案檢查避免網路誤判) | docker-compose.yml |
 | Restart policy | `always` | docker-compose.yml |
 
@@ -142,7 +142,7 @@ docker build --build-arg APP_ENV=development -t edm-image .
 | ------------- | ------------------ | --------------------------- |
 | `production`  | `.env.production`  | 正式 EDM URL、正式中台 URL  |
 | `uat`         | `.env.uat`         | UAT 測試環境 URL            |
-| `development` | `.env.development` | localhost / docker.internal |
+| `development` | `.env.development` | MiddlePlatform (host) + 容器內部網路 |
 
 ---
 
@@ -153,11 +153,11 @@ docker build --build-arg APP_ENV=development -t edm-image .
 | 變數 | 用途 | 例 |
 | --- | --- | --- |
 | `VITE_APP_TITLE` | 瀏覽器標籤 | `EDM 行銷管理` |
-| `VITE_HWS_URL` | 中台登入頁,redirect 用 | `http://localhost/sso/login/` |
-| `VITE_EDM_URL` | EDM 自己的對外 URL,redirect 回來時用 | `http://localhost:82/` |
+| `VITE_HWS_URL` | 中台登入頁,redirect 用 | `MiddlePlatform 登入頁` |
+| `VITE_EDM_URL` | EDM 自己的對外 URL,redirect 回來時用 | `EdmFront/` |
 | `VITE_SSO_VERIFY_URL` | 經 nginx 代理打中台的虛擬路徑 | `/api-sso/edm/sso/verify-token` |
-| `VITE_PROXY_API_TARGET` | Vite dev server 的 API 代理 target(僅 dev) | `http://localhost:81` |
-| `VITE_PROXY_SSO_TARGET` | Vite dev server 的 SSO 代理 target(僅 dev) | `http://host.docker.internal/` |
+| `VITE_PROXY_API_TARGET` | Vite dev server 的 API 代理 target(僅 dev) | `EdmBackend` |
+| `VITE_PROXY_SSO_TARGET` | Vite dev server 的 SSO 代理 target(僅 dev) | `MiddlePlatform/` |
 
 > **`VITE_*` 是 build-time 變數**,寫在 `.env` 裡,build 時就會被打進 bundle。**換環境必須重新 build image**,不能熱換。
 
@@ -174,7 +174,7 @@ pnpm install
 # 2. 跑 web-ele 的 dev server
 pnpm dev:ele
 
-# → http://localhost:5173
+# → EdmFront (dev)
 ```
 
 dev mode 走 Vite,熱更新即時。
@@ -202,9 +202,9 @@ docker compose down -v --remove-orphans
 
 | 服務         | 網址                                           |
 | ------------ | ---------------------------------------------- |
-| EDM Frontend | http://localhost:82/                           |
-| (對中台)     | http://localhost/ — 由中台容器提供             |
-| (對 EDM-BE)  | http://localhost:81/ — 由 edm-backend 容器提供 |
+| EDM Frontend | EdmFront/                           |
+| (對中台)     | MiddlePlatform/ — 由中台容器提供             |
+| (對 EDM-BE)  | EdmBackend/ — 由 edm-backend 容器提供 |
 
 ### 6.3 三系統一起跑
 
@@ -242,7 +242,7 @@ server {
 
     # SSO 隱身代理 — 對外是 /api-sso/,對內接中台
     location /api-sso/ {
-        proxy_pass http://192.168.3.5/;  # 中台真實位址(視部署環境調整)
+        proxy_pass MiddlePlatform/;  # 中台真實位址(視部署環境調整)
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -270,7 +270,7 @@ server {
 | 檢查 | 方式 | 預期 |
 | --- | --- | --- |
 | Container alive | docker-compose `healthcheck: ls /usr/share/nginx/html/index.html` | ok |
-| Web 是否服務 | `curl http://localhost:82/` | HTML 200 |
+| Web 是否服務 | `curl EdmFront/` | HTML 200 |
 | 跨容器通 | container 內 `curl http://edm-backend/api/health` | 200 |
 
 ---
@@ -280,7 +280,7 @@ server {
 | 限制 | 影響 | 緩解 |
 | --- | --- | --- |
 | `--no-frozen-lockfile` | 不同人 build 出來的 deps 可能略不同 | Production 改 `--frozen-lockfile`,本機開發可保留容忍 |
-| Healthcheck 用檔案檢查 | 無法偵測 nginx 真的能服務 | 加 HTTP 探活(`curl http://localhost/`),但 nginx alpine 沒裝 curl,要先裝 |
+| Healthcheck 用檔案檢查 | 無法偵測 nginx 真的能服務 | 加 HTTP 探活(`curl MiddlePlatform/`),但 nginx alpine 沒裝 curl,要先裝 |
 | 中台位址 hardcode 在 nginx.conf | 換環境要改 .conf 重 build | 改用環境變數(envsubst)或在 build 時注入 |
 | 沒 CDN | 靜態檔每次都從 nginx 服務 | Production 加 CloudFront / Cloudflare |
 | 沒 TLS | 只跑 :80 | 部署時加 reverse proxy(nginx 上層 / Cloudflare)做 SSL termination |

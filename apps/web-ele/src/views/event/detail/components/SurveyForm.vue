@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 
 import {
   ElButton,
@@ -18,19 +18,19 @@ import {
 
 import { requestClient } from '#/api/request';
 
+import { useGoogleFormParser } from '../hooks/useGoogleFormParser';
+
 const props = defineProps<{
   eventData: any;
 }>();
 
+const { parseGoogleForm } = useGoogleFormParser();
 const loading = ref(false);
 const isCreated = ref(false);
 const formUrl = ref('');
 const editUrl = ref('');
-const displayList = ref<any[]>([
-  { name: '王大明', email: 'ming@example.com', status: 1, reply: 1 },
-  { name: '李小美', email: 'mei@example.com', status: 1, reply: 0 },
-  { name: '陳建國', email: 'chen@example.com', status: 0, reply: 0 },
-]);
+const formId = ref<number | string>('');
+const displayList = ref<any[]>([]);
 
 // 問券配置資料 (強型別)
 interface Question {
@@ -74,14 +74,110 @@ const hasOptions = (type: string) =>
   ['checkbox', 'dropdown', 'radio'].includes(type);
 
 onMounted(() => {
-  if (props.eventData?.survey_url) {
-    formUrl.value = props.eventData.survey_url;
-    isCreated.value = true;
-  }
+  loadBoundForm();
 });
+
+watch(
+  () => props.eventData?.id,
+  () => {
+    loadBoundForm();
+  },
+);
+
+async function loadBoundForm() {
+  if (!props.eventData?.id) return;
+  loading.value = true;
+  try {
+    const res: any = await requestClient.post(
+      '/edm/event/getDisplayList',
+      { event_id: props.eventData.id },
+      { responseReturn: 'raw', timeout: 60_000 } as any,
+    );
+    const body = res?.data || res || {};
+    if (body.code !== 0) return;
+    const details = body.data?.form_details;
+    if (body.data?.google_form_bound && details) {
+      formUrl.value = details.form_url || '';
+      formId.value = details.id || '';
+      editUrl.value = details.form_id
+        ? `https://docs.google.com/forms/d/${details.form_id}/edit`
+        : '';
+      isCreated.value = true;
+    } else {
+      isCreated.value = false;
+      formId.value = '';
+      formUrl.value = '';
+      editUrl.value = '';
+    }
+  } catch {
+    // 靜默：未綁定屬正常狀態
+  } finally {
+    loading.value = false;
+  }
+}
 
 function openExternalLink(url: string) {
   if (url) window.open(url, '_blank');
+}
+
+async function handleEditForm() {
+  if (!formId.value) return;
+  loading.value = true;
+  try {
+    const res: any = await requestClient.post(
+      '/edm/event/getGoogleForm',
+      { id: formId.value },
+      { timeout: 60_000 } as any,
+    );
+    const googleInfo = res?.data?.google_info || res?.google_info;
+    const parsedConfig = parseGoogleForm(googleInfo);
+    if (parsedConfig) {
+      config.title = parsedConfig.title;
+      config.description = parsedConfig.description;
+      config.customQuestions =
+        (parsedConfig.customQuestions as any[]) || [];
+      isCreated.value = false;
+      ElMessage.success('已載入最新雲端配置');
+    } else {
+      ElMessage.warning('無法解析雲端表單內容');
+    }
+  } catch (error: any) {
+    ElMessage.error(error.message || '無法取得表單配置');
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleDeleteForm() {
+  if (!formId.value) return;
+  try {
+    await ElMessageBox.confirm(
+      '確定解除此 Google 問卷綁定？此操作將同步移除雲端紀錄。',
+      '警告',
+      {
+        type: 'warning',
+        confirmButtonText: '確定解除',
+        confirmButtonClass: 'el-button--danger',
+      },
+    );
+  } catch {
+    return;
+  }
+  loading.value = true;
+  try {
+    await requestClient.post('/edm/event/delGoogleForm', {
+      id: formId.value,
+    });
+    formUrl.value = '';
+    formId.value = '';
+    editUrl.value = '';
+    isCreated.value = false;
+    ElMessage.success('已成功解除綁定');
+  } catch (error: any) {
+    ElMessage.error(error.message || '解除綁定失敗');
+  } finally {
+    loading.value = false;
+  }
 }
 
 function handleCopy() {
@@ -134,10 +230,8 @@ async function handleCreateSurvey() {
     );
 
     if (res && (res.code === 200 || res.code === 0 || res.status === true)) {
-      isCreated.value = true;
-      formUrl.value = res.data?.view_url || '';
-      editUrl.value = res.data?.edit_url || '';
       ElMessage.success('Google 問卷表單產製成功！');
+      await loadBoundForm();
     } else {
       throw new Error(res?.msg || '產製失敗');
     }
@@ -226,23 +320,22 @@ async function handleCreateSurvey() {
               class="!h-10 !rounded-xl px-5 font-bold shadow-md shadow-indigo-500/10 transition-all hover:shadow-indigo-500/20 active:scale-95"
               @click="openExternalLink(formUrl)"
             >
-              開啟預覽 ↗
+              開啟問卷 ↗
             </ElButton>
             <div class="mx-1 h-6 w-[1px] bg-gray-200"></div>
             <ElButton
-              v-if="editUrl"
               type="success"
               class="!h-10 !rounded-xl px-4 font-bold shadow-sm"
-              @click="openExternalLink(editUrl)"
+              @click="handleEditForm"
             >
-              雲端編輯器
+              編輯問卷
             </ElButton>
             <ElButton
               type="danger"
               class="!h-10 !rounded-xl px-4 font-bold shadow-sm"
-              @click="isCreated = false"
+              @click="handleDeleteForm"
             >
-              重新配置
+              解除綁定
             </ElButton>
           </div>
         </div>

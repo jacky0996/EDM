@@ -25,7 +25,7 @@ EDM 是一套**內部行銷活動管理工具**,讓你可以:
 
 ```
 http://edm.example.com/      ← Production
-http://localhost:82/         ← 本機開發
+EdmFront/         ← 本機開發
 ```
 
 ### 2.2 自動跳轉到中台登入

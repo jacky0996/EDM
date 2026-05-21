@@ -19,12 +19,6 @@
   min-height: 56px;
 }
 
-/* 確保橫幅上傳區域寬度 100% */
-:deep(.banner-uploader),
-:deep(.banner-uploader .el-upload) {
-  width: 100%;
-}
-
 /* 確保 CKEditor 寬度與輸入框一致 */
 :deep(.ck-editor) {
   width: 100% !important;

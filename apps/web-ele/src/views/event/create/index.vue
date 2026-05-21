@@ -10,7 +10,6 @@ import {
   ElDialog,
   ElForm,
   ElFormItem,
-  ElIcon,
   ElInput,
   ElOption,
   ElRadioButton,
@@ -31,11 +30,8 @@ const formRef = ref<any>(null);
 const {
   form,
   rules,
-  bannerPreviewUrl,
   previewVisible,
   previewDevice,
-  beforeBannerUpload,
-  handleBannerChange,
   handleSubmit,
   handleCancel,
   generatePreviewHtml,
@@ -74,47 +70,6 @@ function updateIframeHeight(e: any) {
         label-position="top"
         class="space-y-6"
       >
-        <!-- Banner 上傳 -->
-        <ElFormItem
-          label="活動橫幅(預設夾帶華電標誌，點選後可以替換圖片)"
-          prop="img_url"
-          required
-        >
-          <ElUpload
-            class="banner-uploader w-full"
-            :show-file-list="false"
-            :before-upload="beforeBannerUpload"
-            action="#"
-            :auto-upload="false"
-            accept="image/*"
-            :on-change="handleBannerChange"
-          >
-            <img
-              v-if="bannerPreviewUrl"
-              :src="bannerPreviewUrl"
-              class="h-72 w-full rounded-lg border object-cover"
-              alt="Banner 預覽"
-            />
-            <div
-              v-else
-              class="flex h-72 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-blue-400"
-            >
-              <ElIcon class="mb-2 text-4xl text-gray-400">
-                <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    fill="currentColor"
-                    d="M480 480V128a32 32 0 0 1 64 0v352h352a32 32 0 1 1 0 64H544v352a32 32 0 1 1-64 0V544H128a32 32 0 1 1 0-64h352z"
-                  />
-                </svg>
-              </ElIcon>
-              <span class="text-sm text-gray-500">點擊上傳活動橫幅</span>
-              <span class="mt-5 text-4xl text-gray-400"
-                >JPG / PNG / GIF / WebP，最大 5MB</span
-              >
-            </div>
-          </ElUpload>
-        </ElFormItem>
-
         <!-- 2. 活動類型 -->
         <ElFormItem label="活動類型" prop="activity_type" required>
           <ElSelect
@@ -345,7 +300,7 @@ function updateIframeHeight(e: any) {
                   </div>
                   <div class="flex flex-col">
                     <div class="text-sm font-bold">
-                      華電管理員
+                      EDM系統
                       <span class="text-xs font-normal text-secondary"
                         >&lt;admin@hwacom.com&gt;</span
                       >
