@@ -134,8 +134,7 @@ async function handleEditForm() {
     if (parsedConfig) {
       config.title = parsedConfig.title;
       config.description = parsedConfig.description;
-      config.customQuestions =
-        (parsedConfig.customQuestions as any[]) || [];
+      config.customQuestions = (parsedConfig.customQuestions as any[]) || [];
       isCreated.value = false;
       ElMessage.success('已載入最新雲端配置');
     } else {

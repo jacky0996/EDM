@@ -138,10 +138,10 @@ docker build --build-arg APP_ENV=development -t edm-image .
 
 **對應 .env 檔**
 
-| `APP_ENV`     | 讀取的 .env        | 主要差異                    |
-| ------------- | ------------------ | --------------------------- |
-| `production`  | `.env.production`  | 正式 EDM URL、正式中台 URL  |
-| `uat`         | `.env.uat`         | UAT 測試環境 URL            |
+| `APP_ENV`     | 讀取的 .env        | 主要差異                             |
+| ------------- | ------------------ | ------------------------------------ |
+| `production`  | `.env.production`  | 正式 EDM URL、正式中台 URL           |
+| `uat`         | `.env.uat`         | UAT 測試環境 URL                     |
 | `development` | `.env.development` | MiddlePlatform (host) + 容器內部網路 |
 
 ---
@@ -200,10 +200,10 @@ docker compose down -v --remove-orphans
 
 啟動後:
 
-| 服務         | 網址                                           |
-| ------------ | ---------------------------------------------- |
-| EDM Frontend | EdmFront/                           |
-| (對中台)     | MiddlePlatform/ — 由中台容器提供             |
+| 服務         | 網址                                  |
+| ------------ | ------------------------------------- |
+| EDM Frontend | EdmFront/                             |
+| (對中台)     | MiddlePlatform/ — 由中台容器提供      |
 | (對 EDM-BE)  | EdmBackend/ — 由 edm-backend 容器提供 |
 
 ### 6.3 三系統一起跑

@@ -1,0 +1,50 @@
+# Cloud Build pipeline for EDM (frontend) → Cloud Run
+#
+# 觸發來源:Cloud Run continuous deployment(GitHub push to main)
+# 編譯目標:Dockerfile.cloudrun(pnpm build + nginx serve)
+# 部署目標:Cloud Run service `edm-frontend` @ asia-east1
+#
+# 注意:EDM_BACKEND_URL / SSO_URL 在 Cloud Run service 設定頁手動維護,
+#       因為 backend URL 是 deploy 完才知道,放這裡會循環依賴。
+
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --file=Dockerfile.cloudrun
+      - --tag=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE}:${COMMIT_SHA}
+      - --tag=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE}:latest
+      - .
+
+  - id: push-sha
+    name: gcr.io/cloud-builders/docker
+    args: [push, '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE}:${COMMIT_SHA}']
+  - id: push-latest
+    name: gcr.io/cloud-builders/docker
+    args: [push, '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE}:latest']
+
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE}:${COMMIT_SHA}
+      - --region=${_REGION}
+      - --platform=managed
+      - --quiet
+
+substitutions:
+  _REGION: asia-east1
+  _SERVICE: edm-frontend
+  _AR_REPO: cloud-run-source-deploy
+
+images:
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE}:${COMMIT_SHA}
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_AR_REPO}/${_SERVICE}:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8   # SPA build CPU heavy,給大機器
